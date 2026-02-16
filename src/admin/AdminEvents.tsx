@@ -12,15 +12,16 @@ const SAMPLE_EVENTS = [
 const AdminEvents = () => {
   return (
     <div className="admin-page">
-      <div className="admin-page-header">
-        <h1 className="admin-page-title">Event Management</h1>
-        <Link to="/admin/events/create" className="admin-btn-create">
-          + Create Event
-        </Link>
-      </div>
+      <div className="admin-events-container">
+        <div className="admin-page-header">
+          <h1 className="admin-page-title">Event Management</h1>
+          <Link to="/admin/events/create" className="admin-btn-create">
+            + Create Event
+          </Link>
+        </div>
 
-      <div className="admin-event-list">
-        {SAMPLE_EVENTS.map((event) => (
+        <div className="admin-event-list admin-event-list-inside">
+          {SAMPLE_EVENTS.map((event) => (
           <div key={event.id} className="admin-event-row">
             <div className="admin-event-info">
               <h3>{event.title}</h3>
@@ -34,7 +35,8 @@ const AdminEvents = () => {
               <button type="button" aria-label="Delete event">🗑</button>
             </div>
           </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
