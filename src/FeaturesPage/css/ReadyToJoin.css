@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap');
+
+.ready-to-join {
+  width: 100%;
+  background: #281851;
+  padding: 6rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-family: 'Arimo', sans-serif;
+  margin: 0;
+}
+
+.ready-to-join-content {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ready-to-join-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.ready-to-join-description {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.btn-get-started {
+  padding: 1rem 2.5rem;
+  background: #791A94;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Arimo', sans-serif;
+}
+
+.btn-get-started:hover {
+  background: #8a2ba5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(121, 26, 148, 0.6);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ready-to-join {
+    padding: 4rem 1.5rem;
+    min-height: 50vh;
+  }
+
+  .ready-to-join-title {
+    font-size: 2.2rem;
+  }
+
+  .ready-to-join-description {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ready-to-join {
+    padding: 3rem 1rem;
+  }
+
+  .ready-to-join-title {
+    font-size: 1.8rem;
+  }
+
+  .ready-to-join-description {
+    font-size: 1rem;
+  }
+
+  .btn-get-started {
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+  }
+}

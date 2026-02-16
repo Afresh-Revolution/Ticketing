@@ -1,0 +1,247 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap');
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  font-family: 'Arimo', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) rotate(5deg);
+  width: 120px;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(200, 150, 255, 0.3) 0%,
+    rgba(121, 26, 148, 0.7) 30%,
+    rgba(121, 26, 148, 0.95) 50%,
+    rgba(40, 24, 81, 1) 70%,
+    rgba(24, 21, 67, 1) 100%
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+.auth-left {
+  flex: 1;
+  background: linear-gradient(135deg, #181543 0%, #281851 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 320px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-container h1 {
+  color: #ffffff;
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: 'Arimo', sans-serif;
+  text-align: center;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+
+.form-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem 3rem 1rem 0;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(121, 26, 148, 0.5);
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: 'Arimo', sans-serif;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-bottom-color: #791A94;
+}
+
+.input-icon {
+  position: absolute;
+  right: 0;
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+.btn {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Arimo', sans-serif;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #791A94 0%, #8a2ba5 50%, #791A94 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(121, 26, 148, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(121, 26, 148, 0.6);
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 2rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+}
+
+.auth-link button {
+  background: none;
+  border: none;
+  color: #791A94;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0;
+  margin-left: 0.25rem;
+  text-decoration: none;
+}
+
+.auth-link button:hover {
+  color: #8a2ba5;
+  text-decoration: underline;
+}
+
+.auth-right {
+  flex: 1;
+  background: linear-gradient(135deg, #281851 0%, #181543 50%, #791A94 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.auth-right::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, transparent 30%, rgba(121, 26, 148, 0.1) 50%, transparent 70%),
+    linear-gradient(-45deg, transparent 30%, rgba(40, 24, 81, 0.1) 50%, transparent 70%);
+  background-size: 100px 100px;
+  opacity: 0.5;
+}
+
+.auth-right-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #ffffff;
+  width: 100%;
+  max-width: 320px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-right-content h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  font-family: 'Arimo', sans-serif;
+  letter-spacing: 0.1em;
+}
+
+.auth-right-content p {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Arimo', sans-serif;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+  .auth-page {
+    flex-direction: column;
+  }
+
+  .auth-right {
+    min-height: 300px;
+  }
+
+  .auth-right-content h2 {
+    font-size: 3rem;
+  }
+
+  .auth-right-content p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-left {
+    padding: 1.5rem;
+  }
+
+  .auth-container h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .auth-form {
+    gap: 1.5rem;
+  }
+
+  .auth-right-content h2 {
+    font-size: 2.5rem;
+  }
+
+  .auth-right-content p {
+    font-size: 0.95rem;
+  }
+}
