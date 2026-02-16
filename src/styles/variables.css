@@ -1,0 +1,71 @@
+/**
+ * Gatewave – design tokens (colors used across the website)
+ */
+
+:root {
+  /* Primary brand */
+  --color-primary: #791a94;
+  --color-primary-hover: #8f22ad;
+  --color-primary-light: #8a2ba5;
+  --color-primary-dark: #6428a0;
+  --color-primary-glow: rgba(121, 26, 148, 0.6);
+  --color-primary-glow-soft: rgba(121, 26, 148, 0.4);
+  --color-primary-overlay: rgba(121, 26, 148, 0.2);
+  --color-primary-overlay-strong: rgba(121, 26, 148, 0.3);
+
+  /* Backgrounds */
+  --color-bg-base: #181543;
+  --color-bg-dark: #15103a;
+  --color-bg-header: #1e1647;
+  --color-bg-card: #2a2150;
+  --color-bg-search: #36195c;
+  --color-bg-success-page: #2d1e4b;
+  --color-bg-success-alt: #171442;
+  --color-bg-purple-deep: #281851;
+  --color-bg-purple-overlay: rgba(24, 21, 67, 0.3);
+  --color-bg-purple-overlay-strong: rgba(40, 24, 81, 0.8);
+
+  /* Neutrals / UI */
+  --color-white: #ffffff;
+  --color-white-95: rgba(255, 255, 255, 0.95);
+  --color-white-90: rgba(255, 255, 255, 0.9);
+  --color-white-80: rgba(255, 255, 255, 0.8);
+  --color-white-75: rgba(255, 255, 255, 0.75);
+  --color-white-70: rgba(255, 255, 255, 0.7);
+  --color-white-60: rgba(255, 255, 255, 0.6);
+  --color-white-50: rgba(255, 255, 255, 0.5);
+  --color-white-15: rgba(255, 255, 255, 0.15);
+  --color-white-12: rgba(255, 255, 255, 0.12);
+  --color-white-10: rgba(255, 255, 255, 0.1);
+  --color-white-08: rgba(255, 255, 255, 0.08);
+  --color-white-06: rgba(255, 255, 255, 0.06);
+  --color-white-02: rgba(255, 255, 255, 0.2);
+
+  /* Text */
+  --color-text-primary: #ffffff;
+  --color-text-muted: #94a3b8;
+  --color-text-dark: #181543;
+  --color-text-body: #1a1a1a;
+  --color-text-muted-dark: #333333;
+  --color-text-muted-medium: #666666;
+
+  /* Borders */
+  --color-border-light: rgba(255, 255, 255, 0.25);
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-border-faint: rgba(255, 255, 255, 0.08);
+  --color-border-faint-06: rgba(255, 255, 255, 0.06);
+
+  /* Accents (signup/login, cards) */
+  --color-accent-blue: #667eea;
+  --color-accent-purple: #764ba2;
+  --color-card-tag-bg: #f1f5f91a;
+  --color-visa-blue: #1a1f71;
+  --color-mastercard-red: #eb001b;
+  --color-mastercard-orange: #f79e1b;
+  --color-mastercard-overlap: #ff5f00;
+
+  /* Shadows */
+  --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-button: 0 6px 20px rgba(121, 26, 148, 0.6);
+  --shadow-button-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
+}

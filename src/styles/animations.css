@@ -1,0 +1,124 @@
+/**
+ * Scroll-triggered animations – one consistent fadeInUp across the site
+ */
+
+/* Initial state (before in view) – same for all scroll reveals */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Visible state (when .in-view is added by JS) */
+.scroll-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children – same fadeInUp motion */
+.scroll-reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.scroll-reveal-stagger.in-view > *:nth-child(1) { transition-delay: 0.05s; }
+.scroll-reveal-stagger.in-view > *:nth-child(2) { transition-delay: 0.1s; }
+.scroll-reveal-stagger.in-view > *:nth-child(3) { transition-delay: 0.15s; }
+.scroll-reveal-stagger.in-view > *:nth-child(4) { transition-delay: 0.2s; }
+.scroll-reveal-stagger.in-view > *:nth-child(5) { transition-delay: 0.25s; }
+.scroll-reveal-stagger.in-view > *:nth-child(6) { transition-delay: 0.3s; }
+
+.scroll-reveal-stagger.in-view > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Keyframes for one-off or fancy effects */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Optional: apply animation on load (no scroll) */
+.animate-on-load.animate-fadeIn {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.animate-on-load.animate-fadeInUp {
+  animation: fadeInUp 0.7s ease forwards;
+}
+
+.animate-on-load.animate-scaleIn {
+  animation: scaleIn 0.5s ease forwards;
+}
