@@ -1,0 +1,92 @@
+.my-tickets-page {
+  min-height: 100vh;
+  background: #181543;
+  color: #fff;
+  font-family: 'Arimo', sans-serif;
+}
+
+.my-tickets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 2rem;
+  background: #1e1647;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.my-tickets-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #fff;
+}
+
+.my-tickets-logo-icon {
+  width: 36px;
+  height: 36px;
+  background: #791A94;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.my-tickets-logo-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.my-tickets-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.my-tickets-nav-link {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.my-tickets-nav-link:hover {
+  color: #fff;
+}
+
+.my-tickets-nav-link.active {
+  color: #fff;
+}
+
+.my-tickets-main {
+  padding: 4rem 2rem;
+  text-align: center;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.my-tickets-main h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem;
+}
+
+.my-tickets-main p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1.5rem;
+}
+
+.my-tickets-cta {
+  display: inline-block;
+  padding: 0.6rem 1.25rem;
+  background: #791A94;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.my-tickets-cta:hover {
+  background: #8f22ad;
+  color: #fff;
+}
