@@ -223,9 +223,9 @@ const EventsPage = () => {
                     ₦{event.price}
                   </strong>
                 </p>
-                <button type="button" className="event-card-cta">
+                <Link to={`/event/${event.id}`} className="event-card-cta">
                   Get Tickets
-                </button>
+                </Link>
               </div>
             </article>
           ))}

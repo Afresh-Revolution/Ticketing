@@ -74,7 +74,7 @@ const GetTickets = () => {
                       <span className="price-amount">{event.price}</span>
                     </div>
                   </div>
-                  <button className="btn-get-tickets" onClick={() => navigate('/signup')}>
+                  <button className="btn-get-tickets" onClick={() => navigate(`/event/${event.id}`)}>
                     Get Tickets
                   </button>
                 </div>

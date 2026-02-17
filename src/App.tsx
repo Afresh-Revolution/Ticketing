@@ -6,6 +6,8 @@ import SignupPage from './components/SignupPage'
 import PaymentSuccess from './components/PaymentSuccess'
 import EventsPage from './components/EventsPage'
 import MyTicketsPage from './components/MyTicketsPage'
+import EventDetailPage from './components/EventDetailPage'
+import CheckoutPage from './components/CheckoutPage'
 import AdminLayout from './admin/AdminLayout'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminEvents from './admin/AdminEvents'
@@ -22,6 +24,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/events" element={<EventsPage />} />
+        <Route path="/event/:id" element={<EventDetailPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/admin" element={<AdminLayout />}>
