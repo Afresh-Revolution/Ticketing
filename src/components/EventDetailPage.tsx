@@ -1,42 +1,80 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { apiUrl } from "../api/config";
 import "./EventDetailPage.css";
 
-const DEFAULT_EVENT = {
-  id: 1,
-  category: "Art",
-  title: "Sunnichillarious Comedy Special",
-  date: "Thursday, August 28, 2025",
-  time: "07:00 PM",
-  location: "Biraj 1234 Event Center, AX",
-  heroImage:
-    "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-  about:
-    "The biggest comedy show of the year hosted by the legendary Timi Daniel. Prepare for a night of non-stop laughter, special guest performances, and premium entertainment.",
-  organizer: "Laughter Unlimited",
-  tickets: [
-    { id: "regular", name: "Regular", description: "Standard seating access", price: 5000 },
-    { id: "silver", name: "Silver", description: "Middle row seating", price: 10000 },
-    { id: "gold", name: "Gold", description: "Front section seating + Drink", price: 15000 },
-    { id: "premium", name: "Premium", description: "Teddy post + Skip", price: 20000 },
-    { id: "vip", name: "VIP", description: "Front row table + Full Service", price: 25000 },
-  ],
-};
+interface TicketType {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+}
+
+interface EventDetail {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  time: string;
+  location: string;
+  heroImage: string;
+  about: string;
+  organizer: string;
+  tickets: TicketType[];
+}
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [quantities, setQuantities] = useState<Record<string, number>>({
-    regular: 0,
-    silver: 0,
-    gold: 0,
-    premium: 0,
-    vip: 0,
-  });
+  const [event, setEvent] = useState<EventDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  const event = DEFAULT_EVENT;
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const res = await fetch(apiUrl(`/api/events/${id}`));
+        if (!res.ok) throw new Error("Event not found");
+        const data = await res.json();
+        
+        // Transform data to match UI
+        const dateObj = new Date(data.date);
+        const formattedEvent: EventDetail = {
+          id: data.id,
+          title: data.title,
+          category: data.category || "General",
+          date: dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+          time: data.startTime || dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          location: data.location || data.venue || "TBD",
+          heroImage: data.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
+          about: data.description || "No description available.",
+          organizer: "Gatewave Organizer", // TODO: Fetch from createdBy user if available
+          tickets: data.tickets || []
+        };
+        
+        setEvent(formattedEvent);
+        
+        // Initialize quantities
+        const initialQty: Record<string, number> = {};
+        if (data.tickets) {
+          data.tickets.forEach((t: TicketType) => initialQty[t.id] = 0);
+        }
+        setQuantities(initialQty);
+
+      } catch (err) {
+        setError("Could not load event details.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) fetchEvent();
+  }, [id]);
 
   const { totalQty, totalPrice } = useMemo(() => {
+    if (!event) return { totalQty: 0, totalPrice: 0 };
     let qty = 0;
     let price = 0;
     event.tickets.forEach((t) => {
@@ -45,7 +83,7 @@ const EventDetailPage = () => {
       price += n * t.price;
     });
     return { totalQty: qty, totalPrice: price };
-  }, [event.tickets, quantities]);
+  }, [event, quantities]);
 
   const adjustQty = (ticketId: string, delta: number) => {
     setQuantities((prev) => {
@@ -53,6 +91,9 @@ const EventDetailPage = () => {
       return { ...prev, [ticketId]: Math.max(0, next) };
     });
   };
+
+  if (loading) return <div className="event-detail-loading">Loading event...</div>;
+  if (error || !event) return <div className="event-detail-error">{error || "Event not found"}</div>;
 
   return (
     <div className="event-detail-page">
@@ -150,6 +191,7 @@ const EventDetailPage = () => {
         <section className="event-detail-tickets">
           <h2 className="event-detail-tickets-heading">Select Tickets</h2>
           <div className="event-detail-ticket-list">
+            {event.tickets.length === 0 && <p>No tickets available.</p>}
             {event.tickets.map((ticket) => {
               const qty = quantities[ticket.id] ?? 0;
               return (
@@ -204,16 +246,28 @@ const EventDetailPage = () => {
             type="button"
             className="event-detail-checkout-btn"
             disabled={totalQty === 0}
-            onClick={() =>
-              totalQty > 0 &&
-              navigate("/checkout", {
-                state: {
-                  totalPrice,
-                  eventId: id,
-                  eventTitle: event.title,
-                },
-              })
-            }
+            onClick={() => {
+              // Calculate selected items
+              const items = event.tickets
+                .filter(t => (quantities[t.id] ?? 0) > 0)
+                .map(t => ({
+                  ticketTypeId: t.id,
+                  name: t.name,
+                  quantity: quantities[t.id],
+                  price: t.price
+                }));
+
+              if (totalQty > 0) {
+                navigate("/checkout", {
+                  state: {
+                    totalPrice,
+                    eventId: id,
+                    eventTitle: event.title,
+                    items // Pass selected items to checkout
+                  },
+                });
+              }
+            }}
           >
             CheckOut
           </button>

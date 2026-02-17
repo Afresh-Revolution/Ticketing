@@ -1,13 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { apiUrl } from "../api/config";
 import ProfileButton from "./ProfileButton";
 import "./EventsPage.css";
-
-import exploreimg1 from "../assets/exploreimg1.jpg";
-import exploreimg2 from "../assets/exploreimg2.jpg";
-import exploreimg3 from "../assets/exploreimg3.jpg";
-import exploreimg4 from "../assets/exploreimg4.jpg";
-import exploreimg5 from "../assets/exploreimg5.jpg";
 
 const CATEGORIES = [
   "All",
@@ -16,67 +11,61 @@ const CATEGORIES = [
   "Food",
   "Art",
   "Nightlife",
+  "Wellness",
 ] as const;
 
-const EVENTS = [
-  {
-    id: 1,
-    title: "Sunniehillarious Comedy Special",
-    date: "SEP 10",
-    category: "Art",
-    location: "Mees Palace Event Center, Jos",
-    time: "19:00",
-    price: "5,000",
-    image: exploreimg1,
-  },
-  {
-    id: 2,
-    title: "Future Tech Summit 2024",
-    date: "JULY 20",
-    category: "Tech",
-    location: "Landmark Event Center, Lagos",
-    time: "09:00",
-    price: "10,000",
-    image: exploreimg2,
-  },
-  {
-    id: 3,
-    title: "Lagos Food Festival",
-    date: "AUG 15",
-    category: "Food",
-    location: "Onikan Stadium, Lagos",
-    time: "12:00",
-    price: "3,500",
-    image: exploreimg3,
-  },
-  {
-    id: 4,
-    title: "Afro Night Live",
-    date: "SEP 28",
-    category: "Nightlife",
-    location: "Eko Hotel, Lagos",
-    time: "22:00",
-    price: "8,000",
-    image: exploreimg4,
-  },
-  {
-    id: 5,
-    title: "Art in the Park",
-    date: "OCT 5",
-    category: "Art",
-    location: "Nike Art Gallery, Lagos",
-    time: "14:00",
-    price: "2,000",
-    image: exploreimg5,
-  },
-];
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  category: string;
+  location: string;
+  time: string;
+  price: string;
+  image: string;
+}
 
 const EventsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch(apiUrl('/api/events'));
+        if (res.ok) {
+          const data = await res.json();
+          const formattedEvents = data.map((e: any) => {
+            const dateObj = new Date(e.date);
+            const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
+            const day = dateObj.getDate();
+            
+            return {
+              id: e.id,
+              title: e.title,
+              date: `${month} ${day}`,
+              category: e.category || 'General',
+              location: e.location || e.venue || 'TBD',
+              time: e.startTime || 'TBD',
+              price: e.price ? e.price.toLocaleString() : 'Free',
+              image: e.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'
+            };
+          });
+          setEvents(formattedEvents);
+        }
+      } catch (err) {
+        console.error("Failed to fetch events", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const filteredEvents = useMemo(() => {
-    return EVENTS.filter((event) => {
+    return events.filter((event) => {
       const matchesCategory =
         selectedCategory === "All" || event.category === selectedCategory;
       const q = searchQuery.trim().toLowerCase();
@@ -87,7 +76,7 @@ const EventsPage = () => {
         event.category.toLowerCase().includes(q);
       return matchesCategory && matchesSearch;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, events]);
 
   return (
     <div className="events-page">
@@ -179,57 +168,65 @@ const EventsPage = () => {
           </div>
         </section>
 
-        <h2 className="events-count">{filteredEvents.length} Events Found</h2>
+        {loading ? (
+          <div className="events-loading" style={{ textAlign: 'center', padding: '2rem', color: '#fff' }}>
+            Loading events...
+          </div>
+        ) : (
+          <>
+            <h2 className="events-count">{filteredEvents.length} Events Found</h2>
 
-        <div className="events-grid">
-          {filteredEvents.map((event) => (
-            <article key={event.id} className="event-card">
-              <div className="event-card-image-wrap">
-                <img src={event.image} alt="" className="event-card-image" />
-                <span className="event-date-tag">{event.date}</span>
-                <span className="event-category-tag">{event.category}</span>
-              </div>
-              <div className="event-card-body">
-                <h3 className="event-card-title">{event.title}</h3>
-                <p className="event-card-meta">
-                  <svg
-                    className="event-meta-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  {event.location}
-                </p>
-                <p className="event-card-meta">
-                  <svg
-                    className="event-meta-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" />
-                  </svg>
-                  {event.time}
-                </p>
-                <p className="event-card-price">
-                  <span className="event-card-price-label">Starting from</span>
-                  <strong className="event-card-price-amount">
-                    ₦{event.price}
-                  </strong>
-                </p>
-                <Link to={`/event/${event.id}`} className="event-card-cta">
-                  Get Tickets
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+            <div className="events-grid">
+              {filteredEvents.map((event) => (
+                <article key={event.id} className="event-card">
+                  <div className="event-card-image-wrap">
+                    <img src={event.image} alt="" className="event-card-image" />
+                    <span className="event-date-tag">{event.date}</span>
+                    <span className="event-category-tag">{event.category}</span>
+                  </div>
+                  <div className="event-card-body">
+                    <h3 className="event-card-title">{event.title}</h3>
+                    <p className="event-card-meta">
+                      <svg
+                        className="event-meta-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                      </svg>
+                      {event.location}
+                    </p>
+                    <p className="event-card-meta">
+                      <svg
+                        className="event-meta-icon"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      {event.time}
+                    </p>
+                    <p className="event-card-price">
+                      <span className="event-card-price-label">Starting from</span>
+                      <strong className="event-card-price-amount">
+                        ₦{event.price}
+                      </strong>
+                    </p>
+                    <Link to={`/event/${event.id}`} className="event-card-cta">
+                      Get Tickets
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
       </main>
 
       <footer className="events-footer">

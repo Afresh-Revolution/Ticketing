@@ -1,116 +1,97 @@
-@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap');
-
 .payment-success-page {
   min-height: 100vh;
-  background: #171442;
+  background-color: #0f0f13;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  font-family: 'Arimo', sans-serif;
-  box-sizing: border-box;
 }
 
-.payment-success-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.payment-success-card {
+  background: #1a1a23;
+  padding: 3rem;
+  border-radius: 20px;
   text-align: center;
-  max-width: 420px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.success-icon-wrapper {
+.payment-success-icon-wrap {
   width: 80px;
   height: 80px;
+  background: rgba(16, 185, 129, 0.1);
   border-radius: 50%;
-  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  margin: 0 auto 1.5rem;
 }
 
-.success-checkmark {
+.payment-success-icon {
   width: 40px;
   height: 40px;
-  color: #333;
+  color: #10b981;
 }
 
 .payment-success-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 0.75rem;
-  letter-spacing: -0.02em;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.payment-success-description {
-  font-size: 1rem;
+.payment-success-msg {
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.payment-success-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #fff;
-  margin: 0 0 2rem;
-  line-height: 1.5;
-  opacity: 0.95;
+  margin-bottom: 0.5rem;
+}
+
+.payment-success-ref {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-family: monospace;
 }
 
 .payment-success-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  width: 100%;
-  max-width: 280px;
+  gap: 1rem;
 }
 
-.btn-view-tickets {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.875rem 1.5rem;
-  background: #fff;
-  color: #333;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: 'Arimo', sans-serif;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-
-.btn-view-tickets:hover {
-  background: #f5f5f5;
-  transform: translateY(-1px);
-}
-
-.btn-back-home {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: auto;
-  padding: 0.875rem 1.5rem;
-  background: #791A94;
+.payment-success-btn {
+  background: #8b5cf6;
   color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: 'Arimo', sans-serif;
-  cursor: pointer;
+  padding: 1rem;
+  border-radius: 12px;
   text-decoration: none;
-  transition: background 0.2s, transform 0.1s;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.btn-back-home:hover {
-  background: #7b32c4;
+.payment-success-btn:hover {
+  background: #7c3aed;
+  transform: translateY(-2px);
+}
+
+.payment-success-link {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s;
+}
+
+.payment-success-link:hover {
   color: #fff;
-  transform: translateY(-1px);
-}
-
-.payment-success-actions .btn-icon {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
 }

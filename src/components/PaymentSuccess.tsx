@@ -1,31 +1,46 @@
-import { Link } from 'react-router-dom';
-import './PaymentSuccess.css';
+import { Link, useLocation } from "react-router-dom";
+import "./PaymentSuccess.css";
 
 const PaymentSuccess = () => {
+  const location = useLocation();
+  const state = location.state as { amount?: number; eventTitle?: string; orderId?: string } | null;
+
   return (
     <div className="payment-success-page">
-      <div className="payment-success-content">
-        <div className="success-icon-wrapper">
-          <svg className="success-checkmark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <div className="payment-success-card">
+        <div className="payment-success-icon-wrap">
+          <svg
+            className="payment-success-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
         </div>
         <h1 className="payment-success-title">Payment Successful!</h1>
-        <p className="payment-success-description">
-          Your tickets have been sent to your email and added to your wallet.
+        <p className="payment-success-msg">
+          You have successfully purchased tickets for{" "}
+          <strong>{state?.eventTitle || "the event"}</strong>.
         </p>
+        {state?.amount && (
+          <p className="payment-success-amount">
+            Amount Paid: ₦{state.amount.toLocaleString()}
+          </p>
+        )}
+        {state?.orderId && (
+          <p className="payment-success-ref">
+            Order ID: {state.orderId}
+          </p>
+        )}
         <div className="payment-success-actions">
-          <button type="button" className="btn-view-tickets">
-            <svg className="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 9V7a2 2 0 012-2h16a2 2 0 012 2v2M2 9v6a2 2 0 002 2h16a2 2 0 002-2V9M2 9h20M8 13h.01M12 13h.01M16 13h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <Link to="/my-tickets" className="payment-success-btn">
             View My Tickets
-          </button>
-          <Link to="/events" className="btn-back-home">
-            <svg className="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back To Home
+          </Link>
+          <Link to="/" className="payment-success-link">
+            Back to Home
           </Link>
         </div>
       </div>

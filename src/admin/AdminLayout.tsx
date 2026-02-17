@@ -5,6 +5,10 @@ import './admin.css';
 const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Get user role from localStorage
+  const userRole = localStorage.getItem('adminRole');
+  const isSuperAdmin = userRole === 'superadmin';
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -27,8 +31,12 @@ const AdminLayout = () => {
           <span className="admin-logo-text">GATEWAVE</span>
         </div>
         <div className="admin-header-actions">
-          <button type="button" className="admin-btn admin-btn-role" aria-label="Admin">
-            Admin
+          <button 
+            type="button" 
+            className={`admin-btn admin-btn-role ${isSuperAdmin ? 'admin-btn-superadmin' : ''}`}
+            aria-label={isSuperAdmin ? 'Super Admin' : 'Admin'}
+          >
+            {isSuperAdmin ? 'Super Admin' : 'Admin'}
           </button>
           <button type="button" className="admin-btn admin-btn-logout" onClick={() => navigate('/')} aria-label="Logout">
             &rarr; Logout
