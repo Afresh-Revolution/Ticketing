@@ -160,7 +160,7 @@ const EventDetailPage = () => {
                   </div>
                   <div className="event-detail-ticket-right">
                     <span className="event-detail-ticket-price">
-                      N{ticket.price.toLocaleString()}
+                      ₦{ticket.price.toLocaleString()}
                     </span>
                     <div className="event-detail-qty-controls">
                       <button
@@ -189,25 +189,25 @@ const EventDetailPage = () => {
             })}
           </div>
         </section>
-      </main>
 
-      <div className="event-detail-checkout-bar">
-        <div className="event-detail-checkout-summary">
-          <span className="event-detail-checkout-count">
-            {totalQty} Ticket{totalQty !== 1 ? "s" : ""}
-          </span>
-          <span className="event-detail-checkout-total">
-            N{totalPrice.toLocaleString()}
-          </span>
+        <div className="event-detail-checkout-bar">
+          <div className="event-detail-checkout-summary">
+            <span className="event-detail-checkout-count">
+              {totalQty} Ticket{totalQty !== 1 ? "s" : ""}
+            </span>
+            <span className="event-detail-checkout-total">
+              ₦{totalPrice.toLocaleString()}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="event-detail-checkout-btn"
+            disabled={totalQty === 0}
+          >
+            CheckOut
+          </button>
         </div>
-        <button
-          type="button"
-          className="event-detail-checkout-btn"
-          disabled={totalQty === 0}
-        >
-          CheckOut
-        </button>
-      </div>
+      </main>
     </div>
   );
 };
