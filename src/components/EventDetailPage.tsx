@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import "./EventDetailPage.css";
 
 const DEFAULT_EVENT = {
@@ -25,6 +25,7 @@ const DEFAULT_EVENT = {
 
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [quantities, setQuantities] = useState<Record<string, number>>({
     regular: 0,
     silver: 0,
@@ -203,6 +204,16 @@ const EventDetailPage = () => {
             type="button"
             className="event-detail-checkout-btn"
             disabled={totalQty === 0}
+            onClick={() =>
+              totalQty > 0 &&
+              navigate("/checkout", {
+                state: {
+                  totalPrice,
+                  eventId: id,
+                  eventTitle: event.title,
+                },
+              })
+            }
           >
             CheckOut
           </button>
