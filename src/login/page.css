@@ -145,9 +145,23 @@
   text-decoration: none;
 }
 
-.auth-link button:hover {
+.auth-link button:hover,
+.auth-link a:hover {
   color: #8a2ba5;
   text-decoration: underline;
+}
+
+.auth-link a {
+  color: #791a94;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.auth-error {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
 }
 
 .auth-right {

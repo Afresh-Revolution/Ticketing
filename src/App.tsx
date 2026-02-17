@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import LandingPage from './components/LandingPage'
 import LoginPage from './components/LoginPage'
 import SignupPage from './components/SignupPage'
@@ -14,6 +15,7 @@ import './App.css'
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -31,6 +33,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </AuthProvider>
   )
 }
 

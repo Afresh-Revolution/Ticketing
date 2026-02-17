@@ -234,6 +234,70 @@
   background: var(--admin-accent-bright);
 }
 
+/* Available Pools layout */
+.admin-pools-wrap {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.admin-pools-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-pools-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--admin-text);
+  margin: 0;
+}
+
+.admin-pools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-pool-card {
+  background: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.admin-pool-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.admin-pool-card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+}
+
+.admin-pool-remove {
+  background: none;
+  border: none;
+  color: var(--admin-danger);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.admin-pool-remove:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+
 .admin-form-actions {
   display: flex;
   justify-content: flex-end;
