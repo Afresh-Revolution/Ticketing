@@ -137,6 +137,16 @@
   margin: 0;
 }
 
+.copyright-admin-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.copyright-admin-link:hover {
+  text-decoration: underline;
+}
+
 .payment-info {
   display: flex;
   align-items: center;

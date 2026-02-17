@@ -1,0 +1,24 @@
+/* Default styles when ProfileButton is used without a custom className */
+.profile-btn-trigger {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.profile-btn-trigger:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-btn-trigger svg {
+  width: 20px;
+  height: 20px;
+}
