@@ -2,12 +2,25 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './admin.css';
 
+type TicketPool = {
+  id: string;
+  ticketName: string;
+  price: string;
+  quantity: string;
+  description: string;
+};
+
+const defaultPool = (): TicketPool => ({
+  id: crypto.randomUUID(),
+  ticketName: 'General Admission',
+  price: '0',
+  quantity: '100',
+  description: '',
+});
+
 const AdminCreateEvent = () => {
   const navigate = useNavigate();
-  const [ticketName, setTicketName] = useState('General Admission');
-  const [price, setPrice] = useState('0');
-  const [quantity, setQuantity] = useState('100');
-  const [description, setDescription] = useState('');
+  const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
 
   return (
     <div className="admin-page">
@@ -119,26 +132,99 @@ const AdminCreateEvent = () => {
           <h2 className="admin-section-title">
             <span className="admin-section-icon" aria-hidden>👥</span>
             Capacity & Tickets
-            <button type="button" className="admin-btn-add-ticket">+ Add Ticket Type</button>
           </h2>
           <label className="admin-label">Total Capacity *</label>
           <input type="number" className="admin-input" defaultValue="500" min={1} required style={{ maxWidth: '200px' }} />
           <label className="admin-label">Min Tickets per Order</label>
           <input type="number" className="admin-input" defaultValue="1" min={0} style={{ maxWidth: '200px' }} />
-          <label className="admin-label">Ticket Name *</label>
-          <input type="text" className="admin-input" value={ticketName} onChange={(e) => setTicketName(e.target.value)} required />
-          <div className="admin-form-row">
-            <div>
-              <label className="admin-label">Price (₦) *</label>
-              <input type="number" className="admin-input" value={price} onChange={(e) => setPrice(e.target.value)} min={0} step="0.01" required />
+
+          <div className="admin-pools-wrap">
+            <div className="admin-pools-heading">
+              <h3 className="admin-pools-title">Available Pools</h3>
+              <button
+                type="button"
+                className="admin-btn-add-ticket"
+                onClick={() => setPools((prev) => [...prev, defaultPool()])}
+              >
+                + Add Ticket Type
+              </button>
             </div>
-            <div>
-              <label className="admin-label">Quantity *</label>
-              <input type="number" className="admin-input" value={quantity} onChange={(e) => setQuantity(e.target.value)} min={1} required />
+            <div className="admin-pools-list">
+              {pools.map((pool) => (
+                <div key={pool.id} className="admin-pool-card">
+                  <div className="admin-pool-card-header">
+                    <span className="admin-pool-card-title">Ticket Pool</span>
+                    {pools.length > 1 && (
+                      <button
+                        type="button"
+                        className="admin-pool-remove"
+                        onClick={() => setPools((prev) => prev.filter((p) => p.id !== pool.id))}
+                        aria-label="Remove pool"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <label className="admin-label">Ticket Name *</label>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    value={pool.ticketName}
+                    onChange={(e) =>
+                      setPools((prev) =>
+                        prev.map((p) => (p.id === pool.id ? { ...p, ticketName: e.target.value } : p))
+                      )
+                    }
+                    required
+                  />
+                  <div className="admin-form-row">
+                    <div>
+                      <label className="admin-label">Price (₦) *</label>
+                      <input
+                        type="number"
+                        className="admin-input"
+                        value={pool.price}
+                        onChange={(e) =>
+                          setPools((prev) =>
+                            prev.map((p) => (p.id === pool.id ? { ...p, price: e.target.value } : p))
+                          )
+                        }
+                        min={0}
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="admin-label">Quantity *</label>
+                      <input
+                        type="number"
+                        className="admin-input"
+                        value={pool.quantity}
+                        onChange={(e) =>
+                          setPools((prev) =>
+                            prev.map((p) => (p.id === pool.id ? { ...p, quantity: e.target.value } : p))
+                          )
+                        }
+                        min={1}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <label className="admin-label">Description</label>
+                  <textarea
+                    className="admin-textarea"
+                    placeholder="Optional ticket type description"
+                    value={pool.description}
+                    onChange={(e) =>
+                      setPools((prev) =>
+                        prev.map((p) => (p.id === pool.id ? { ...p, description: e.target.value } : p))
+                      )
+                    }
+                  />
+                </div>
+              ))}
             </div>
           </div>
-          <label className="admin-label">Description</label>
-          <textarea className="admin-textarea" placeholder="Optional ticket type description" value={description} onChange={(e) => setDescription(e.target.value)} />
         </section>
 
         {/* Event Media */}

@@ -344,6 +344,7 @@
 }
 
 .event-card-cta {
+  display: inline-block;
   margin-top: auto;
   padding-top: 0.75rem;
   align-self: flex-end;
@@ -357,6 +358,8 @@
   font-family: inherit;
   cursor: pointer;
   transition: background 0.2s;
+  text-decoration: none;
+  text-align: center;
 }
 
 .event-card-cta:hover {
