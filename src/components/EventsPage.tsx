@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, NavLink } from "react-router-dom";
+import ProfileButton from "./ProfileButton";
 import "./EventsPage.css";
 
 import exploreimg1 from "../assets/exploreimg1.jpg";
@@ -120,20 +121,7 @@ const EventsPage = () => {
           </Link>
         </nav>
         <div className="events-header-right">
-          <button
-            type="button"
-            className="events-profile-btn"
-            aria-label="Profile"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" />
-            </svg>
-          </button>
+          <ProfileButton className="events-profile-btn" aria-label="Profile" />
         </div>
       </header>
 
@@ -340,6 +328,7 @@ const EventsPage = () => {
           </div>
         </div>
       </footer>
+
     </div>
   );
 };
