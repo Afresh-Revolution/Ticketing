@@ -117,19 +117,32 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
-.info-item.price {
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
+.event-details-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.info-item.price {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.info-item.price .price-wrapper {
+  padding-top: 0;
 }
 
 .price-wrapper {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding-top: 0.75rem;
 }
 
 .price-label {
@@ -145,10 +158,6 @@
 }
 
 .btn-get-tickets {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 70%;
-  transform: translateX(-50%);
   padding: 0.75rem 1.5rem;
   background: #791A94;
   color: #ffffff;
@@ -161,11 +170,12 @@
   font-family: 'Arimo', sans-serif;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .btn-get-tickets:hover {
   background: #8a2ba5;
-  transform: translateX(-50%) translateY(-2px);
+  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(121, 26, 148, 0.6);
 }
 
@@ -216,11 +226,13 @@
     font-size: 0.85rem;
   }
 
+  .event-details-footer {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
   .btn-get-tickets {
     padding: 0.7rem 1.25rem;
     font-size: 0.95rem;
-    bottom: 0.25rem;
-    left: 50%;
-    transform: translateX(-50%);
   }
 }

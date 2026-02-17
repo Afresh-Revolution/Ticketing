@@ -66,16 +66,18 @@ const GetTickets = () => {
                     </svg>
                     <span>{event.time}</span>
                   </div>
+                </div>
+                <div className="event-details-footer">
                   <div className="info-item price">
                     <div className="price-wrapper">
                       <span className="price-label">Starting From</span>
                       <span className="price-amount">{event.price}</span>
                     </div>
                   </div>
+                  <button className="btn-get-tickets" onClick={() => navigate(`/event/${event.id}`)}>
+                    Get Tickets
+                  </button>
                 </div>
-                <button className="btn-get-tickets" onClick={() => navigate('/signup')}>
-                  Get Tickets
-                </button>
               </div>
             </div>
           ))}
