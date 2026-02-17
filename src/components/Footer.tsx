@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import '../FeaturesPage/css/Footer.css';
 
 const Footer = () => {
@@ -76,7 +77,7 @@ const Footer = () => {
         {/* Footer Bottom */}
         <div className="footer-bottom">
           <div className="footer-bottom-content">
-            <p className="copyright">© 2026 Gatewave. All rights reserved.</p>
+            <p className="copyright"><Link to="/admin" className="copyright-admin-link" aria-label="Admin">©</Link> 2026 Gatewave. All rights reserved.</p>
             <div className="payment-info">
               <span className="secure-payment">SECURE PAYMENT</span>
               <div className="payment-icons">
