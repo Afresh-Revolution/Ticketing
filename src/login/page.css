@@ -102,6 +102,30 @@
   pointer-events: none;
 }
 
+.password-toggle-btn {
+  position: absolute;
+  right: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  z-index: 2;
+}
+
+.password-toggle-btn:hover {
+  color: #ffffff;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+  color: #ffffff;
+}
+
 .btn {
   padding: 1rem 2rem;
   border: none;

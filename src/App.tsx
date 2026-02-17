@@ -8,7 +8,8 @@ import EventsPage from './components/EventsPage'
 import MyTicketsPage from './components/MyTicketsPage'
 import EventDetailPage from './components/EventDetailPage'
 import CheckoutPage from './components/CheckoutPage'
-import AdminLayout from './admin/AdminLayout'
+import AdminLogin from './admin/AdminLogin'
+import ProtectedAdminRoute from './admin/ProtectedAdminRoute'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminEvents from './admin/AdminEvents'
 import AdminCreateEvent from './admin/AdminCreateEvent'
@@ -28,7 +29,8 @@ function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<ProtectedAdminRoute />}>
           <Route index element={<AdminDashboard />} />
           <Route path="events" element={<AdminEvents />} />
           <Route path="events/create" element={<AdminCreateEvent />} />
