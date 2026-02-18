@@ -1,8 +1,29 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import MembershipPlanModal from './MembershipPlanModal';
+import LegalModal from './LegalModal';
+import SupportModal from './SupportModal';
 import '../FeaturesPage/css/Footer.css';
 
 const Footer = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLegalOpen, setIsLegalOpen] = useState(false);
+  const [legalSection, setLegalSection] = useState('');
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [supportSection, setSupportSection] = useState('');
+
+  const openLegal = (section: string) => {
+    setLegalSection(section);
+    setIsLegalOpen(true);
+  };
+
+  const openSupport = (section: string) => {
+    setSupportSection(section);
+    setIsSupportOpen(true);
+  };
+
   return (
+    <>
     <footer className="footer">
       <div className="footer-content">
         <div className="footer-main">
@@ -43,11 +64,11 @@ const Footer = () => {
           <div className="footer-column">
             <h3 className="footer-heading">Explore</h3>
             <ul className="footer-links">
-              <li><a href="#">Browse Events</a></li>
-              <li><a href="#">Upcoming Events</a></li>
-              <li><a href="#">Popular Events</a></li>
-              <li><a href="#">Become an Organizer</a></li>
-              <li><a href="#">Create an Event</a></li>
+              <li><Link to="/events">Browse Events</Link></li>
+              <li><Link to="/events?filter=upcoming">Upcoming Events</Link></li>
+              <li><Link to="/events?filter=popular">Popular Events</Link></li>
+              <li><button className="footer-link-btn" onClick={() => setIsModalOpen(true)}>Become an Organizer</button></li>
+              <li><Link to="/events/create">Create an Event</Link></li>
             </ul>
           </div>
 
@@ -55,10 +76,10 @@ const Footer = () => {
           <div className="footer-column">
             <h3 className="footer-heading">Support</h3>
             <ul className="footer-links">
-              <li><a href="#">Help Center</a></li>
-              <li><a href="#">FAQs</a></li>
-              <li><a href="#">Contact Support</a></li>
-              <li><a href="#">Report an Issue</a></li>
+              <li><button className="footer-link-btn" onClick={() => openSupport('')}>Help Center</button></li>
+              <li><button className="footer-link-btn" onClick={() => openSupport('faqs')}>FAQs</button></li>
+              <li><button className="footer-link-btn" onClick={() => openSupport('contact')}>Contact Support</button></li>
+              <li><button className="footer-link-btn" onClick={() => openSupport('report')}>Report an Issue</button></li>
             </ul>
           </div>
 
@@ -66,10 +87,10 @@ const Footer = () => {
           <div className="footer-column">
             <h3 className="footer-heading">Legal</h3>
             <ul className="footer-links">
-              <li><a href="#">Terms & Conditions</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Refund Policy</a></li>
-              <li><a href="#">Cookie Policy</a></li>
+              <li><button className="footer-link-btn" onClick={() => openLegal('terms')}>Terms & Conditions</button></li>
+              <li><button className="footer-link-btn" onClick={() => openLegal('privacy')}>Privacy Policy</button></li>
+              <li><button className="footer-link-btn" onClick={() => openLegal('refund')}>Refund Policy</button></li>
+              <li><button className="footer-link-btn" onClick={() => openLegal('cookie')}>Cookie Policy</button></li>
             </ul>
           </div>
         </div>
@@ -86,12 +107,17 @@ const Footer = () => {
                 </svg>
                 <span>VISA</span>
                 <span>MC</span>
+                <span>Paystack</span>
               </div>
             </div>
           </div>
         </div>
       </div>
     </footer>
+    <MembershipPlanModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+    <LegalModal isOpen={isLegalOpen} onClose={() => setIsLegalOpen(false)} sectionId={legalSection} />
+    <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} sectionId={supportSection} />
+    </>
   );
 };
 

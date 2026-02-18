@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { apiUrl } from "../api/config";
-import ProfileButton from "./ProfileButton";
+import Navbar from "./Navbar";
 import "./EventsPage.css";
 
 const CATEGORIES = [
@@ -80,39 +80,7 @@ const EventsPage = () => {
 
   return (
     <div className="events-page">
-      <header className="events-header">
-        <div className="events-header-left">
-          <Link to="/" className="events-logo">
-            <div className="events-logo-icon">G</div>
-            <span className="events-logo-text">Gatewave</span>
-          </Link>
-        </div>
-        <nav className="events-nav">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `events-nav-link${isActive ? " active" : ""}`
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/events"
-            className={({ isActive }) =>
-              `events-nav-link${isActive ? " active" : ""}`
-            }
-          >
-            Explore
-          </NavLink>
-          <Link to="/my-tickets" className="events-nav-link">
-            My Tickets
-          </Link>
-        </nav>
-        <div className="events-header-right">
-          <ProfileButton className="events-profile-btn" aria-label="Profile" />
-        </div>
-      </header>
+      <Navbar />
 
       <main className="events-main">
         <section className="events-search-section">

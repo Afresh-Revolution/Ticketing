@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import FeaturesPage from './FeaturesPage';
 import ScrollReveal from './ScrollReveal';
+import Navbar from './Navbar';
 import '../LandingPage/css/LandingPage.css';
 
 const LandingPage = () => {
@@ -9,18 +10,7 @@ const LandingPage = () => {
   return (
     <div className="landing-page">
       {/* Navigation */}
-      <nav className="navbar">
-        <div className="logo">
-          <div className="logo-icon">G</div>
-          <span className="logo-text">GATEWAVE</span>
-        </div>
-        <div className="nav-links">
-          <a href="#" className="nav-link">Explore Events</a>
-          <button className="nav-btn-signin" onClick={() => navigate('/login')}>
-            sign in
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero + Video: one stretched background image */}
       <div className="hero-video-backdrop">

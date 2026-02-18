@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/config";
+import Navbar from "./Navbar";
 import "./EventDetailPage.css";
 
 interface TicketType {
@@ -97,23 +98,7 @@ const EventDetailPage = () => {
 
   return (
     <div className="event-detail-page">
-      <header className="event-detail-header">
-        <Link to="/" className="event-detail-logo">
-          <div className="event-detail-logo-icon">G</div>
-          <span className="event-detail-logo-text">Gatewave</span>
-        </Link>
-        <nav className="event-detail-nav">
-          <Link to="/" className="event-detail-nav-link">
-            Home
-          </Link>
-          <Link to="/events" className="event-detail-nav-link">
-            Explore
-          </Link>
-          <Link to="/my-tickets" className="event-detail-nav-link">
-            My Tickets
-          </Link>
-        </nav>
-      </header>
+      <Navbar />
 
       <div className="event-detail-hero-wrap">
         <div

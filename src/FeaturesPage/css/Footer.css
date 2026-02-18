@@ -213,3 +213,19 @@
     gap: 0.5rem;
   }
 }
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.3s ease;
+}
+
+.footer-link-btn:hover {
+  color: #ffffff;
+}

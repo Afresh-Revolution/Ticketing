@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePaystackPayment } from "react-paystack";
 import { apiUrl } from "../api/config";
@@ -16,9 +16,23 @@ interface CheckoutState {
   }>;
 }
 
+import { useAuth } from "../contexts/AuthContext";
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  
+  // Auth Guard
+  if (!isAuthenticated) {
+    // Redirect to login but save the checkout state to return later
+    // For now, simpler redirect
+    useEffect(() => {
+       navigate('/login', { state: { from: location } });
+    }, [isAuthenticated, navigate, location]);
+    return null; 
+  }
+
   const state = (location.state as CheckoutState) || {};
   const totalPrice = state.totalPrice ?? 0;
 
