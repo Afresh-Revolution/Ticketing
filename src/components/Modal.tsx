@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './Modal.css';
 
 interface ModalProps {
@@ -23,7 +24,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className={`modal-content ${className}`} onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="Close modal">
@@ -34,7 +35,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
