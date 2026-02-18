@@ -413,6 +413,18 @@ const AdminCreateEvent = () => {
             value={formData.imageUrl}
             onChange={handleChange}
           />
+          <p className="admin-input-hint">
+            Don't have a URL? Upload your image and get a link instantly at{' '}
+            <a
+              href="https://www.imageurlgenerator.com/image-to-url"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="admin-hint-link"
+            >
+              imageurlgenerator.com
+            </a>
+            , then paste the URL above.
+          </p>
           <div className="admin-upload-zone">
             <div className="admin-upload-icon">🖼</div>
             <p>Paste image URL above or (uploading coming soon)</p>
