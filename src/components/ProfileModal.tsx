@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Modal from './Modal';
 import "./ProfileModal.css";
 
 const DEFAULT_PROFILE = {
@@ -17,8 +18,6 @@ type ProfileModalProps = {
 const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
   const [form, setForm] = useState(DEFAULT_PROFILE);
 
-  if (!isOpen) return null;
-
   const initials =
     (form.firstName?.charAt(0) || "") + (form.lastName?.charAt(0) || "") || "?";
 
@@ -34,30 +33,7 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
   };
 
   return (
-    <div className="profile-modal-backdrop" onClick={onClose}>
-      <div
-        className="profile-modal"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-labelledby="profile-modal-title"
-        aria-modal="true"
-      >
-        <header className="profile-modal-header">
-          <h2 id="profile-modal-title" className="profile-modal-title">
-            My Profile
-          </h2>
-          <button
-            type="button"
-            className="profile-modal-close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </header>
-
+    <Modal isOpen={isOpen} onClose={onClose} title="My Profile" className="profile-modal-container">
         <div className="profile-modal-body">
           <div className="profile-modal-left">
             <div className="profile-avatar">{initials.toUpperCase()}</div>
@@ -142,8 +118,7 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

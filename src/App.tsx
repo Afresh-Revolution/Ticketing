@@ -14,6 +14,8 @@ import AdminDashboard from './admin/AdminDashboard'
 import AdminEvents from './admin/AdminEvents'
 import AdminCreateEvent from './admin/AdminCreateEvent'
 import AdminSales from './admin/AdminSales'
+import AdminMemberships from './admin/AdminMemberships'
+import AdminMembershipPlans from './admin/AdminMembershipPlans'
 import './App.css'
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
           <Route path="events" element={<AdminEvents />} />
           <Route path="events/create" element={<AdminCreateEvent />} />
           <Route path="sales" element={<AdminSales />} />
+          <Route path="memberships" element={<AdminMemberships />} />
+          <Route path="membership-plans" element={<AdminMembershipPlans />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Routes>
