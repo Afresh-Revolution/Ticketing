@@ -39,7 +39,15 @@ const EventDetailPage = () => {
         const res = await fetch(apiUrl(`/api/events/${id}`));
         if (!res.ok) throw new Error("Event not found");
         const data = await res.json();
-        
+        const rawTickets = data.tickets ?? data.ticketTypes;
+        const tickets = (Array.isArray(rawTickets) ? rawTickets : []).map((t: { id: string; name?: string; ticketName?: string; description?: string; price?: number | string; quantity?: number | string }) => ({
+          id: t.id,
+          name: t.name ?? t.ticketName ?? 'Ticket',
+          description: t.description ?? '',
+          price: Number(t.price) || 0,
+          quantity: Number(t.quantity) || 0,
+        }));
+
         // Transform data to match UI
         const dateObj = new Date(data.date);
         const formattedEvent: EventDetail = {
@@ -52,16 +60,14 @@ const EventDetailPage = () => {
           heroImage: data.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
           about: data.description || "No description available.",
           organizer: "Gatewave Organizer", // TODO: Fetch from createdBy user if available
-          tickets: data.tickets || []
+          tickets
         };
         
         setEvent(formattedEvent);
-        
-        // Initialize quantities
+
+        // Initialize quantities from normalized tickets
         const initialQty: Record<string, number> = {};
-        if (data.tickets) {
-          data.tickets.forEach((t: TicketType) => initialQty[t.id] = 0);
-        }
+        tickets.forEach((t: TicketType) => { initialQty[t.id] = 0; });
         setQuantities(initialQty);
 
       } catch (err) {
@@ -173,48 +179,57 @@ const EventDetailPage = () => {
           </div>
         </div>
 
-        <section className="event-detail-tickets">
-          <h2 className="event-detail-tickets-heading">Select Tickets</h2>
+        <section className="event-detail-tickets" aria-labelledby="event-detail-tickets-heading">
+          <h2 id="event-detail-tickets-heading" className="event-detail-tickets-heading">Select Tickets</h2>
           <div className="event-detail-ticket-list">
-            {event.tickets.length === 0 && <p>No tickets available.</p>}
-            {event.tickets.map((ticket) => {
-              const qty = quantities[ticket.id] ?? 0;
-              return (
-                <div key={ticket.id} className="event-detail-ticket-card">
-                  <div className="event-detail-ticket-info">
-                    <h4 className="event-detail-ticket-name">{ticket.name}</h4>
-                    <p className="event-detail-ticket-desc">{ticket.description}</p>
-                    <span className="event-detail-ticket-badge">Available</span>
-                  </div>
-                  <div className="event-detail-ticket-right">
-                    <span className="event-detail-ticket-price">
-                      ₦{ticket.price.toLocaleString()}
-                    </span>
-                    <div className="event-detail-qty-controls">
-                      <button
-                        type="button"
-                        className="event-detail-qty-btn"
-                        onClick={() => adjustQty(ticket.id, -1)}
-                        aria-label={`Decrease ${ticket.name}`}
-                      >
-                        −
-                      </button>
-                      <span className="event-detail-qty-value" aria-live="polite">
-                        {qty}
-                      </span>
-                      <button
-                        type="button"
-                        className="event-detail-qty-btn"
-                        onClick={() => adjustQty(ticket.id, 1)}
-                        aria-label={`Increase ${ticket.name}`}
-                      >
-                        +
-                      </button>
+            {event.tickets.length === 0 ? (
+              <div className="event-detail-ticket-list-empty">
+                <span className="event-detail-ticket-list-empty-icon" aria-hidden>🎫</span>
+                <p>No tickets available for this event.</p>
+                <p className="event-detail-ticket-list-empty-hint">The organizer may add ticket types later. Check back or contact support.</p>
+              </div>
+            ) : (
+              <>
+                {event.tickets.map((ticket) => {
+                  const qty = quantities[ticket.id] ?? 0;
+                  return (
+                    <div key={ticket.id} className="event-detail-ticket-card">
+                      <div className="event-detail-ticket-info">
+                        <h4 className="event-detail-ticket-name">{ticket.name}</h4>
+                        <p className="event-detail-ticket-desc">{ticket.description || '—'}</p>
+                        <span className="event-detail-ticket-badge">Available</span>
+                      </div>
+                      <div className="event-detail-ticket-right">
+                        <span className="event-detail-ticket-price">
+                          ₦{Number(ticket.price).toLocaleString()}
+                        </span>
+                        <div className="event-detail-qty-controls">
+                          <button
+                            type="button"
+                            className="event-detail-qty-btn"
+                            onClick={() => adjustQty(ticket.id, -1)}
+                            aria-label={`Decrease ${ticket.name}`}
+                          >
+                            −
+                          </button>
+                          <span className="event-detail-qty-value" aria-live="polite">
+                            {qty}
+                          </span>
+                          <button
+                            type="button"
+                            className="event-detail-qty-btn"
+                            onClick={() => adjustQty(ticket.id, 1)}
+                            aria-label={`Increase ${ticket.name}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </>
+            )}
           </div>
         </section>
 

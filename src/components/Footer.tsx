@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import MembershipPlanModal from './MembershipPlanModal';
 import LegalModal from './LegalModal';
 import SupportModal from './SupportModal';
+import Logo from './Logo';
 import '../FeaturesPage/css/Footer.css';
 
 const Footer = () => {
@@ -30,8 +31,7 @@ const Footer = () => {
           {/* Company Info Column */}
           <div className="footer-column company-info">
             <div className="footer-logo">
-              <div className="footer-logo-icon">G</div>
-              <span className="footer-logo-text">GATEWAVE</span>
+              <Logo variant="sec" className="footer-logo-img" />
             </div>
             <p className="footer-description">
               The premier platform for discovering and hosting events. We connect passionate organizers with enthusiastic attendees to create unforgettable experiences.

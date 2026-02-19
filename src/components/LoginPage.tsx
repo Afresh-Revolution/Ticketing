@@ -34,8 +34,9 @@ const LoginPage = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-left">
-        <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-left">
+          <div className="auth-container">
           <h1>Sign In</h1>
           <form className="auth-form" onSubmit={handleSubmit}>
             {error && <p className="auth-error">{error}</p>}
@@ -91,11 +92,12 @@ const LoginPage = () => {
             Don&apos;t have an account? <Link to="/signup">Sign Up</Link>
           </p>
         </div>
-      </div>
-      <div className="auth-right">
-        <div className="auth-right-content">
-          <h2>Welcome back</h2>
-          <p>Sign in to book tickets and manage your events.</p>
+        </div>
+        <div className="auth-right">
+          <div className="auth-right-content">
+            <h2><span>Welcome</span><span>back</span></h2>
+            <p>Sign in to book tickets and manage your events.</p>
+          </div>
         </div>
       </div>
     </div>

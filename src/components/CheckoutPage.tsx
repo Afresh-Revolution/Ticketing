@@ -42,26 +42,37 @@ const CheckoutPage = () => {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  // Paystack Config
-  const config = {
+  const [paystackConfig, setPaystackConfig] = useState<{
+    reference: string;
+    email: string;
+    amount: number;
+    publicKey: string;
+  } | null>(null);
+
+  const publicKey = (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "";
+  const defaultConfig = {
     reference: (new Date()).getTime().toString(),
-    email: email,
-    amount: totalPrice * 100, // Paystack expects amount in kobo
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string,
+    email: "",
+    amount: 100,
+    publicKey: publicKey || "pk_test_placeholder",
   };
+  const configToUse = paystackConfig ?? defaultConfig;
+  const initializePayment = usePaystackPayment(configToUse);
 
   const onSuccess = (reference: any) => {
-    // Verify transaction with backend
     verifyPayment(reference);
   };
 
   const onClose = () => {
     setLoading(false);
-    console.log('Payment closed');
+    setPaystackConfig(null);
   };
 
-  const initializePayment = usePaystackPayment(config);
+  useEffect(() => {
+    if (!paystackConfig) return;
+    initializePayment({ onSuccess, onClose });
+    setPaystackConfig(null);
+  }, [paystackConfig]);
 
   const handleBack = () => {
     if (state.eventId) {
@@ -96,7 +107,17 @@ const CheckoutPage = () => {
       if (!state.eventId || !state.items) {
         throw new Error("Invalid order details");
       }
-      
+      if (!email || !email.includes("@")) {
+        throw new Error("Please enter a valid email address");
+      }
+      const amountKobo = Math.round(totalPrice * 100);
+      if (amountKobo < 100) {
+        throw new Error("Amount must be at least ₦1. Please select at least one ticket.");
+      }
+      if (!publicKey || publicKey === "pk_test_placeholder") {
+        throw new Error("Payment is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.");
+      }
+
       // 1. Create Order in Backend (Pending)
       const orderPayload = {
         eventId: state.eventId,
@@ -115,14 +136,19 @@ const CheckoutPage = () => {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create order");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to create order");
       }
 
-      await res.json(); // Data unused for now
+      await res.json();
 
-      // 2. Open Paystack Modal
-      initializePayment({ onSuccess, onClose });
-
+      // 2. Open Paystack with current form values (amount in kobo, valid email)
+      setPaystackConfig({
+        reference: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+        email: email.trim(),
+        amount: amountKobo,
+        publicKey,
+      });
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Payment processing failed");

@@ -13,6 +13,7 @@ import ProtectedAdminRoute from './admin/ProtectedAdminRoute'
 import AdminDashboard from './admin/AdminDashboard'
 import AdminEvents from './admin/AdminEvents'
 import AdminCreateEvent from './admin/AdminCreateEvent'
+import AdminEditEvent from './admin/AdminEditEvent'
 import AdminSales from './admin/AdminSales'
 import AdminMemberships from './admin/AdminMemberships'
 import AdminMembershipPlans from './admin/AdminMembershipPlans'
@@ -37,6 +38,7 @@ function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="events" element={<AdminEvents />} />
           <Route path="events/create" element={<AdminCreateEvent />} />
+          <Route path="events/edit/:id" element={<AdminEditEvent />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="memberships" element={<AdminMemberships />} />
           <Route path="membership-plans" element={<AdminMembershipPlans />} />

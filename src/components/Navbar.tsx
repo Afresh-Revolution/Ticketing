@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Logo from './Logo';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -37,8 +38,7 @@ const Navbar = () => {
       <div className={`nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
       <div className="navbar-container">
         <div className="logo" onClick={() => navigate('/')}>
-          <div className="logo-icon">G</div>
-          <span className="logo-text">GATEWAVE</span>
+          <Logo variant="main" className="logo-img" />
         </div>
 
         <div className={`nav-links ${mobileMenuOpen ? 'active' : ''}`}>

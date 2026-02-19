@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, type FormEvent, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -19,13 +19,14 @@ const defaultPool = (): TicketPool => ({
   description: '',
 });
 
-const AdminCreateEvent = () => {
+const AdminEditEvent = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
 
-  // Form State
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -35,40 +36,84 @@ const AdminCreateEvent = () => {
     startTime: '',
     endDate: '',
     endTime: '',
-    timezone: '',
-    venue: 'Afresh Center',
+    timezone: 'Africa/Lagos',
+    venue: '',
     address: '',
     city: '',
     state: '',
     country: 'Nigeria',
     capacity: '500',
     minTickets: '1',
-    imageUrl: '' 
+    imageUrl: '',
   });
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchEvent = async () => {
+      try {
+        const res = await fetch(apiUrl(`/api/events/${id}`));
+        if (!res.ok) throw new Error('Event not found');
+        const data = await res.json();
+        const d = new Date(data.date);
+        const startDate = d.toISOString().slice(0, 10);
+        const startTime = d.toTimeString().slice(0, 5);
+        setFormData({
+          title: data.title ?? '',
+          description: data.description ?? '',
+          category: data.category ?? '',
+          eventType: '',
+          startDate,
+          startTime: data.startTime ?? startTime,
+          endDate: startDate,
+          endTime: data.startTime ?? startTime,
+          timezone: 'Africa/Lagos',
+          venue: data.venue ?? '',
+          address: '',
+          city: '',
+          state: '',
+          country: 'Nigeria',
+          capacity: '500',
+          minTickets: '1',
+          imageUrl: data.imageUrl ?? '',
+        });
+        const tickets = data.tickets ?? data.ticketTypes ?? [];
+        if (tickets.length > 0) {
+          setPools(
+            tickets.map((t: { id: string; name?: string; description?: string; price?: number; quantity?: number }) => ({
+              id: t.id,
+              ticketName: t.name ?? 'Ticket',
+              price: String(t.price ?? 0),
+              quantity: String(t.quantity ?? 0),
+              description: t.description ?? '',
+            }))
+          );
+        }
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load event');
+      }
+    };
+    fetchEvent();
+  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!id) return;
     setLoading(true);
-    setError('');
+    setSubmitError('');
 
     try {
-      // 1. Construct the location string
       let locationString = formData.venue;
       if (formData.city) locationString += `, ${formData.city}`;
-
-      // 2. Prepare the payload
-      // Note: Backend expects 'date' combined
       const dateTimeString = `${formData.startDate}T${formData.startTime}:00`;
-
-      // Get price from the first pool for display price
       const displayPrice = pools.length > 0 ? pools[0].price : '0';
 
       const ticketTypes = pools.map((p) => ({
+        id: p.id,
         name: p.ticketName,
         description: p.description || null,
         price: parseInt(p.price, 10) || 0,
@@ -84,79 +129,91 @@ const AdminCreateEvent = () => {
         category: formData.category,
         startTime: formData.startTime,
         price: displayPrice,
-        currency: 'NGN',
-        imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
+        imageUrl: formData.imageUrl || undefined,
         ticketTypes,
       };
 
       const token = localStorage.getItem('adminToken');
-      
-      const res = await fetch(apiUrl('/api/events'), {
-        method: 'POST',
+      const res = await fetch(apiUrl(`/api/events/${id}`), {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to create event');
-      }
-
-      // Success!
+      if (!res.ok) throw new Error(data.error || 'Failed to update event');
       navigate('/admin/events');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
   };
 
+  if (loadError) {
+    return (
+      <div className="admin-page">
+        <p className="admin-error-message">{loadError}</p>
+        <button type="button" className="admin-btn-secondary" onClick={() => navigate('/admin/events')}>
+          Back to Events
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-page">
-      <h1 className="admin-page-title">Create Event</h1>
+      <h1 className="admin-page-title">Edit Event</h1>
 
-      {error && (
-        <div className="admin-error-message" style={{ marginBottom: '1rem', color: '#fca5a5', background: 'rgba(220, 38, 38, 0.1)', padding: '1rem', borderRadius: '8px' }}>
-          {error}
+      {submitError && (
+        <div
+          className="admin-error-message"
+          style={{
+            marginBottom: '1rem',
+            color: '#fca5a5',
+            background: 'rgba(220, 38, 38, 0.1)',
+            padding: '1rem',
+            borderRadius: '8px',
+          }}
+        >
+          {submitError}
         </div>
       )}
 
       <form className="admin-form" onSubmit={handleSubmit}>
-        {/* Basic Information */}
         <section className="admin-section">
           <h2 className="admin-section-title">
             <span className="admin-section-icon" aria-hidden>📅</span>
             Basic Information
           </h2>
           <label className="admin-label">Event Name *</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="title"
-            className="admin-input" 
-            placeholder="Enter event name" 
-            required 
+            className="admin-input"
+            placeholder="Enter event name"
+            required
             value={formData.title}
             onChange={handleChange}
           />
           <label className="admin-label">Description *</label>
-          <textarea 
+          <textarea
             name="description"
-            className="admin-textarea" 
-            placeholder="Describe your event in detail" 
-            required 
+            className="admin-textarea"
+            placeholder="Describe your event"
+            required
             value={formData.description}
             onChange={handleChange}
           />
           <div className="admin-form-row">
             <div>
               <label className="admin-label">Category *</label>
-              <select 
+              <select
                 name="category"
-                className="admin-select" 
+                className="admin-select"
                 required
                 value={formData.category}
                 onChange={handleChange}
@@ -170,165 +227,61 @@ const AdminCreateEvent = () => {
                 <option value="Nightlife">Nightlife</option>
               </select>
             </div>
-            <div>
-              <label className="admin-label">Event Type *</label>
-              <select 
-                name="eventType"
-                className="admin-select" 
-                required
-                value={formData.eventType}
-                onChange={handleChange}
-              >
-                <option value="">Select type</option>
-                <option value="in-person">In Person</option>
-                <option value="online">Online</option>
-                <option value="hybrid">Hybrid</option>
-              </select>
-            </div>
           </div>
         </section>
 
-        {/* Date & Time */}
         <section className="admin-section">
-          <h2 className="admin-section-title">
-            <span className="admin-section-icon" aria-hidden>📅</span>
-            Date & Time
-          </h2>
+          <h2 className="admin-section-title">Date & Time</h2>
           <div className="admin-form-row">
             <div>
               <label className="admin-label">Start Date *</label>
-              <input 
-                type="date" 
+              <input
+                type="date"
                 name="startDate"
-                className="admin-input" 
-                required 
+                className="admin-input"
+                required
                 value={formData.startDate}
                 onChange={handleChange}
               />
             </div>
             <div>
               <label className="admin-label">Start Time *</label>
-              <input 
-                type="time" 
+              <input
+                type="time"
                 name="startTime"
-                className="admin-input" 
-                required 
+                className="admin-input"
+                required
                 value={formData.startTime}
                 onChange={handleChange}
               />
             </div>
           </div>
-          <div className="admin-form-row">
-            <div>
-              <label className="admin-label">End Date *</label>
-              <input 
-                type="date" 
-                name="endDate"
-                className="admin-input" 
-                required 
-                value={formData.endDate}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="admin-label">End Time *</label>
-              <input 
-                type="time" 
-                name="endTime"
-                className="admin-input" 
-                required 
-                value={formData.endTime}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-          <div>
-            <label className="admin-label">Timezone *</label>
-            <select 
-              name="timezone"
-              className="admin-select" 
-              required
-              value={formData.timezone}
-              onChange={handleChange}
-            >
-              <option value="">Select timezone</option>
-              <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
-              <option value="UTC">UTC</option>
-            </select>
-          </div>
         </section>
 
-        {/* Location */}
         <section className="admin-section">
-          <h2 className="admin-section-title">
-            <span className="admin-section-icon" aria-hidden>📍</span>
-            Location
-          </h2>
+          <h2 className="admin-section-title">Location</h2>
           <label className="admin-label">Venue Name *</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="venue"
-            className="admin-input" 
-            required 
+            className="admin-input"
+            required
             value={formData.venue}
             onChange={handleChange}
           />
-          <label className="admin-label">Address *</label>
-          <input 
-            type="text" 
-            name="address"
-            className="admin-input" 
-            placeholder="Street address" 
-            required 
-            value={formData.address}
+          <label className="admin-label">City</label>
+          <input
+            type="text"
+            name="city"
+            className="admin-input"
+            placeholder="City"
+            value={formData.city}
             onChange={handleChange}
           />
-          <div className="admin-form-row">
-            <div>
-              <label className="admin-label">City *</label>
-              <input 
-                type="text" 
-                name="city"
-                className="admin-input" 
-                placeholder="City" 
-                required 
-                value={formData.city}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="admin-label">State *</label>
-              <input 
-                type="text" 
-                name="state"
-                className="admin-input" 
-                placeholder="State" 
-                required 
-                value={formData.state}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
         </section>
 
-        {/* Capacity & Tickets */}
         <section className="admin-section">
-          <h2 className="admin-section-title">
-            <span className="admin-section-icon" aria-hidden>👥</span>
-            Capacity & Tickets
-          </h2>
-          <label className="admin-label">Total Capacity *</label>
-          <input 
-            type="number" 
-            name="capacity"
-            className="admin-input" 
-            min={1} 
-            required 
-            style={{ maxWidth: '200px' }} 
-            value={formData.capacity}
-            onChange={handleChange}
-          />
-          
+          <h2 className="admin-section-title">Ticket Types</h2>
           <div className="admin-pools-wrap">
             <div className="admin-pools-heading">
               <h3 className="admin-pools-title">Ticket Types</h3>
@@ -405,37 +358,17 @@ const AdminCreateEvent = () => {
           </div>
         </section>
 
-        {/* Event Media */}
         <section className="admin-section">
-          <h2 className="admin-section-title">
-            <span className="admin-section-icon" aria-hidden>🖼</span>
-            Event Media
-          </h2>
+          <h2 className="admin-section-title">Event Media</h2>
           <label className="admin-label">Image URL (Optional)</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="imageUrl"
-            className="admin-input" 
-            placeholder="https://..." 
+            className="admin-input"
+            placeholder="https://..."
             value={formData.imageUrl}
             onChange={handleChange}
           />
-          <p className="admin-input-hint">
-            Don't have a URL? Upload your image and get a link instantly at{' '}
-            <a
-              href="https://www.imageurlgenerator.com/image-to-url"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="admin-hint-link"
-            >
-              imageurlgenerator.com
-            </a>
-            , then paste the URL above.
-          </p>
-          <div className="admin-upload-zone">
-            <div className="admin-upload-icon">🖼</div>
-            <p>Paste image URL above or (uploading coming soon)</p>
-          </div>
         </section>
 
         <div className="admin-form-actions">
@@ -443,7 +376,7 @@ const AdminCreateEvent = () => {
             Cancel
           </button>
           <button type="submit" className="admin-btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Event'}
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </form>
@@ -451,5 +384,4 @@ const AdminCreateEvent = () => {
   );
 };
 
-export default AdminCreateEvent;
-
+export default AdminEditEvent;

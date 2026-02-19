@@ -14,6 +14,12 @@
   background: #181543;
 }
 
+/* Logo size on landing (navbar logo) */
+.landing-page .navbar .logo img,
+.landing-page .navbar .logo .logo-img {
+  height: 60px !important;
+}
+
 /* Hero + Video: one stretched background image */
 .hero-video-backdrop {
   position: relative;

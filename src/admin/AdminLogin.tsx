@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn } from '../api/auth';
+import Logo from '../components/Logo';
 import './admin.css';
 
 const AdminLogin = () => {
@@ -36,8 +37,7 @@ const AdminLogin = () => {
       <div className="admin-login-card">
         <div className="admin-login-header">
           <div className="admin-login-logo">
-            <div className="admin-login-logo-icon">G</div>
-            <span className="admin-login-logo-text">GATEWAVE</span>
+            <Logo variant="main" className="admin-login-logo-img" height={72} />
           </div>
           <h1 className="admin-login-title">Admin Portal</h1>
           <p className="admin-login-subtitle">Sign in to access the admin dashboard</p>
