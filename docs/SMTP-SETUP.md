@@ -1,74 +1,45 @@
-# SMTP Setup for Gatewave
+# Email Setup for Gatewave
 
-This guide explains how to configure SMTP for email delivery in the Ticketing backend. SMTP is used for:
+This guide explains how to configure email delivery in the Ticketing backend. The app uses **Resend** for:
 
 - **Signup verification** – 6-digit OTP sent when a user creates an account (required on first login)
 - **Forgot password** – 6-digit OTP sent for password reset
 
-## Environment Variables
+## Resend Setup
+
+### Environment Variables
 
 Add these to your backend `.env` file:
 
-| Variable      | Description                    | Example                     |
-|---------------|--------------------------------|-----------------------------|
-| `SMTP_HOST`   | SMTP server hostname           | `smtp.gmail.com`            |
-| `SMTP_PORT`   | SMTP port (587 for TLS)        | `587`                       |
-| `SMTP_SECURE` | Use SSL/TLS (set to `true` for 465) | `false`               |
-| `SMTP_USER`   | SMTP username / email          | `your-app@gmail.com`        |
-| `SMTP_PASS`   | SMTP password or app password  | `your-app-password`         |
-| `SMTP_FROM`   | From address (optional)        | `noreply@yourdomain.com`     |
+| Variable          | Description                          | Example                                  |
+|-------------------|--------------------------------------|------------------------------------------|
+| `RESEND_API_KEY`  | Resend API key                       | `re_xxxxxxxxxxxx`                         |
+| `RESEND_FROM`     | From address (must be verified)      | `Gatewave <onboarding@resend.dev>`        |
 
-## Gmail Setup
+### Getting an API Key
 
-1. Create or use a Gmail account.
-2. Enable 2-Step Verification (required for app passwords).
-3. Go to [Google Account → Security → App passwords](https://myaccount.google.com/apppasswords).
-4. Create an app password for "Mail" and "Other (custom name)" (e.g. "Gatewave").
-5. Use that 16-character password as `SMTP_PASS`.
+1. Sign up at [resend.com](https://resend.com)
+2. Go to [API Keys](https://resend.com/api-keys)
+3. Create an API key and copy it
+
+### From Address
+
+- **Testing:** Use `Gatewave <onboarding@resend.dev>` (Resend's test domain, works without verification)
+- **Production:** Add and verify your domain in the [Resend Dashboard](https://resend.com/domains), then use e.g. `Gatewave <noreply@yourdomain.com>`
 
 Example `.env`:
 
 ```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-app@gmail.com
-SMTP_PASS=abcd efgh ijkl mnop
-SMTP_FROM=noreply@gatewave.com
+RESEND_API_KEY=re_xxxxxxxxxxxx
+RESEND_FROM=Gatewave <onboarding@resend.dev>
 ```
 
-## Other Providers
+## Development Without Resend
 
-### SendGrid
-```
-SMTP_HOST=smtp.sendgrid.net
-SMTP_PORT=587
-SMTP_USER=apikey
-SMTP_PASS=<your SendGrid API key>
-```
-
-### Mailgun
-```
-SMTP_HOST=smtp.mailgun.org
-SMTP_PORT=587
-SMTP_USER=postmaster@your-domain.mailgun.org
-SMTP_PASS=<your Mailgun SMTP password>
-```
-
-### Outlook / Microsoft 365
-```
-SMTP_HOST=smtp.office365.com
-SMTP_PORT=587
-SMTP_USER=your-email@yourdomain.com
-SMTP_PASS=<your account password>
-```
-
-## Development Without SMTP
-
-If `SMTP_USER` and `SMTP_PASS` are not set, the backend will **not** send real emails. Instead, it will log what would be sent to the console:
+If `RESEND_API_KEY` is not set, the backend will **not** send real emails. Instead, it will log what would be sent:
 
 ```
-[email] (SMTP not configured) Would send: { to: 'user@example.com', subject: 'Verify your email...', ... }
+[email] (Resend not configured) Would send: { to: 'user@example.com', subject: 'Verify your email...', ... }
 ```
 
 Use this for local development. You can inspect the OTP in logs or temporarily add a `console.log(code)` in the verification flow (remove before production).
@@ -100,7 +71,7 @@ This marks all current users as verified so they can log in without an OTP.
 
 ## Security Notes
 
-- Never commit `.env` or SMTP credentials to version control.
+- Never commit `.env` or your Resend API key to version control.
 - Use environment variables or secrets management in production (e.g. Render, Vercel, Railway).
 - OTP codes expire in 10 minutes.
 - Only one active OTP per email/type at a time (new code invalidates the previous one).
