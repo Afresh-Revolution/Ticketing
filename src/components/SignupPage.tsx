@@ -34,8 +34,9 @@ const SignupPage = () => {
 
   return (
     <div className="auth-page">
-      <div className="auth-left">
-        <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-left">
+          <div className="auth-container">
           <h1>Sign Up</h1>
           <form className="auth-form" onSubmit={handleSubmit}>
             {error && <p className="auth-error">{error}</p>}
@@ -92,11 +93,12 @@ const SignupPage = () => {
             Already have an account? <Link to="/login">Sign In</Link>
           </p>
         </div>
-      </div>
-      <div className="auth-right">
-        <div className="auth-right-content">
-          <h2>Join us!</h2>
-          <p>Create an account to book tickets faster and track your events.</p>
+        </div>
+        <div className="auth-right">
+          <div className="auth-right-content">
+            <h2><span>JOIN</span><span>US!</span></h2>
+            <p>Create an account to book tickets faster and track your events.</p>
+          </div>
         </div>
       </div>
     </div>
