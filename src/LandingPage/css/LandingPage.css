@@ -20,11 +20,12 @@
   height: 60px !important;
 }
 
-/* Hero + Video: one stretched background image */
+/* Hero + Video: one stretched background image – starts below fixed navbar */
 .hero-video-backdrop {
   position: relative;
   width: 100%;
   background: #181543;
+  padding-top: 4rem;
 }
 
 .hero-video-backdrop::before {
@@ -54,7 +55,7 @@
 .hero {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 8rem 3rem 4rem;
+  padding: 3rem 3rem 4rem;
   text-align: center;
   min-height: 70vh;
   display: flex;
