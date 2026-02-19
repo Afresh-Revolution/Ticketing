@@ -188,6 +188,59 @@
   margin: 0 0 0.5rem 0;
 }
 
+.auth-success {
+  color: #86efac;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.auth-forgot {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.auth-forgot-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.auth-forgot-btn:hover {
+  color: #b794f6;
+}
+
+.auth-otp-hint {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.auth-otp-input {
+  font-size: 1.25rem;
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+
+.auth-back-btn {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.auth-back-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .auth-right {
   flex: 1;
   background: transparent;

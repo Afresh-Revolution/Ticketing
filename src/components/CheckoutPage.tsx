@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { usePaystackPayment } from "react-paystack";
 import { apiUrl } from "../api/config";
@@ -21,7 +21,8 @@ import { useAuth } from "../contexts/AuthContext";
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
+  const createdOrderIdRef = useRef<string | null>(null);
   
   // Auth Guard
   if (!isAuthenticated) {
@@ -83,19 +84,32 @@ const CheckoutPage = () => {
   };
 
   const verifyPayment = async (reference: any) => {
-    // In a real app, send reference to backend to verify
-    // For now, we trust the callback and navigate
-    // Actually, we should update the order status to 'paid'
-    
-    // We navigate to success
-    navigate("/payment-success", { 
-        state: { 
-          amount: totalPrice, 
-          eventTitle: state.eventTitle,
-          orderId: "ORDER-" + reference.reference, // Placeholder
-          reference: reference.reference
-        } 
-      });
+    const ref = reference?.reference || reference?.trxref || reference;
+    const orderId = createdOrderIdRef.current;
+    if (orderId && ref) {
+      try {
+        const res = await fetch(apiUrl('/api/orders/verify'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: ref, orderId }),
+        });
+        if (!res.ok) {
+          console.error('Verify failed:', await res.text());
+        }
+      } catch (e) {
+        console.error('Verify error:', e);
+      } finally {
+        createdOrderIdRef.current = null;
+      }
+    }
+    navigate("/payment-success", {
+      state: {
+        amount: totalPrice,
+        eventTitle: state.eventTitle,
+        orderId: orderId || undefined,
+        reference: ref,
+      },
+    });
   };
 
   const handlePay = async (e: React.FormEvent) => {
@@ -129,10 +143,13 @@ const CheckoutPage = () => {
         address
       };
 
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const res = await fetch(apiUrl('/api/orders'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
+        headers,
+        body: JSON.stringify(orderPayload),
       });
 
       if (!res.ok) {
@@ -140,7 +157,8 @@ const CheckoutPage = () => {
         throw new Error(data.error || "Failed to create order");
       }
 
-      await res.json();
+      const createdOrder = await res.json();
+      createdOrderIdRef.current = createdOrder?.id || null;
 
       // 2. Open Paystack with current form values (amount in kobo, valid email)
       setPaystackConfig({
