@@ -1,5 +1,17 @@
 import { apiUrl } from './config';
 
+const AUTH_EMAIL_TIMEOUT_MS = 20000;
+
+function fetchWithTimeout(
+  url: string,
+  opts: RequestInit & { timeout?: number } = {}
+): Promise<Response> {
+  const { timeout = AUTH_EMAIL_TIMEOUT_MS, ...rest } = opts;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...rest, signal: controller.signal }).finally(() => clearTimeout(id));
+}
+
 export type UserRole = 'superadmin' | 'admin';
 
 export interface AuthUser {
@@ -67,42 +79,63 @@ export async function signUp(
   password: string,
   name?: string
 ): Promise<{ message: string }> {
-  const res = await fetch(apiUrl('/api/auth/signup'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, name: name || undefined }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error ?? 'Sign up failed');
+  try {
+    const res = await fetchWithTimeout(apiUrl('/api/auth/signup'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name: name || undefined }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error ?? 'Sign up failed');
+    }
+    return data as { message: string };
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw e;
   }
-  return data as { message: string };
 }
 
 export async function forgotPassword(email: string): Promise<{ message: string }> {
-  const res = await fetch(apiUrl('/api/auth/forgot-password'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error ?? 'Failed to send reset code');
+  try {
+    const res = await fetchWithTimeout(apiUrl('/api/auth/forgot-password'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error ?? 'Failed to send reset code');
+    }
+    return data as { message: string };
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw e;
   }
-  return data as { message: string };
 }
 
 export async function resendVerification(email: string): Promise<{ message: string }> {
-  const res = await fetch(apiUrl('/api/auth/resend-verification'), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error ?? 'Failed to send code');
+  try {
+    const res = await fetchWithTimeout(apiUrl('/api/auth/resend-verification'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error ?? 'Failed to send code');
+    }
+    return data as { message: string };
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.');
+    }
+    throw e;
   }
-  return data as { message: string };
 }
 
 export async function resetPassword(
