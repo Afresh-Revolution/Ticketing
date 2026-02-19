@@ -306,6 +306,13 @@
   margin-bottom: 0.75rem;
 }
 
+.events-logo-img {
+  height: 18px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
 .events-footer-desc {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.8);

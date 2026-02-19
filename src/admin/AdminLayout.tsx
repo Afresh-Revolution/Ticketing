@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 import './admin.css';
 
 const AdminLayout = () => {
@@ -27,8 +28,7 @@ const AdminLayout = () => {
           <span className="admin-sidebar-toggle-bar" />
         </button>
         <div className="admin-logo">
-          <div className="admin-logo-icon">G</div>
-          <span className="admin-logo-text">GATEWAVE</span>
+          <Logo variant="main" className="admin-logo-img" height={54} />
         </div>
         <div className="admin-header-actions">
           <button 

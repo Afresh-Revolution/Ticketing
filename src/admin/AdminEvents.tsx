@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { apiUrl } from '../api/config';
 import './admin.css';
@@ -17,6 +17,7 @@ interface AdminEvent {
 }
 
 const AdminEvents = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const userRole = localStorage.getItem('adminRole');
@@ -35,6 +36,22 @@ const AdminEvents = () => {
       console.error('Failed to fetch events:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string, title: string) => {
+    if (!window.confirm(`Delete event "${title}"? This cannot be undone.`)) return;
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(apiUrl(`/api/events/${eventId}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete');
+      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert('Failed to delete event. You may not have permission.');
     }
   };
 
@@ -118,8 +135,20 @@ const AdminEvents = () => {
                       ★
                     </button>
                   )}
-                  <button type="button" aria-label="Edit event">✎</button>
-                  <button type="button" aria-label="Delete event">🗑</button>
+                  <button
+                    type="button"
+                    aria-label="Edit event"
+                    onClick={() => navigate(`/admin/events/edit/${event.id}`)}
+                  >
+                    ✎
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Delete event"
+                    onClick={() => handleDeleteEvent(event.id, event.title)}
+                  >
+                    🗑
+                  </button>
                 </div>
               </div>
             ))

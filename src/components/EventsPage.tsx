@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import Navbar from "./Navbar";
+import Logo from "./Logo";
 import "./EventsPage.css";
 
 const CATEGORIES = [
@@ -201,8 +202,7 @@ const EventsPage = () => {
         <div className="events-footer-top">
           <div className="events-footer-brand">
             <div className="events-logo events-logo-footer">
-              <div className="events-logo-icon">G</div>
-              <span className="events-logo-text">Gatewave</span>
+              <Logo variant="sec" className="events-logo-img" />
             </div>
             <p className="events-footer-desc">
               The premier platform for discovering and hosting events. We
