@@ -15,6 +15,7 @@ import AdminEvents from './admin/AdminEvents'
 import AdminCreateEvent from './admin/AdminCreateEvent'
 import AdminEditEvent from './admin/AdminEditEvent'
 import AdminSales from './admin/AdminSales'
+import AdminAdmins from './admin/AdminAdmins'
 import AdminMemberships from './admin/AdminMemberships'
 import AdminMembershipPlans from './admin/AdminMembershipPlans'
 import AdminWithdraw from './admin/AdminWithdraw'
@@ -43,6 +44,7 @@ function App() {
           <Route path="memberships" element={<AdminMemberships />} />
           <Route path="membership-plans" element={<AdminMembershipPlans />} />
           <Route path="withdraw" element={<AdminWithdraw />} />
+          <Route path="admins" element={<AdminAdmins />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Routes>

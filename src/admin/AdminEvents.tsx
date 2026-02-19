@@ -14,12 +14,17 @@ interface AdminEvent {
   capacity?: number;
   sold?: number;
   isTrending: boolean;
+  createdByName?: string;
 }
+
+type DeleteConfirm = { eventId: string; title: string } | null;
 
 const AdminEvents = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
+  const [deleting, setDeleting] = useState(false);
   const userRole = localStorage.getItem('adminRole');
   const isSuperAdmin = userRole === 'superadmin';
 
@@ -29,29 +34,42 @@ const AdminEvents = () => {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch(apiUrl('/api/events'));
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(apiUrl('/api/admin/events'), {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Failed to fetch events');
       const data = await res.json();
-      setEvents(data);
+      setEvents(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to fetch events:', err);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteEvent = async (eventId: string, title: string) => {
-    if (!window.confirm(`Delete event "${title}"? This cannot be undone.`)) return;
+    setDeleteConfirm({ eventId, title });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm) return;
+    setDeleting(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(apiUrl(`/api/events/${eventId}`), {
+      const res = await fetch(apiUrl(`/api/events/${deleteConfirm.eventId}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to delete');
-      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+      setEvents((prev) => prev.filter((e) => e.id !== deleteConfirm.eventId));
+      setDeleteConfirm(null);
     } catch (err) {
       console.error('Delete failed:', err);
       alert('Failed to delete event. You may not have permission.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -116,6 +134,9 @@ const AdminEvents = () => {
                   </h3>
                   <p className="admin-event-meta">{event.category} • {new Date(event.date).toLocaleDateString()}</p>
                   <p className="admin-event-meta">{event.location || 'No location'}</p>
+                  {event.createdByName && (
+                    <p className="admin-event-creator">Created by {event.createdByName}</p>
+                  )}
                 </div>
                 <span className="admin-event-price">₦{event.price}</span>
                 <div className="admin-event-actions">
@@ -155,6 +176,48 @@ const AdminEvents = () => {
           )}
         </div>
       </div>
+
+      {deleteConfirm && (
+        <div className="admin-modal-overlay" onClick={() => !deleting && setDeleteConfirm(null)}>
+          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Delete event</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => !deleting && setDeleteConfirm(null)}
+                disabled={deleting}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="admin-modal-form">
+              <p className="admin-delete-confirm-message">
+                Are you sure you want to delete <strong>"{deleteConfirm.title}"</strong>? This action cannot be undone.
+              </p>
+              <div className="admin-modal-actions">
+                <button
+                  type="button"
+                  className="admin-btn-cancel"
+                  onClick={() => !deleting && setDeleteConfirm(null)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn-danger"
+                  onClick={handleConfirmDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting…' : 'Delete event'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
