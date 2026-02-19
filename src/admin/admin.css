@@ -856,6 +856,22 @@
   color: var(--admin-text-muted);
 }
 
+.admin-admins-delete-btn {
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid rgba(220, 38, 38, 0.5);
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.admin-admins-delete-btn:hover {
+  background: rgba(220, 38, 38, 0.3);
+}
+
 /* ========== Responsive: Tablet ========== */
 @media (max-width: 1200px) {
   .admin-main {

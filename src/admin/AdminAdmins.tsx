@@ -12,10 +12,14 @@ interface AdminUser {
   updatedAt: string;
 }
 
+type DeleteConfirm = { admin: AdminUser } | null;
+
 const AdminAdmins = () => {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchAdmins();
@@ -47,6 +51,28 @@ const AdminAdmins = () => {
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
+  const handleDeleteAdmin = async () => {
+    if (!deleteConfirm) return;
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(apiUrl(`/api/admin/admins/${deleteConfirm.admin.id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Failed to delete admin');
+      }
+      setDeleteConfirm(null);
+      await fetchAdmins();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete admin');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="admin-page">
       <div className="admin-admins-container">
@@ -69,18 +95,19 @@ const AdminAdmins = () => {
                 <th>Role</th>
                 <th>Email verified</th>
                 <th>Created</th>
+                <th style={{ width: '100px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="admin-table-empty">
+                  <td colSpan={6} className="admin-table-empty">
                     Loading…
                   </td>
                 </tr>
               ) : admins.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="admin-table-empty">
+                  <td colSpan={6} className="admin-table-empty">
                     No admin accounts found.
                   </td>
                 </tr>
@@ -96,6 +123,17 @@ const AdminAdmins = () => {
                     </td>
                     <td>{admin.emailVerified ? 'Yes' : 'No'}</td>
                     <td>{formatDate(admin.createdAt)}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        className="admin-admins-delete-btn"
+                        onClick={() => setDeleteConfirm({ admin })}
+                        title="Delete this admin account"
+                        aria-label="Delete admin"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -103,6 +141,48 @@ const AdminAdmins = () => {
           </table>
         </div>
       </div>
+
+      {deleteConfirm && (
+        <div className="admin-modal-overlay" onClick={() => !deleting && setDeleteConfirm(null)}>
+          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Delete admin account</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => !deleting && setDeleteConfirm(null)}
+                disabled={deleting}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="admin-modal-form">
+              <p className="admin-delete-confirm-message">
+                Permanently delete the admin account for <strong>{deleteConfirm.admin.name || deleteConfirm.admin.email}</strong> ({deleteConfirm.admin.email})? They will no longer be able to sign in. Events they created will remain but will no longer be linked to them.
+              </p>
+              <div className="admin-modal-actions">
+                <button
+                  type="button"
+                  className="admin-btn-cancel"
+                  onClick={() => !deleting && setDeleteConfirm(null)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn-danger"
+                  onClick={handleDeleteAdmin}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting…' : 'Delete account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
