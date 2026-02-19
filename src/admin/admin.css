@@ -559,6 +559,12 @@
   margin: 0;
 }
 
+.admin-event-creator {
+  font-size: 0.8rem;
+  color: var(--admin-accent-bright);
+  margin: 0.25rem 0 0 0;
+}
+
 .admin-event-badge {
   display: inline-block;
   padding: 0.35rem 0.65rem;
@@ -700,9 +706,56 @@
   gap: 0.4rem;
 }
 
-.admin-btn-export:hover {
+.admin-btn-export:hover:not(:disabled) {
   background: var(--admin-accent);
   color: white;
+}
+
+.admin-btn-export:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-sales-id {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.admin-sales-buyer-email {
+  font-size: 0.75rem;
+  color: var(--admin-text-muted);
+}
+
+/* All Admins page */
+.admin-admins-container {
+  background: #36195c;
+  border-radius: 12px;
+  border: 1px solid var(--admin-border);
+  padding: 1.25rem 1.5rem;
+  overflow: hidden;
+}
+
+.admin-admins-container .admin-page-header {
+  margin-bottom: 1rem;
+}
+
+.admin-role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.admin-role-superadmin {
+  background: rgba(139, 92, 246, 0.25);
+  color: var(--admin-accent-bright);
+}
+
+.admin-role-admin {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--admin-text-muted);
 }
 
 /* ========== Responsive: Tablet ========== */
@@ -1256,6 +1309,42 @@
   text-decoration: underline;
 }
 
+.admin-login-forgot-wrap {
+  margin: 0;
+  text-align: center;
+}
+
+.admin-login-forgot-link {
+  background: none;
+  border: none;
+  color: var(--admin-accent-bright);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.admin-login-forgot-link:hover {
+  color: var(--admin-accent);
+  text-decoration: underline;
+}
+
+.admin-login-success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  color: #86efac;
+  font-size: 0.9rem;
+}
+
+.admin-login-otp-input {
+  text-align: center;
+  letter-spacing: 0.5em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Mobile responsiveness for login page */
 @media (max-width: 480px) {
   .admin-login-container {
@@ -1390,6 +1479,62 @@
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--admin-border);
+}
+
+.admin-delete-confirm-message {
+  margin: 0 0 1rem 0;
+  color: var(--admin-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.admin-delete-confirm-message strong {
+  color: var(--admin-text);
+}
+
+.admin-btn-cancel {
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: transparent;
+  color: var(--admin-text-muted);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+}
+
+.admin-btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-btn-danger {
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 1);
+}
+
+.admin-btn-danger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* Add Admin Button */
