@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import { signUp } from '../api/auth';
 import '../login/page.css';
 
 const SignupPage = () => {
-  const navigate = useNavigate();
-  const { login } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +21,9 @@ const SignupPage = () => {
     }
     setLoading(true);
     try {
-      const { user, token } = await signUp(email.trim(), password, name.trim() || undefined);
-      login(user, token);
-      navigate('/events', { replace: true });
+      await signUp(email.trim(), password, name.trim() || undefined);
+      setSignupSuccess(true);
+      setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign up failed.');
     } finally {
@@ -38,6 +37,14 @@ const SignupPage = () => {
         <div className="auth-left">
           <div className="auth-container">
           <h1>Sign Up</h1>
+          {signupSuccess ? (
+            <div className="auth-form">
+              <p className="auth-success">Account created! Check your email for a verification code. You will need it when you first sign in.</p>
+              <Link to="/login" className="btn btn-primary" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+                Go to Sign In
+              </Link>
+            </div>
+          ) : (
           <form className="auth-form" onSubmit={handleSubmit}>
             {error && <p className="auth-error">{error}</p>}
             <div className="form-group">
@@ -89,6 +96,7 @@ const SignupPage = () => {
               {loading ? 'Creating account…' : 'Sign Up'}
             </button>
           </form>
+          )}
           <p className="auth-link">
             Already have an account? <Link to="/login">Sign In</Link>
           </p>
