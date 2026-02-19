@@ -160,6 +160,7 @@
 }
 
 .admin-layout.admin-sidebar-open-body {
+  position: relative;
   overflow: hidden;
   height: 100vh;
 }
@@ -941,6 +942,7 @@
   }
 
   .admin-sidebar-open {
+    position: relative;
     transform: translateX(0);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
   }
@@ -1173,6 +1175,7 @@
   }
 
   .admin-sidebar-open {
+    position: relative;
     width: 100%;
     max-width: 100%;
   }
