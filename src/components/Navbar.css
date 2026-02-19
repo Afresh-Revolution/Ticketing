@@ -5,7 +5,7 @@
   left: 0;
   width: 100%;
   z-index: 1000;
-  padding: 1.5rem 0;
+  padding: 0.35rem 0;
   transition: all 0.3s ease;
   background: transparent;
 }
@@ -13,7 +13,7 @@
 .navbar.scrolled {
   background: rgba(18, 18, 18, 0.95);
   backdrop-filter: blur(10px);
-  padding: 1rem 0;
+  padding: 0.3rem 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -35,15 +35,15 @@
 }
 
 .logo-img {
-  height: 60px;
+  height: 26px;
   width: auto;
   display: block;
   object-fit: contain;
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
+  width: 22px;
+  height: 22px;
   background: linear-gradient(135deg, #791A94 0%, #3B28CC 100%);
   border-radius: 12px;
   display: flex;
