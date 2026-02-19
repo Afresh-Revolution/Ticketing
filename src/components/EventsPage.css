@@ -9,11 +9,17 @@
   flex-direction: column;
 }
 
+/* Navbar & logo – match landing and My Tickets */
+.events-page .navbar .logo img,
+.events-page .navbar .logo .logo-img {
+  height: 60px !important;
+}
+
 /* Main */
 .events-main {
   flex: 1;
   padding: 2rem;
-  padding-top: 3.5rem;
+  padding-top: 5.5rem;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -113,8 +119,8 @@
 .events-cat-pill {
   padding: 0.5rem 1rem;
   border-radius: 999px;
-  border: 1px solid #791A94;
-  background: #791A94;
+  border: 1px solid #791a94;
+  background: #791a94;
   color: #fff;
   font-size: 0.9rem;
   font-family: inherit;
@@ -200,7 +206,7 @@
   position: absolute;
   bottom: 0.5rem;
   left: 0.5rem;
-  background: #F1F5F91A;
+  background: #f1f5f91a;
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
@@ -336,7 +342,9 @@
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .events-social a:hover {

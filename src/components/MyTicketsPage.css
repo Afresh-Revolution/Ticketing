@@ -3,98 +3,177 @@
   background: #181543;
   color: #fff;
   font-family: 'Arimo', sans-serif;
-}
-
-.my-tickets-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 2rem;
-  background: #1e1647;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-direction: column;
 }
 
-.my-tickets-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: #fff;
-}
-
-.my-tickets-logo-icon {
-  width: 36px;
-  height: 36px;
-  background: #791A94;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.my-tickets-logo-text {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.my-tickets-nav {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.my-tickets-nav-link {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.my-tickets-nav-link:hover {
-  color: #fff;
-}
-
-.my-tickets-nav-link.active {
-  color: #fff;
+/* Logo size on My Tickets – match landing page */
+.my-tickets-page .navbar .logo img,
+.my-tickets-page .navbar .logo .logo-img {
+  height: 60px !important;
 }
 
 .my-tickets-main {
-  padding: 4rem 2rem;
-  padding-top: 4rem;
-  margin: 0 auto;
-  max-width: 600px;
+  flex: 1;
+  padding: 5.5rem 2rem 3rem;
+  padding-top: 5.5rem;
+  margin: 0 15px;
+  max-width: calc(100vw - 30px);
+  width: 100%;
+  box-sizing: border-box;
 }
-.my-tickets-main h1 {
+
+/* Profile card */
+.my-tickets-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #791A94 0%, #5c1580 100%);
+  padding: 1.5rem 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.my-tickets-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.my-tickets-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.my-tickets-profile-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: #fff;
+}
+
+.my-tickets-profile-email {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.my-tickets-settings-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.my-tickets-settings-btn:hover {
+  color: #fff;
+}
+
+/* Tabs */
+.my-tickets-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.my-tickets-tab {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.my-tickets-tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.my-tickets-tab.active {
+  color: #fff;
+}
+
+.my-tickets-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #791A94;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Empty state */
+.my-tickets-empty {
   text-align: center;
+  padding: 3rem 1.5rem;
 }
+
+.my-tickets-empty-icon {
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 1rem;
+}
+
+.my-tickets-empty-text {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1.5rem;
+}
+
+/* Loading & error */
 .my-tickets-loading,
 .my-tickets-error {
   text-align: center;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 1.5rem;
 }
+
 .my-tickets-error {
   color: #f87171;
 }
+
+/* Ticket cards */
 .my-tickets-list {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   text-align: left;
 }
+
 .my-tickets-card {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   overflow: hidden;
 }
+
 .my-tickets-card-header {
   display: flex;
   gap: 1rem;
   padding: 1rem;
   align-items: flex-start;
 }
+
 .my-tickets-card-img {
   width: 80px;
   height: 80px;
@@ -102,26 +181,31 @@
   border-radius: 8px;
   flex-shrink: 0;
 }
-.my-tickets-card-info h2 {
+
+.my-tickets-card-info h3 {
   font-size: 1.1rem;
   margin: 0 0 0.25rem;
 }
+
 .my-tickets-venue,
 .my-tickets-date {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
+
 .my-tickets-card-items {
   padding: 0 1rem 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .my-tickets-item {
   display: flex;
   justify-content: space-between;
   padding: 0.35rem 0;
   font-size: 0.95rem;
 }
+
 .my-tickets-card-footer {
   display: flex;
   justify-content: space-between;
@@ -130,29 +214,23 @@
   background: rgba(0, 0, 0, 0.15);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
+
 .my-tickets-card-footer strong {
   font-size: 1rem;
 }
+
 .my-tickets-card-link {
   color: #b794f6;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
 }
+
 .my-tickets-card-link:hover {
   text-decoration: underline;
 }
 
-.my-tickets-main h1 {
-  font-size: 1.75rem;
-  margin: 0 0 0.5rem;
-}
-
-.my-tickets-main p {
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 1.5rem;
-}
-
+/* CTA */
 .my-tickets-cta {
   display: inline-block;
   padding: 0.6rem 1.25rem;
@@ -166,4 +244,37 @@
 .my-tickets-cta:hover {
   background: #8f22ad;
   color: #fff;
+}
+
+/* Logout button */
+.my-tickets-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 280px;
+  margin: 2.5rem auto 0;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 10px;
+  font-family: inherit;
+  transition: background 0.2s, color 0.2s;
+}
+
+.my-tickets-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+@media (max-width: 768px) {
+  .my-tickets-main {
+    margin: 0 6px;
+    max-width: calc(100vw - 12px);
+  }
 }
