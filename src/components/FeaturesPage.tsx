@@ -21,7 +21,6 @@ const FeaturesPage = () => {
       <ScrollReveal animation="fadeInUp">
         <ReadyToJoin />
       </ScrollReveal>
-      <div className="section-separator"></div>
       <ScrollReveal animation="fadeInUp">
         <Footer />
       </ScrollReveal>

@@ -6,6 +6,13 @@
   background: #1a122e;
   color: #fff;
   font-family: "Arimo", sans-serif;
+  padding-top: 3.5rem;
+}
+
+/* Navbar & logo – match other pages */
+.event-detail-page .navbar .logo img,
+.event-detail-page .navbar .logo .logo-img {
+  height: 60px !important;
 }
 
 /* Hero */
