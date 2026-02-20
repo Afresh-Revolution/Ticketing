@@ -25,9 +25,9 @@ const PaymentSuccess = () => {
           You have successfully purchased tickets for{" "}
           <strong>{state?.eventTitle || "the event"}</strong>.
         </p>
-        {state?.amount && (
+        {state?.amount != null && (
           <p className="payment-success-amount">
-            Amount Paid: ₦{state.amount.toLocaleString()}
+            {state.amount === 0 ? 'Free ticket' : `Amount Paid: ₦${state.amount.toLocaleString()}`}
           </p>
         )}
         {state?.orderId && (

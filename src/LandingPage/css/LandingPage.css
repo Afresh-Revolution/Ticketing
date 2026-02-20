@@ -17,7 +17,7 @@
 /* Logo size on landing (navbar logo) */
 .landing-page .navbar .logo img,
 .landing-page .navbar .logo .logo-img {
-  height: 60px !important;
+  height: 40px !important;
 }
 
 /* Hero + Video: one stretched background image – starts below fixed navbar */
@@ -44,9 +44,9 @@
   pointer-events: none;
 }
 
-.hero-video-backdrop .hero,
-.hero-video-backdrop .video-previews {
+.hero-video-backdrop .hero {
   position: relative;
+  top: 40px;
   z-index: 1;
 }
 
@@ -122,11 +122,85 @@
   box-shadow: var(--shadow-button);
 }
 
-/* Video Preview Cards */
+/* PWA Download card on landing (below hero) */
+.landing-pwa-card-wrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 3rem;
+  position: relative;
+  z-index: 1;
+}
+
+.landing-pwa-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, #3a1f5b 0%, #2a1645 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 1.25rem 1.75rem;
+  max-width: 420px;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.landing-pwa-card-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.landing-pwa-card-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.landing-pwa-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.landing-pwa-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: #fff;
+}
+
+.landing-pwa-card-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.landing-pwa-card-btn {
+  flex-shrink: 0;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: var(--color-primary-hover, #791A94);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.landing-pwa-card-btn:hover {
+  background: var(--color-primary-light, #9E7BEE);
+  transform: translateY(-1px);
+}
+
+/* Video Preview Cards – moved below hero */
 .video-previews {
   padding: 4rem 3rem 0 3rem;
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .video-container {
@@ -259,7 +333,18 @@
 
 /* Mobile landscape / large phone */
 @media (max-width: 768px) {
-  /* Removed responsive navbar styles */
+  .landing-pwa-card-wrap {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .landing-pwa-card {
+    flex-wrap: wrap;
+    padding: 1rem 1.25rem;
+  }
+
+  .landing-pwa-card-btn {
+    width: 100%;
+  }
 
   .hero {
     padding: 5rem 1.5rem 3rem;
@@ -300,7 +385,9 @@
 
 /* Mobile */
 @media (max-width: 640px) {
-  /* Removed responsive navbar styles */
+  .landing-pwa-card-wrap {
+    padding: 1.25rem 1rem;
+  }
 
   .hero {
     padding: 4rem 1rem 2.5rem;

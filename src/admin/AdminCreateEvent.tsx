@@ -6,6 +6,7 @@ import './admin.css';
 type TicketPool = {
   id: string;
   ticketName: string;
+  ticketType: 'paid' | 'free';
   price: string;
   quantity: string;
   description: string;
@@ -14,6 +15,7 @@ type TicketPool = {
 const defaultPool = (): TicketPool => ({
   id: crypto.randomUUID(),
   ticketName: 'General Admission',
+  ticketType: 'paid',
   price: '0',
   quantity: '100',
   description: '',
@@ -71,7 +73,8 @@ const AdminCreateEvent = () => {
       const ticketTypes = pools.map((p) => ({
         name: p.ticketName,
         description: p.description || null,
-        price: parseInt(p.price, 10) || 0,
+        type: p.ticketType,
+        price: p.ticketType === 'free' ? 0 : parseInt(p.price, 10) || 0,
         quantity: parseInt(p.quantity, 10) || 0,
       }));
 
@@ -369,6 +372,25 @@ const AdminCreateEvent = () => {
                   />
                   <div className="admin-form-row">
                     <div>
+                      <label className="admin-label">Ticket Type *</label>
+                      <select
+                        className="admin-select"
+                        value={pool.ticketType}
+                        onChange={(e) =>
+                          setPools((prev) =>
+                            prev.map((p) =>
+                              p.id === pool.id
+                                ? { ...p, ticketType: e.target.value as 'paid' | 'free', price: e.target.value === 'free' ? '0' : p.price }
+                                : p
+                            )
+                          )
+                        }
+                      >
+                        <option value="paid">Paid</option>
+                        <option value="free">Free</option>
+                      </select>
+                    </div>
+                    <div>
                       <label className="admin-label">Price (₦) *</label>
                       <input
                         type="number"
@@ -380,7 +402,8 @@ const AdminCreateEvent = () => {
                           )
                         }
                         min={0}
-                        required
+                        required={pool.ticketType === 'paid'}
+                        disabled={pool.ticketType === 'free'}
                       />
                     </div>
                     <div>

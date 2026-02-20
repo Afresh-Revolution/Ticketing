@@ -112,6 +112,8 @@ const CheckoutPage = () => {
     });
   };
 
+  const isFreeOrder = totalPrice === 0;
+
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -124,15 +126,7 @@ const CheckoutPage = () => {
       if (!email || !email.includes("@")) {
         throw new Error("Please enter a valid email address");
       }
-      const amountKobo = Math.round(totalPrice * 100);
-      if (amountKobo < 100) {
-        throw new Error("Amount must be at least ₦1. Please select at least one ticket.");
-      }
-      if (!publicKey || publicKey === "pk_test_placeholder") {
-        throw new Error("Payment is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.");
-      }
 
-      // 1. Create Order in Backend (Pending)
       const orderPayload = {
         eventId: state.eventId,
         items: state.items,
@@ -158,9 +152,31 @@ const CheckoutPage = () => {
       }
 
       const createdOrder = await res.json();
-      createdOrderIdRef.current = createdOrder?.id || null;
 
-      // 2. Open Paystack with current form values (amount in kobo, valid email)
+      // Free tickets: backend already set status to paid and sent ticket email; go to success
+      if (isFreeOrder) {
+        navigate("/payment-success", {
+          state: {
+            amount: totalPrice,
+            eventTitle: state.eventTitle,
+            orderId: createdOrder?.id,
+            reference: createdOrder?.reference,
+          },
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Paid: open Paystack
+      const amountKobo = Math.round(totalPrice * 100);
+      if (amountKobo < 100) {
+        throw new Error("Amount must be at least ₦1. Please select at least one ticket.");
+      }
+      if (!publicKey || publicKey === "pk_test_placeholder") {
+        throw new Error("Payment is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.");
+      }
+
+      createdOrderIdRef.current = createdOrder?.id || null;
       setPaystackConfig({
         reference: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         email: email.trim(),
@@ -260,11 +276,23 @@ const CheckoutPage = () => {
 
           <div className="checkout-actions">
             <button type="submit" className="checkout-pay-btn" disabled={loading}>
-              <svg className="checkout-pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              {loading ? 'Processing...' : `Pay ₦${totalPrice.toLocaleString()}`}
+              {isFreeOrder ? (
+                <>
+                  <svg className="checkout-pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                  {loading ? 'Processing...' : 'Get'}
+                </>
+              ) : (
+                <>
+                  <svg className="checkout-pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  {loading ? 'Processing...' : `Pay ₦${totalPrice.toLocaleString()}`}
+                </>
+              )}
             </button>
           </div>
         </form>

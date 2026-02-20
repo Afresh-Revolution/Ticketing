@@ -10,6 +10,8 @@ interface TicketType {
   description: string;
   price: number;
   quantity: number;
+  sold?: number;
+  type?: 'paid' | 'free';
 }
 
 interface EventDetail {
@@ -40,12 +42,14 @@ const EventDetailPage = () => {
         if (!res.ok) throw new Error("Event not found");
         const data = await res.json();
         const rawTickets = data.tickets ?? data.ticketTypes;
-        const tickets = (Array.isArray(rawTickets) ? rawTickets : []).map((t: { id: string; name?: string; ticketName?: string; description?: string; price?: number | string; quantity?: number | string }) => ({
+        const tickets = (Array.isArray(rawTickets) ? rawTickets : []).map((t: { id: string; name?: string; ticketName?: string; description?: string; price?: number | string; quantity?: number | string; sold?: number; type?: string }) => ({
           id: t.id,
           name: t.name ?? t.ticketName ?? 'Ticket',
           description: t.description ?? '',
           price: Number(t.price) || 0,
           quantity: Number(t.quantity) || 0,
+          sold: Number(t.sold) || 0,
+          type: (t.type === 'free' ? 'free' : 'paid') as 'paid' | 'free',
         }));
 
         // Transform data to match UI
@@ -93,9 +97,15 @@ const EventDetailPage = () => {
   }, [event, quantities]);
 
   const adjustQty = (ticketId: string, delta: number) => {
+    const ticket = event?.tickets.find((t) => t.id === ticketId);
+    const sold = ticket?.sold ?? 0;
+    const quantity = ticket?.quantity ?? 0;
+    const available = Math.max(0, quantity - sold);
     setQuantities((prev) => {
-      const next = (prev[ticketId] ?? 0) + delta;
-      return { ...prev, [ticketId]: Math.max(0, next) };
+      const current = prev[ticketId] ?? 0;
+      const next = current + delta;
+      const capped = Math.min(available, Math.max(0, next));
+      return { ...prev, [ticketId]: capped };
     });
   };
 
@@ -192,16 +202,24 @@ const EventDetailPage = () => {
               <>
                 {event.tickets.map((ticket) => {
                   const qty = quantities[ticket.id] ?? 0;
+                  const sold = ticket.sold ?? 0;
+                  const total = ticket.quantity ?? 0;
+                  const isSoldOut = total > 0 && sold >= total;
                   return (
-                    <div key={ticket.id} className="event-detail-ticket-card">
+                    <div key={ticket.id} className={`event-detail-ticket-card ${isSoldOut ? 'event-detail-ticket-card-sold-out' : ''}`}>
                       <div className="event-detail-ticket-info">
                         <h4 className="event-detail-ticket-name">{ticket.name}</h4>
                         <p className="event-detail-ticket-desc">{ticket.description || '—'}</p>
-                        <span className="event-detail-ticket-badge">Available</span>
+                        <span className="event-detail-ticket-count">{sold}/{total}</span>
+                        {isSoldOut ? (
+                          <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">Sold Out</span>
+                        ) : (
+                          <span className="event-detail-ticket-badge">Available</span>
+                        )}
                       </div>
                       <div className="event-detail-ticket-right">
                         <span className="event-detail-ticket-price">
-                          ₦{Number(ticket.price).toLocaleString()}
+                          {ticket.price === 0 ? 'Free' : `₦${Number(ticket.price).toLocaleString()}`}
                         </span>
                         <div className="event-detail-qty-controls">
                           <button
@@ -209,6 +227,7 @@ const EventDetailPage = () => {
                             className="event-detail-qty-btn"
                             onClick={() => adjustQty(ticket.id, -1)}
                             aria-label={`Decrease ${ticket.name}`}
+                            disabled={qty === 0}
                           >
                             −
                           </button>
@@ -220,6 +239,7 @@ const EventDetailPage = () => {
                             className="event-detail-qty-btn"
                             onClick={() => adjustQty(ticket.id, 1)}
                             aria-label={`Increase ${ticket.name}`}
+                            disabled={isSoldOut || (sold + (qty + 1) > total)}
                           >
                             +
                           </button>
@@ -239,38 +259,44 @@ const EventDetailPage = () => {
               {totalQty} Ticket{totalQty !== 1 ? "s" : ""}
             </span>
             <span className="event-detail-checkout-total">
-              ₦{totalPrice.toLocaleString()}
+              {totalPrice === 0 ? 'Free' : `₦${totalPrice.toLocaleString()}`}
             </span>
           </div>
-          <button
-            type="button"
-            className="event-detail-checkout-btn"
-            disabled={totalQty === 0}
-            onClick={() => {
-              // Calculate selected items
-              const items = event.tickets
-                .filter(t => (quantities[t.id] ?? 0) > 0)
-                .map(t => ({
-                  ticketTypeId: t.id,
-                  name: t.name,
-                  quantity: quantities[t.id],
-                  price: t.price
-                }));
+          {(() => {
+            const allSoldOut = event.tickets.length > 0 && event.tickets.every((t) => (t.sold ?? 0) >= (t.quantity ?? 0));
+            const buttonLabel = allSoldOut ? 'Sold Out' : totalPrice === 0 ? 'Get' : 'CheckOut';
+            return (
+              <button
+                type="button"
+                className="event-detail-checkout-btn"
+                disabled={totalQty === 0 || allSoldOut}
+                onClick={() => {
+                  const items = event.tickets
+                    .filter((t) => (quantities[t.id] ?? 0) > 0)
+                    .map((t) => ({
+                      ticketTypeId: t.id,
+                      name: t.name,
+                      quantity: quantities[t.id],
+                      price: t.price,
+                      type: t.type ?? (t.price === 0 ? 'free' : 'paid'),
+                    }));
 
-              if (totalQty > 0) {
-                navigate("/checkout", {
-                  state: {
-                    totalPrice,
-                    eventId: id,
-                    eventTitle: event.title,
-                    items // Pass selected items to checkout
-                  },
-                });
-              }
-            }}
-          >
-            CheckOut
-          </button>
+                  if (totalQty > 0 && !allSoldOut) {
+                    navigate('/checkout', {
+                      state: {
+                        totalPrice,
+                        eventId: id,
+                        eventTitle: event.title,
+                        items,
+                      },
+                    });
+                  }
+                }}
+              >
+                {buttonLabel}
+              </button>
+            );
+          })()}
         </div>
       </main>
     </div>
