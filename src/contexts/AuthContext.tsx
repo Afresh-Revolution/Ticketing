@@ -9,7 +9,7 @@ import {
 } from 'react';
 import type { AuthUser } from '../api/auth';
 
-const STORAGE_KEY = 'gatewave_auth';
+const STORAGE_KEY = 'gatewav_auth';
 
 interface StoredAuth {
   user: AuthUser;
@@ -72,6 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+export default AuthProvider;
 
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);

@@ -138,7 +138,7 @@ const AdminLogin = () => {
                 className="admin-login-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@gatewave.com"
+                placeholder="admin@gatewav.com"
                 required
                 autoComplete="email"
               />
@@ -228,7 +228,7 @@ const AdminLogin = () => {
                 className="admin-login-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@gatewave.com"
+                placeholder="admin@gatewav.com"
                 required
                 autoComplete="email"
               />

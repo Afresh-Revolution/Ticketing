@@ -42,7 +42,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, sectionId 
 
         <section id="contact" className="modal-section">
           <h3>Contact Us</h3>
-          <p>Need help? Reach out to our support team at <a href="mailto:support@gatewave.com" style={{color: '#791A94'}}>support@gatewave.com</a>.</p>
+          <p>Need help? Reach out to our support team at <a href="mailto:support@gatewav.com" style={{color: '#791A94'}}>support@gatewav.com</a>.</p>
           <p>We typically respond within 24 hours.</p>
         </section>
 

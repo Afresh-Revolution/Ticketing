@@ -100,6 +100,7 @@ const GetTickets = () => {
                     <span>{event.startTime || 'Time TBD'}</span>
                   </div>
                 </div>
+                <hr className="event-card-hr" />
                 <div className="event-details-footer">
                   <div className="info-item price">
                     <div className="price-wrapper">

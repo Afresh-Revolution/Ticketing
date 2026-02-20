@@ -654,6 +654,8 @@
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-table {
@@ -968,6 +970,24 @@
 .admin-scanner-result p {
   margin: 0.25rem 0;
   font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .admin-scanner-container {
+    padding: 1rem 1.25rem;
+  }
+
+  .admin-scanner-input-wrap {
+    flex-direction: column;
+  }
+
+  .admin-scanner-verify-btn {
+    width: 100%;
+  }
+
+  .admin-scanner-camera-wrap {
+    max-width: 100%;
+  }
 }
 
 /* All Admins page */

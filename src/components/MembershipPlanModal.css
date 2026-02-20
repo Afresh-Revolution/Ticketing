@@ -71,6 +71,35 @@
   gap: 2rem;
 }
 
+@media (max-width: 640px) {
+  .modal-content {
+    width: 95%;
+    padding: 1.5rem 1rem;
+    margin: 1rem;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .plan-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    width: 100%;
+    margin: 0.5rem;
+    padding: 1.25rem 1rem;
+  }
+}
+
 .plan-card {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;

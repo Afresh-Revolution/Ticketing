@@ -1,5 +1,5 @@
 /**
- * Gatewave – design tokens (colors used across the website)
+ * Gatewav – design tokens (colors used across the website)
  */
 
 :root {
@@ -68,4 +68,10 @@
   --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.3);
   --shadow-button: 0 6px 20px rgba(121, 26, 148, 0.6);
   --shadow-button-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
+
+  /* Responsive breakpoints (use in media queries) */
+  --bp-sm: 480px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
 }

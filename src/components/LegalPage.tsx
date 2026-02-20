@@ -11,7 +11,7 @@ const LegalPage = () => {
         
         <section id="terms" style={{ marginBottom: '3rem' }}>
           <h2>Terms & Conditions</h2>
-          <p>Welcome to Gatewave. By using our platform, you agree to these terms...</p>
+          <p>Welcome to Gatewav. By using our platform, you agree to these terms...</p>
           {/* Add more placeholder content */}
         </section>
 

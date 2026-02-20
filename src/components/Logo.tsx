@@ -18,7 +18,7 @@ const DEFAULT_HEIGHT_SEC = 54;
 export default function Logo({
   variant = 'main',
   className = '',
-  alt = 'Gatewave',
+  alt = 'Gatewav',
   height,
 }: LogoProps) {
   const h = height ?? (variant === 'sec' ? DEFAULT_HEIGHT_SEC : DEFAULT_HEIGHT_MAIN);

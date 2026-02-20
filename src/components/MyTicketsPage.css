@@ -317,5 +317,120 @@
   .my-tickets-main {
     margin: 0 6px;
     max-width: calc(100vw - 12px);
+    padding: 5rem 1rem 2rem;
+  }
+
+  .my-tickets-profile-card {
+    padding: 1.25rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .my-tickets-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 1.25rem;
+  }
+
+  .my-tickets-profile-name {
+    font-size: 1.2rem;
+  }
+
+  .my-tickets-tabs {
+    margin-bottom: 1.5rem;
+  }
+
+  .my-tickets-tab {
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .my-tickets-card-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .my-tickets-card-img {
+    width: 64px;
+    height: 64px;
+  }
+
+  .my-tickets-card-info h3 {
+    font-size: 1rem;
+  }
+
+  .my-tickets-ticket-code {
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+  }
+
+  .my-tickets-qr-wrap {
+    padding: 8px;
+  }
+
+  .my-tickets-qr-wrap svg {
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  .my-tickets-card-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-tickets-main {
+    padding: 4.5rem 0.75rem 1.5rem;
+    margin: 0 4px;
+    max-width: calc(100vw - 8px);
+  }
+
+  .my-tickets-profile-card {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .my-tickets-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 1.1rem;
+  }
+
+  .my-tickets-tab {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .my-tickets-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .my-tickets-card-img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+  }
+
+  .my-tickets-card-items,
+  .my-tickets-ticket-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .my-tickets-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .my-tickets-qr-wrap svg {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  .my-tickets-logout-btn {
+    max-width: 100%;
   }
 }

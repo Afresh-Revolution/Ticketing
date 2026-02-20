@@ -24,6 +24,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .navbar-container {
+    padding: 0 0.75rem;
+  }
 }
 
 .logo {

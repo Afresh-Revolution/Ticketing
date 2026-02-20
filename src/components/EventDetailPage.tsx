@@ -59,7 +59,7 @@ const EventDetailPage = () => {
           location: data.location || data.venue || "TBD",
           heroImage: data.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
           about: data.description || "No description available.",
-          organizer: "Gatewave Organizer", // TODO: Fetch from createdBy user if available
+          organizer: "Gatewav Organizer", // TODO: Fetch from createdBy user if available
           tickets
         };
         

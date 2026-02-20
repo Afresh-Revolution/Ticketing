@@ -6,6 +6,35 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .payment-success-page {
+    padding: 1rem;
+  }
+
+  .payment-success-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .payment-success-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-success-page {
+    padding: 0.75rem;
+  }
+
+  .payment-success-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .payment-success-title {
+    font-size: 1.35rem;
+  }
 }
 
 .payment-success-card {
