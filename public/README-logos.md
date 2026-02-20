@@ -7,4 +7,4 @@ Place your logo image files in this **public** folder so they are served at the 
 
 They will be available as `/logo-main.png` and `/logo-sec.png`.
 
-If the files are missing, the app shows a "G" + "GATEWAVE" text fallback automatically.
+If the files are missing, the app shows a "G" + "GATEWAV" text fallback automatically.

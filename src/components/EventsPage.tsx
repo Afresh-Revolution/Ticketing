@@ -181,15 +181,18 @@ const EventsPage = () => {
                       </svg>
                       {event.time}
                     </p>
-                    <p className="event-card-price">
-                      <span className="event-card-price-label">Starting from</span>
-                      <strong className="event-card-price-amount">
-                        ₦{event.price}
-                      </strong>
-                    </p>
-                    <Link to={`/event/${event.id}`} className="event-card-cta">
-                      Get Tickets
-                    </Link>
+                    <hr className="event-card-hr" />
+                    <div className="event-card-bottom">
+                      <p className="event-card-price">
+                        <span className="event-card-price-label">Starting from</span>
+                        <strong className="event-card-price-amount">
+                          ₦{event.price}
+                        </strong>
+                      </p>
+                      <Link to={`/event/${event.id}`} className="event-card-cta">
+                        Get Tickets
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -250,7 +253,7 @@ const EventsPage = () => {
           </div>
         </div>
         <div className="events-footer-bottom">
-          <span>© 2026 Gatewave. All rights reserved.</span>
+          <span>© 2026 Gatewav. All rights reserved.</span>
           <div className="events-payment-badges">
             <span className="payment-label">SECURE PAYMENT</span>
             <span className="events-card-icons" aria-hidden="true">

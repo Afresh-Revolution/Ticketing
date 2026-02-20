@@ -1,6 +1,6 @@
 # Paystack Setup Guide
 
-To enable real payments on Gatewave, you need to configure Paystack.
+To enable real payments on Gatewav, you need to configure Paystack.
 
 ## 1. Get Your API Keys
 1.  **Sign Up / Log In**: Go to [https://dashboard.paystack.com/](https://dashboard.paystack.com/) and create an account or log in.

@@ -23,7 +23,7 @@ const SupportPage = () => {
 
         <section id="contact" style={{ marginBottom: '3rem' }}>
           <h2>Contact Us</h2>
-          <p>Need help? Reach out to our support team at support@gatewave.com</p>
+          <p>Need help? Reach out to our support team at support@gatewav.com</p>
         </section>
 
         <section id="report">

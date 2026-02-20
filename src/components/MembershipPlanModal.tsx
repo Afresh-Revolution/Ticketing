@@ -105,7 +105,7 @@ const MembershipPlanModal = ({ isOpen, onClose }: MembershipPlanModalProps) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Become an Organizer" className="modal-top-aligned">
-      <p className="modal-subtitle">Choose a plan to start hosting events on Gatewave.</p>
+      <p className="modal-subtitle">Choose a plan to start hosting events on Gatewav.</p>
 
       {error && <div className="modal-error">{error}</div>}
       

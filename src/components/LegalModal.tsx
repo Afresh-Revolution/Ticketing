@@ -25,7 +25,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, sectionId }) =
         <section id="terms" className="modal-section">
           <h3>Terms & Conditions</h3>
           <p>
-            Welcome to Gatewave. By using our platform, you agree to comply with and be bound by the following terms and conditions of use. 
+            Welcome to Gatewav. By using our platform, you agree to comply with and be bound by the following terms and conditions of use. 
             If you disagree with any part of these terms and conditions, please do not use our website.
           </p>
           <p>
@@ -44,7 +44,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, sectionId }) =
         <section id="refund" className="modal-section">
           <h3>Refund Policy</h3>
           <p>
-            Refunds are handled on a case-by-case basis depending on the event organizer's policy. Gatewave facilitates the transaction but the organizer is responsible for setting and honoring their refund policy.
+            Refunds are handled on a case-by-case basis depending on the event organizer's policy. Gatewav facilitates the transaction but the organizer is responsible for setting and honoring their refund policy.
             Generally, tickets are non-refundable unless the event is cancelled or significantly rescheduled.
           </p>
         </section>

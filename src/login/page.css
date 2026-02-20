@@ -160,7 +160,7 @@
 .auth-link button {
   background: none;
   border: none;
-  color: #791A94;
+  color: #919191;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
@@ -171,12 +171,12 @@
 
 .auth-link button:hover,
 .auth-link a:hover {
-  color: #8a2ba5;
+  color: #ffffff;
   text-decoration: underline;
 }
 
 .auth-link a {
-  color: #791a94;
+  color: #919191;
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none;
@@ -323,8 +323,12 @@
 }
 
 @media (max-width: 640px) {
+  .auth-page {
+    padding: 1rem;
+  }
+
   .auth-left {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
 
   .auth-container h1 {
@@ -342,5 +346,38 @@
 
   .auth-right-content p {
     font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 0.75rem;
+  }
+
+  .auth-card {
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .auth-left {
+    padding: 1rem;
+  }
+
+  .auth-container h1 {
+    font-size: 1.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-right-content h2 {
+    font-size: 2rem;
+  }
+
+  .form-group input {
+    font-size: 16px; /* avoid zoom on iOS */
+  }
+
+  .btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
   }
 }

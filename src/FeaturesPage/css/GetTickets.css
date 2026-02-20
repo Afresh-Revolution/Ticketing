@@ -117,14 +117,20 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+.event-card-hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0.75rem 0 1rem;
+}
+
 .event-details-footer {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 0;
 }
 
 .info-item.price {
