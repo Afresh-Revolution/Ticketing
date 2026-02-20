@@ -1,0 +1,82 @@
+/* Small square badges for Install and Update – fixed position, non-intrusive */
+.pwa-badge {
+  position: fixed;
+  z-index: 9999;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.pwa-badge-install {
+  bottom: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #5a2c8f 0%, #3a1f5b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pwa-badge-update {
+  bottom: 1rem;
+  left: 1rem;
+  right: auto;
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pwa-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.pwa-badge-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pwa-badge-btn:active {
+  transform: scale(0.98);
+}
+
+.pwa-badge-icon {
+  display: flex;
+  width: 18px;
+  height: 18px;
+}
+
+.pwa-badge-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pwa-badge-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .pwa-badge {
+    bottom: 0.75rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    right: auto;
+    max-width: 200px;
+  }
+
+  .pwa-badge-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .pwa-badge-label {
+    white-space: normal;
+    line-height: 1.2;
+  }
+}

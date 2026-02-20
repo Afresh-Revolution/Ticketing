@@ -281,6 +281,14 @@
   margin: 0 0 0.5rem;
 }
 
+.event-detail-ticket-count {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-right: 0.5rem;
+}
+
 .event-detail-ticket-badge {
   display: inline-block;
   background: #5a2c8f;
@@ -289,6 +297,15 @@
   font-weight: 500;
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
+}
+
+.event-detail-ticket-badge-sold-out {
+  background: #6b2d2d;
+  color: #ffb3b3;
+}
+
+.event-detail-ticket-card-sold-out .event-detail-ticket-price {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .event-detail-ticket-right {
