@@ -140,10 +140,10 @@
 
 /* Top-aligned modal styling (e.g. for "Become an Organizer") */
 .modal-content.modal-top-aligned {
-  margin-top: 80px; /* Match navbar height */
+  margin-top: var(--navbar-total-height, 56px);
   width: 100%;
   max-width: 100%;
-  height: calc(100vh - 80px);
+  height: calc(100vh - var(--navbar-total-height, 56px));
   max-height: none;
   border-radius: 0;
   border-left: none;

@@ -7,16 +7,10 @@
   flex-direction: column;
 }
 
-/* Logo size on My Tickets – match landing page */
-.my-tickets-page .navbar .logo img,
-.my-tickets-page .navbar .logo .logo-img {
-  height: 60px !important;
-}
-
 .my-tickets-main {
   flex: 1;
-  padding: 5.5rem 2rem 3rem;
-  padding-top: 5.5rem;
+  padding: calc(var(--navbar-total-height, 56px) + 2rem) 2rem 3rem;
+  padding-top: calc(var(--navbar-total-height, 56px) + 2rem);
   margin: 0 15px;
   max-width: calc(100vw - 30px);
   width: 100%;

@@ -14,18 +14,12 @@
   background: #181543;
 }
 
-/* Logo size on landing (navbar logo) */
-.landing-page .navbar .logo img,
-.landing-page .navbar .logo .logo-img {
-  height: 40px !important;
-}
-
-/* Hero + Video: one stretched background image – starts below fixed navbar */
+/* Hero + Video: starts below fixed navbar (same offset as all pages) */
 .hero-video-backdrop {
   position: relative;
   width: 100%;
   background: #181543;
-  padding-top: 4rem;
+  padding-top: var(--navbar-total-height, 56px);
 }
 
 .hero-video-backdrop::before {
