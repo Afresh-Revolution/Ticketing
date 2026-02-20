@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiUrl } from '../api/config';
 import Navbar from './Navbar';
@@ -20,6 +21,7 @@ interface Order {
   totalAmount: number;
   status: string;
   createdAt: string;
+  ticketCode?: string | null;
   event: {
     title: string;
     description: string;
@@ -101,7 +103,6 @@ const MyTicketsPage = () => {
     }
     return 'U';
   };
-;
 
   const formatDate = (d: string) => {
     try {
@@ -198,6 +199,16 @@ const MyTicketsPage = () => {
                         </div>
                       ))}
                     </div>
+                    {order.ticketCode && (
+                      <div className="my-tickets-ticket-section">
+                        <p className="my-tickets-ticket-label">Ticket code</p>
+                        <p className="my-tickets-ticket-code">{order.ticketCode}</p>
+                        <div className="my-tickets-qr-wrap">
+                          <QRCodeSVG value={order.ticketCode} size={140} level="M" />
+                        </div>
+                        <p className="my-tickets-qr-hint">Show this QR at the venue</p>
+                      </div>
+                    )}
                     <div className="my-tickets-card-footer">
                       <strong>Total: {formatAmount(order.totalAmount)}</strong>
                       <Link to={`/event/${order.eventId}`} className="my-tickets-card-link">View event</Link>

@@ -65,6 +65,9 @@ const AdminLayout = () => {
             <NavLink to="/admin/withdraw" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
               Withdraw
             </NavLink>
+            <NavLink to="/admin/scanner" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+              Scanner
+            </NavLink>
             {isSuperAdmin && (
               <NavLink to="/admin/memberships" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
                 Memberships

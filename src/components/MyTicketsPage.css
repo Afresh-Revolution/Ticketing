@@ -206,6 +206,47 @@
   font-size: 0.95rem;
 }
 
+.my-tickets-ticket-section {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.my-tickets-ticket-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 0.25rem;
+}
+
+.my-tickets-ticket-code {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  margin: 0 0 0.75rem;
+  color: #fff;
+}
+
+.my-tickets-qr-wrap {
+  display: inline-flex;
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.my-tickets-qr-wrap svg {
+  display: block;
+}
+
+.my-tickets-qr-hint {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
 .my-tickets-card-footer {
   display: flex;
   justify-content: space-between;
