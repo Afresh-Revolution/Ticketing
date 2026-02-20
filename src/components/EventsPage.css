@@ -9,17 +9,11 @@
   flex-direction: column;
 }
 
-/* Navbar & logo – match landing and My Tickets */
-.events-page .navbar .logo img,
-.events-page .navbar .logo .logo-img {
-  height: 60px !important;
-}
-
-/* Main */
+/* Main – clear fixed navbar */
 .events-main {
   flex: 1;
   padding: 2rem;
-  padding-top: 5.5rem;
+  padding-top: calc(var(--navbar-total-height, 56px) + 2rem);
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
