@@ -885,6 +885,9 @@
 }
 
 .admin-scanner-camera-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.65rem 1rem;
   border-radius: 8px;
   border: 1px solid var(--admin-border);
@@ -893,6 +896,15 @@
   font-family: inherit;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+.admin-scanner-camera-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-scanner-camera-icon svg {
+  display: block;
 }
 
 .admin-scanner-camera-btn:hover {
