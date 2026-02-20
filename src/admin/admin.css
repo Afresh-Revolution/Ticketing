@@ -887,28 +887,26 @@
 .admin-scanner-camera-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--admin-border);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--admin-text);
-  font-family: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.admin-scanner-camera-icon {
-  display: inline-flex;
-  align-items: center;
   justify-content: center;
-}
-.admin-scanner-camera-icon svg {
-  display: block;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(167, 139, 250, 0.3));
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .admin-scanner-camera-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(167, 139, 250, 0.5));
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+}
+
+.admin-scanner-camera-btn svg {
+  display: block;
 }
 
 .admin-scanner-camera-wrap {

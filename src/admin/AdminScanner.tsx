@@ -136,14 +136,11 @@ const AdminScanner = () => {
         {supportsBarcodeDetector && (
           <div className="admin-scanner-camera">
             {!cameraOn ? (
-              <button type="button" className="admin-scanner-camera-btn" onClick={() => setCameraOn(true)} aria-label="Scan with camera">
-                <span className="admin-scanner-camera-icon" aria-hidden>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                    <circle cx="12" cy="13" r="4" />
-                  </svg>
-                </span>
-                Scan with camera
+              <button type="button" className="admin-scanner-camera-btn" onClick={() => setCameraOn(true)} aria-label="Scan with camera" title="Scan with camera">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z" />
+                  <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />
+                </svg>
               </button>
             ) : (
               <div className="admin-scanner-camera-wrap">
