@@ -23,7 +23,12 @@ const SupportPage = () => {
 
         <section id="contact" style={{ marginBottom: '3rem' }}>
           <h2>Contact Us</h2>
-          <p>Need help? Reach out to our support team at support@gatewav.com</p>
+          <p>Need help? Reach out to our support team:</p>
+          <p style={{ marginTop: '0.75rem' }}>
+            <a href="tel:+2349061255824" style={{ color: '#9E7BEE', marginRight: '1rem' }}>09061255824</a>
+            <span style={{ marginRight: '0.5rem' }}>·</span>
+            <a href="https://wa.me/2349061255824" target="_blank" rel="noopener noreferrer" style={{ color: '#9E7BEE' }}>Chat on WhatsApp</a>
+          </p>
         </section>
 
         <section id="report">

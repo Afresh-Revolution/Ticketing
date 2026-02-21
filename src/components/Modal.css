@@ -5,6 +5,8 @@
   left: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
   background: rgba(0, 0, 0, 0.75);
   display: flex;
   justify-content: center;
@@ -13,6 +15,10 @@
   backdrop-filter: blur(5px);
   animation: fadeIn 0.3s ease;
   padding: 1.5rem;
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  padding-top: max(1.5rem, env(safe-area-inset-top));
   box-sizing: border-box;
 }
 
@@ -23,17 +29,18 @@
 }
 
 .modal-content {
-  background: #36195C;
+  background: #281851;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   width: 100%;
   max-width: 600px;
-  max-height: 90vh;
+  max-height: min(90vh, 90dvh);
   position: relative;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .modal-close {
@@ -195,6 +202,10 @@
 @media (max-width: 480px) {
   .modal-overlay {
     padding: 0.5rem;
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-top: max(0.5rem, env(safe-area-inset-top));
   }
 
   .modal-content {
@@ -203,5 +214,57 @@
 
   .modal-title {
     font-size: 1.2rem;
+  }
+}
+
+/* PWA / narrow standalone */
+@media (max-width: 430px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    max-height: min(85dvh, 85vh);
+    margin: auto 0;
+    border-radius: 12px;
+  }
+
+  .modal-content.modal-top-aligned {
+    margin-top: max(env(safe-area-inset-top), 0.5rem);
+    height: calc(100dvh - var(--navbar-total-height, 56px) - env(safe-area-inset-top, 0px));
+  }
+
+  .modal-title {
+    font-size: 1.1rem;
+    padding: 1rem 2.5rem 0.75rem 1rem;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .modal-close {
+    top: 0.5rem;
+    right: 0.75rem;
+    font-size: 1.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .modal-title {
+    font-size: 1rem;
+  }
+
+  .modal-body {
+    padding: 0.875rem;
+    font-size: 0.9rem;
   }
 }

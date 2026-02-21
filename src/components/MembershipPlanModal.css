@@ -15,7 +15,7 @@
 }
 
 .modal-content {
-  background: #1a1a1a;
+  background: #281851;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 2.5rem;
@@ -97,6 +97,77 @@
     width: 100%;
     margin: 0.5rem;
     padding: 1.25rem 1rem;
+  }
+}
+
+/* PWA / narrow standalone */
+@media (max-width: 430px) {
+  .modal-overlay {
+    padding: max(0.5rem, env(safe-area-inset-top)) max(0.5rem, env(safe-area-inset-right)) max(0.5rem, env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-left));
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-width: calc(100% - 1rem);
+    margin: 0.5rem;
+    padding: 1rem 0.875rem;
+    border-radius: 12px;
+  }
+
+  .modal-title {
+    font-size: 1.35rem;
+  }
+
+  .modal-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .plans-grid {
+    gap: 1rem;
+  }
+
+  .plan-card {
+    padding: 1.25rem;
+  }
+
+  .plan-name {
+    font-size: 1.25rem;
+  }
+
+  .plan-price {
+    font-size: 1.5rem;
+  }
+
+  .plan-select-btn {
+    min-height: 44px;
+    padding: 0.875rem;
+  }
+
+  .modal-close {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .modal-content {
+    padding: 0.875rem 0.75rem;
+  }
+
+  .plan-name {
+    font-size: 1.1rem;
+  }
+
+  .plan-price {
+    font-size: 1.35rem;
   }
 }
 
