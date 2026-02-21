@@ -39,14 +39,14 @@ const MembershipPlanModal = ({ isOpen, onClose }: MembershipPlanModalProps) => {
       if (!res.ok) throw new Error('Failed to fetch plans');
       const data = await res.json();
       setPlans(data);
-    } catch (err) {
+    } catch {
       setError('Could not load membership plans.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSuccess = async (reference: any) => {
+  const handleSuccess = async (reference: { reference?: string }) => {
     if (!selectedPlan || !user || !token) return;
 
     try {
@@ -67,8 +67,8 @@ const MembershipPlanModal = ({ isOpen, onClose }: MembershipPlanModalProps) => {
       
       alert('Membership activated successfully!');
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Payment verification failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Payment verification failed');
     } finally {
       setLoading(false);
     }

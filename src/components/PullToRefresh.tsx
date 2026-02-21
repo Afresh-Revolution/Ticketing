@@ -11,14 +11,15 @@ export default function PullToRefresh() {
   const startYRef = useRef(0);
   const pullYRef = useRef(0);
 
-  pullYRef.current = pullY;
-
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH}px)`);
-    setIsMobile(mql.matches);
+    const id = setTimeout(() => setIsMobile(mql.matches), 0);
     const handler = () => setIsMobile(mql.matches);
     mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
+    return () => {
+      clearTimeout(id);
+      mql.removeEventListener('change', handler);
+    };
   }, []);
 
   useEffect(() => {
@@ -38,7 +39,9 @@ export default function PullToRefresh() {
       const delta = currentY - startYRef.current;
       if (delta > 0) {
         e.preventDefault();
-        setPullY(Math.min(delta, MAX_PULL));
+        const value = Math.min(delta, MAX_PULL);
+        pullYRef.current = value;
+        setPullY(value);
       }
     };
 

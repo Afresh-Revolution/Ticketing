@@ -62,6 +62,8 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   return <PWAContext.Provider value={value}>{children}</PWAContext.Provider>;
 }
 
+// Context consumer hook – same-file export is intentional
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePWA() {
   const ctx = useContext(PWAContext);
   return ctx;

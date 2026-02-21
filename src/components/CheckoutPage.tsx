@@ -18,21 +18,13 @@ interface CheckoutState {
 
 import { useAuth } from "../contexts/AuthContext";
 
+type PaystackReference = { reference?: string; trxref?: string } | string;
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, token } = useAuth();
   const createdOrderIdRef = useRef<string | null>(null);
-  
-  // Auth Guard
-  if (!isAuthenticated) {
-    // Redirect to login but save the checkout state to return later
-    // For now, simpler redirect
-    useEffect(() => {
-       navigate('/login', { state: { from: location } });
-    }, [isAuthenticated, navigate, location]);
-    return null; 
-  }
 
   const state = (location.state as CheckoutState) || {};
   const totalPrice = state.totalPrice ?? 0;
@@ -52,7 +44,7 @@ const CheckoutPage = () => {
 
   const publicKey = (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "";
   const defaultConfig = {
-    reference: (new Date()).getTime().toString(),
+    reference: new Date().getTime().toString(),
     email: "",
     amount: 100,
     publicKey: publicKey || "pk_test_placeholder",
@@ -60,7 +52,14 @@ const CheckoutPage = () => {
   const configToUse = paystackConfig ?? defaultConfig;
   const initializePayment = usePaystackPayment(configToUse);
 
-  const onSuccess = (reference: any) => {
+  // Auth guard: redirect to login when not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location } });
+    }
+  }, [isAuthenticated, navigate, location]);
+
+  const onSuccess = (reference: PaystackReference) => {
     verifyPayment(reference);
   };
 
@@ -73,6 +72,7 @@ const CheckoutPage = () => {
     if (!paystackConfig) return;
     initializePayment({ onSuccess, onClose });
     setPaystackConfig(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run only when paystackConfig is set
   }, [paystackConfig]);
 
   const handleBack = () => {
@@ -83,21 +83,24 @@ const CheckoutPage = () => {
     }
   };
 
-  const verifyPayment = async (reference: any) => {
-    const ref = reference?.reference || reference?.trxref || reference;
+  const verifyPayment = async (reference: PaystackReference): Promise<void> => {
+    const ref =
+      typeof reference === "string"
+        ? reference
+        : (reference?.reference ?? reference?.trxref ?? "");
     const orderId = createdOrderIdRef.current;
     if (orderId && ref) {
       try {
-        const res = await fetch(apiUrl('/api/orders/verify'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch(apiUrl("/api/orders/verify"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ reference: ref, orderId }),
         });
         if (!res.ok) {
-          console.error('Verify failed:', await res.text());
+          console.error("Verify failed:", await res.text());
         }
       } catch (e) {
-        console.error('Verify error:', e);
+        console.error("Verify error:", e);
       } finally {
         createdOrderIdRef.current = null;
       }
@@ -114,34 +117,49 @@ const CheckoutPage = () => {
 
   const isFreeOrder = totalPrice === 0;
 
+  if (!isAuthenticated) {
+    return null;
+  }
+
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      if (!state.eventId || !state.items) {
+      if (!state.eventId || !state.items || !Array.isArray(state.items) || state.items.length === 0) {
         throw new Error("Invalid order details");
       }
-      if (!email || !email.includes("@")) {
+      const trimmedName = (fullName || "").trim();
+      if (!trimmedName) {
+        throw new Error("Please enter your full name");
+      }
+      const trimmedEmail = (email || "").trim();
+      if (!trimmedEmail || !trimmedEmail.includes("@")) {
         throw new Error("Please enter a valid email address");
+      }
+      const totalAmount = Number(totalPrice);
+      if (Number.isNaN(totalAmount) || totalAmount < 0) {
+        throw new Error("Invalid total amount");
       }
 
       const orderPayload = {
         eventId: state.eventId,
         items: state.items,
-        totalAmount: totalPrice,
-        fullName,
-        email,
-        phone,
-        address
+        totalAmount,
+        fullName: trimmedName,
+        email: trimmedEmail,
+        phone: (phone || "").trim(),
+        address: (address || "").trim(),
       };
 
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res = await fetch(apiUrl('/api/orders'), {
-        method: 'POST',
+      const res = await fetch(apiUrl("/api/orders"), {
+        method: "POST",
         headers,
         body: JSON.stringify(orderPayload),
       });
@@ -170,10 +188,14 @@ const CheckoutPage = () => {
       // Paid: open Paystack
       const amountKobo = Math.round(totalPrice * 100);
       if (amountKobo < 100) {
-        throw new Error("Amount must be at least ₦1. Please select at least one ticket.");
+        throw new Error(
+          "Amount must be at least ₦1. Please select at least one ticket.",
+        );
       }
       if (!publicKey || publicKey === "pk_test_placeholder") {
-        throw new Error("Payment is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.");
+        throw new Error(
+          "Payment is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.",
+        );
       }
 
       createdOrderIdRef.current = createdOrder?.id || null;
@@ -183,9 +205,9 @@ const CheckoutPage = () => {
         amount: amountKobo,
         publicKey,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Payment processing failed");
+      setError(err instanceof Error ? err.message : "Payment processing failed");
       setLoading(false);
     }
   };
@@ -195,7 +217,7 @@ const CheckoutPage = () => {
       <div className="checkout-page">
         <div className="checkout-error">
           <p>No event selected.</p>
-          <button onClick={() => navigate('/events')}>Browse Events</button>
+          <button onClick={() => navigate("/events")}>Browse Events</button>
         </div>
       </div>
     );
@@ -210,7 +232,9 @@ const CheckoutPage = () => {
           onClick={handleBack}
           aria-label="Back"
         >
-          <span className="checkout-back-arrow" aria-hidden>←</span>
+          <span className="checkout-back-arrow" aria-hidden>
+            ←
+          </span>
           <span className="checkout-title">Checkout</span>
         </button>
       </header>
@@ -218,79 +242,103 @@ const CheckoutPage = () => {
       <main className="checkout-main">
         <form className="checkout-form" onSubmit={handlePay}>
           <h2 className="checkout-section-label">Attendee Info</h2>
-          
+
           {error && <div className="checkout-error-msg">{error}</div>}
 
           <div className="checkout-field-wrap">
-          <div className="checkout-field checkout-field-full">
-            <input
-              type="text"
-              id="checkout-fullname"
-              className="checkout-input"
-              placeholder="Full Name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              autoComplete="name"
-            />
-          </div>
-
-          <div className="checkout-row">
-            <div className="checkout-field checkout-field-half">
+            <div className="checkout-field checkout-field-full">
               <input
-                type="email"
-                id="checkout-email"
+                type="text"
+                id="checkout-fullname"
                 className="checkout-input"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
-                autoComplete="email"
+                autoComplete="name"
               />
             </div>
-            <div className="checkout-field checkout-field-half">
-              <input
-                type="tel"
-                id="checkout-phone"
-                className="checkout-input"
-                placeholder="Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                autoComplete="tel"
-              />
-            </div>
-          </div>
 
-          <div className="checkout-field checkout-field-full">
-            <input
-              type="text"
-              id="checkout-address"
-              className="checkout-input"
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              autoComplete="street-address"
-            />
-          </div>
+            <div className="checkout-row">
+              <div className="checkout-field checkout-field-half">
+                <input
+                  type="email"
+                  id="checkout-email"
+                  className="checkout-input"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              <div className="checkout-field checkout-field-half">
+                <input
+                  type="tel"
+                  id="checkout-phone"
+                  className="checkout-input"
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  autoComplete="tel"
+                />
+              </div>
+            </div>
+
+            <div className="checkout-field checkout-field-full">
+              <input
+                type="text"
+                id="checkout-address"
+                className="checkout-input"
+                placeholder="Address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                autoComplete="street-address"
+              />
+            </div>
           </div>
 
           <div className="checkout-actions">
-            <button type="submit" className="checkout-pay-btn" disabled={loading}>
+            <button
+              type="submit"
+              className="checkout-pay-btn"
+              disabled={loading}
+            >
               {isFreeOrder ? (
                 <>
-                  <svg className="checkout-pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <svg
+                    className="checkout-pay-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
                   </svg>
-                  {loading ? 'Processing...' : 'Get'}
+                  {loading ? "Processing..." : "Get"}
                 </>
               ) : (
                 <>
-                  <svg className="checkout-pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <svg
+                    className="checkout-pay-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                   </svg>
-                  {loading ? 'Processing...' : `Pay ₦${totalPrice.toLocaleString()}`}
+                  {loading
+                    ? "Processing..."
+                    : `Pay ₦${totalPrice.toLocaleString()}`}
                 </>
               )}
             </button>
