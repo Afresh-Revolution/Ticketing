@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiUrl } from '../api/config';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,11 +17,7 @@ const AdminMemberships = () => {
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchMemberships();
-  }, []);
-
-  const fetchMemberships = async () => {
+  const fetchMemberships = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(apiUrl('/api/memberships'), {
@@ -30,12 +26,16 @@ const AdminMemberships = () => {
       if (!res.ok) throw new Error('Failed to fetch memberships');
       const data = await res.json();
       setMemberships(data);
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchMemberships();
+  }, [fetchMemberships]);
 
   const handleAction = async (id: string, action: 'suspend' | 'extend') => {
     try {
@@ -54,7 +54,7 @@ const AdminMemberships = () => {
       
       if (!res.ok) throw new Error('Action failed');
       fetchMemberships();
-    } catch (err) {
+    } catch {
       alert('Failed to update membership');
     }
   };

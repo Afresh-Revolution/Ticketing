@@ -21,9 +21,10 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu when route changes
+  // Close mobile menu when route changes (defer to avoid synchronous setState in effect)
   useEffect(() => {
-    setMobileMenuOpen(false);
+    const id = setTimeout(() => setMobileMenuOpen(false), 0);
+    return () => clearTimeout(id);
   }, [location]);
 
   const handleLogout = () => {

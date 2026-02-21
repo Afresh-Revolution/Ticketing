@@ -123,8 +123,8 @@ const BankSetupModal = ({ onClose, onSaved }: BankModalProps) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to save bank account');
       onSaved(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save bank account');
     } finally {
       setSaving(false);
     }
@@ -272,8 +272,8 @@ const AdminWithdraw = () => {
       });
       if (!res.ok) throw new Error('Failed to load withdraw data');
       setData(await res.json());
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load');
     } finally {
       setLoading(false);
     }
@@ -293,8 +293,8 @@ const AdminWithdraw = () => {
       if (!res.ok) throw new Error(json.error || 'Withdrawal failed');
       showToast(`Withdrawal successful! Net: ${fmt(json.withdrawal.net)}`, 'success');
       fetchData();
-    } catch (err: any) {
-      showToast(err.message, 'error');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Withdrawal failed', 'error');
     } finally {
       setWithdrawing(null);
     }

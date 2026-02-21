@@ -38,7 +38,8 @@ const EventsPage = () => {
         const res = await fetch(apiUrl('/api/events'));
         if (res.ok) {
           const data = await res.json();
-          const formattedEvents = data.map((e: any) => {
+          interface ApiEvent { id: string; title: string; date: string; category?: string; location?: string; venue?: string; startTime?: string; price?: number; imageUrl?: string }
+          const formattedEvents = data.map((e: ApiEvent) => {
             const dateObj = new Date(e.date);
             const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
             const day = dateObj.getDate();

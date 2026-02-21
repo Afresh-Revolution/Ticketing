@@ -81,7 +81,7 @@ const AdminMembershipPlans = () => {
       await fetchPlans();
       setShowForm(false);
       setFormData({ name: '', price: '', currency: 'NGN', duration: 'monthly', description: '' });
-    } catch (err) {
+    } catch {
       alert('Error creating plan');
     }
   };

@@ -61,8 +61,8 @@ const AdminDashboard = () => {
         const data = await res.json();
         setStats(data.stats);
         setRecentSales(data.recentSales);
-      } catch (err: any) {
-        setError(err.message || 'Could not load dashboard');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Could not load dashboard');
       } finally {
         setLoading(false);
       }
@@ -104,8 +104,8 @@ const AdminDashboard = () => {
       fetchSubscription();
       setSuccessMessage(action === 'cancel' ? 'Subscription cancelled.' : 'Resubscribed successfully!');
       setTimeout(() => setSuccessMessage(''), 3500);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Action failed');
       setTimeout(() => setError(''), 4000);
     } finally {
       setSubAction(null);
