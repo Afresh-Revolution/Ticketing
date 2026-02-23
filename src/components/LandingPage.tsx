@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import FeaturesPage from './FeaturesPage';
-import ScrollReveal from './ScrollReveal';
 import Navbar from './Navbar';
+import GetTickets from './GetTickets';
 import { usePWA } from '../contexts/PWAContext';
 import '../LandingPage/css/LandingPage.css';
 
@@ -55,43 +55,8 @@ const LandingPage = () => {
         </section>
       )}
 
-      {/* Video previews – moved below hero */}
-      <section className="video-previews">
-        <ScrollReveal animation="fadeInUp">
-          <div className="video-container">
-            <div className="video-card">
-              <div className="video-thumbnail video-1">
-                <div className="play-button">
-                  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="30" cy="30" r="30" fill="rgba(255, 255, 255, 0.9)"/>
-                    <path d="M24 20L24 40L38 30L24 20Z" fill="#791A94"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="video-card">
-              <div className="video-thumbnail video-2">
-                <div className="play-button">
-                  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="30" cy="30" r="30" fill="rgba(255, 255, 255, 0.9)"/>
-                    <path d="M24 20L24 40L38 30L24 20Z" fill="#791A94"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="video-card">
-              <div className="video-thumbnail video-3">
-                <div className="play-button">
-                  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="30" cy="30" r="30" fill="rgba(255, 255, 255, 0.9)"/>
-                    <path d="M24 20L24 40L38 30L24 20Z" fill="#791A94"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ScrollReveal>
-      </section>
+      {/* Available tickets (Trending Now) – where video previews were */}
+      <GetTickets />
 
       {/* Features Page Section */}
       <FeaturesPage />
