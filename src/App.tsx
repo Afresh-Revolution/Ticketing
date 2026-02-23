@@ -23,6 +23,7 @@ import AdminScanner from './admin/AdminScanner'
 import AdminMemberships from './admin/AdminMemberships'
 import AdminMembershipPlans from './admin/AdminMembershipPlans'
 import AdminWithdraw from './admin/AdminWithdraw'
+import AdminTopUsers from './admin/AdminTopUsers'
 import './App.css'
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
           <Route path="withdraw" element={<AdminWithdraw />} />
           <Route path="admins" element={<AdminAdmins />} />
           <Route path="scanner" element={<AdminScanner />} />
+          <Route path="top-users" element={<AdminTopUsers />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Routes>
