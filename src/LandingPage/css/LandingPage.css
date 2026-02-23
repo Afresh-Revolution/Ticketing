@@ -44,14 +44,62 @@
   z-index: 1;
 }
 
+/* Floating badges in hero – base + responsive */
+.hero-badge {
+  position: absolute;
+  z-index: 0;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(121, 26, 148, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  animation: heroBadgeFloat 8s ease-in-out infinite;
+  pointer-events: none;
+}
+/* Badges in top/bottom bands only – never overlap centered hero text */
+.hero-badge-1 { top: calc(12% + 40px); left: 6%;  animation-delay: 0s; }
+.hero-badge-2 { top: calc(12% + 40px); right: 6%; animation-delay: -2s; }
+.hero-badge-3 { bottom: calc(12% + 40px); left: 6%;  animation-delay: -4s; }
+.hero-badge-4 { bottom: calc(12% + 40px); right: 6%;  animation-delay: -6s; }
+@keyframes heroBadgeFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+  50% { transform: translateY(-8px) scale(1.02); opacity: 1; }
+}
 
-/* Hero Section */
+@media (max-width: 1024px) {
+  .hero-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+  }
+  .hero-badge-1 { top: calc(11% + 40px); left: 5%; }
+  .hero-badge-2 { top: calc(11% + 40px); right: 5%; }
+  .hero-badge-3 { bottom: 11%; left: 5%; }
+  .hero-badge-4 { bottom: 11%; right: 5%; }
+}
+
+@media (max-width: 900px) {
+  .hero-badge {
+    font-size: 0.72rem;
+    padding: 0.32rem 0.7rem;
+  }
+  .hero-badge-1 { top: calc(10% + 40px); left: 4%; }
+  .hero-badge-2 { top: calc(10% + 40px); right: 4%; }
+  .hero-badge-3 { bottom: 10%; left: 4%; }
+  .hero-badge-4 { bottom: 10%; right: 4%; }
+}
+
+/* Hero Section – height +50px */
 .hero {
   max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 3rem 4rem;
   text-align: center;
-  min-height: 70vh;
+  min-height: calc(70vh + 50px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -291,7 +339,7 @@
 
   .hero {
     padding: 6rem 2rem 4rem;
-    min-height: 60vh;
+    min-height: calc(60vh + 50px);
   }
 
   .hero-title {
@@ -343,8 +391,17 @@
 
   .hero {
     padding: 5rem 1.5rem 3rem;
-    min-height: 55vh;
+    min-height: calc(55vh + 50px);
   }
+
+  .hero-badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.65rem;
+  }
+  .hero-badge-1 { top: calc(10% + 40px); left: 3%; }
+  .hero-badge-2 { top: calc(10% + 40px); right: 3%; }
+  .hero-badge-3 { bottom: 10%; left: 3%; }
+  .hero-badge-4 { bottom: 10%; right: 3%; }
 
   .hero-title {
     font-size: 2.1rem;
@@ -386,8 +443,17 @@
 
   .hero {
     padding: 4rem 1rem 2.5rem;
-    min-height: 50vh;
+    min-height: calc(50vh + 50px);
   }
+
+  .hero-badge {
+    font-size: 0.68rem;
+    padding: 0.28rem 0.58rem;
+  }
+  .hero-badge-1 { top: calc(9% + 40px); left: 2.5%; }
+  .hero-badge-2 { top: calc(9% + 40px); right: 2.5%; }
+  .hero-badge-3 { bottom: 9%; left: 2.5%; }
+  .hero-badge-4 { bottom: 9%; right: 2.5%; }
 
   .hero-title {
     font-size: 1.75rem;
@@ -425,8 +491,17 @@
 
   .hero {
     padding: 3.5rem 0.75rem 2rem;
-    min-height: auto;
+    min-height: calc(45vh + 40px);
   }
+
+  .hero-badge {
+    font-size: 0.62rem;
+    padding: 0.22rem 0.48rem;
+  }
+  .hero-badge-1 { top: calc(8% + 40px); left: 2%; }
+  .hero-badge-2 { top: calc(8% + 40px); right: 2%; }
+  .hero-badge-3 { bottom: 8%; left: 2%; }
+  .hero-badge-4 { bottom: 8%; right: 2%; }
 
   .hero-title {
     font-size: 1.5rem;
@@ -461,7 +536,14 @@
 
 /* Extra small phone */
 @media (max-width: 380px) {
-  /* Removed responsive navbar styles */
+  .hero-badge {
+    font-size: 0.58rem;
+    padding: 0.2rem 0.4rem;
+  }
+  .hero-badge-1 { top: calc(7% + 40px); left: 1.5%; }
+  .hero-badge-2 { top: calc(7% + 40px); right: 1.5%; }
+  .hero-badge-3 { bottom: 7%; left: 1.5%; }
+  .hero-badge-4 { bottom: 7%; right: 1.5%; }
 
   .hero-title {
     font-size: 1.35rem;

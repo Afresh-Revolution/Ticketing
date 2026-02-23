@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import FeaturesPage from './FeaturesPage';
 import Navbar from './Navbar';
 import GetTickets from './GetTickets';
+import TopUsersCarousel from './TopUsersCarousel';
 import { usePWA } from '../contexts/PWAContext';
 import '../LandingPage/css/LandingPage.css';
 
@@ -16,6 +17,11 @@ const LandingPage = () => {
 
       {/* Hero: one stretched background image */}
       <div className="hero-video-backdrop">
+        {/* Floating badges */}
+        <span className="hero-badge hero-badge-1">Live Events</span>
+        <span className="hero-badge hero-badge-2">Instant Tickets</span>
+        <span className="hero-badge hero-badge-3">Secure Checkout</span>
+        <span className="hero-badge hero-badge-4">QR at Venue</span>
         <section className="hero">
           <div className="hero-content">
             <h1 className="hero-title">
@@ -32,6 +38,9 @@ const LandingPage = () => {
           </div>
         </section>
       </div>
+
+      {/* Top users carousel – infinite scroll with fade */}
+      <TopUsersCarousel />
 
       {/* PWA Download card – visible on landing page */}
       {pwa?.installable && (
