@@ -146,13 +146,8 @@ const AdminScanner = () => {
   return (
     <div className="admin-page">
       <div className="admin-scanner-container">
-        <div className="admin-page-header">
-          <h1 className="admin-page-title">Ticket Scanner</h1>
-          <p className="admin-scanner-subtitle">Verify tickets for your events. Open the camera to scan a QR code or enter the code below.</p>
-        </div>
-
-        {/* Always visible: open camera to scan */}
-        <div className="admin-scanner-camera">
+        {/* Camera button first and always visible */}
+        <section className="admin-scanner-camera-section" aria-label="Scan QR with camera">
           {!cameraOn ? (
             <button
               type="button"
@@ -161,6 +156,7 @@ const AdminScanner = () => {
               disabled={loading}
               aria-label="Open camera to scan QR code"
               title="Open camera to scan QR code"
+              style={{ display: 'inline-flex', opacity: 1, visibility: 'visible' }}
             >
               <span className="admin-scanner-camera-btn-icon" aria-hidden>
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
@@ -180,6 +176,11 @@ const AdminScanner = () => {
             </div>
           )}
           {cameraError && <p className="admin-scanner-camera-error">{cameraError}</p>}
+        </section>
+
+        <div className="admin-page-header">
+          <h1 className="admin-page-title">Ticket Scanner</h1>
+          <p className="admin-scanner-subtitle">Verify tickets for your events. Open the camera to scan a QR code or enter the code below.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="admin-scanner-form">

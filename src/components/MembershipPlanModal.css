@@ -67,8 +67,115 @@
 
 .plans-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.plan-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #791a94, #a78bfa);
+  opacity: 0.9;
+}
+
+.plan-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(121, 26, 148, 0.25);
+  border-color: rgba(121, 26, 148, 0.4);
+}
+
+.plan-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.plan-price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.plan-duration {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.plan-desc {
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.plan-select-btn {
+  width: 100%;
+  margin-top: auto;
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, #791a94 0%, #6b21a8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(121, 26, 148, 0.4);
+}
+
+.plan-select-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8b2a9e 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(121, 26, 148, 0.5);
+}
+
+.plan-select-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.plan-select-btn:disabled {
+  background: #4b5563;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.login-prompt {
+  margin-top: auto;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  padding: 0.875rem 1rem;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 @media (max-width: 640px) {
@@ -88,7 +195,7 @@
   }
 
   .plan-card {
-    padding: 1.5rem;
+    padding: 1.5rem 1.25rem;
   }
 }
 
@@ -169,81 +276,6 @@
   .plan-price {
     font-size: 1.35rem;
   }
-}
-
-.plan-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s, background 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.plan-card:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(121, 26, 148, 0.3);
-}
-
-.plan-name {
-  font-size: 1.5rem;
-  color: #fff;
-  margin-bottom: 1rem;
-}
-
-.plan-price {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #791A94; /* Primary brand color */
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.plan-duration {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 400;
-}
-
-.plan-desc {
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 2rem;
-  flex-grow: 1;
-  line-height: 1.6;
-}
-
-.plan-select-btn {
-  width: 100%;
-  padding: 1rem;
-  background: #791A94;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.plan-select-btn:hover {
-  background: #8a2ba5;
-}
-
-.plan-select-btn:disabled {
-  background: #555;
-  cursor: not-allowed;
-}
-
-.login-prompt {
-    text-align: center;
-    color: #aaa;
-    font-size: 0.9rem;
-    padding: 0.5rem;
-    border: 1px dashed rgba(255,255,255,0.2);
-    border-radius: 4px;
 }
 
 @keyframes fadeIn {
