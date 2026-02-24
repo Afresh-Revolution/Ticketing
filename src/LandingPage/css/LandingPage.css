@@ -61,9 +61,9 @@
   animation: heroBadgeFloat 8s ease-in-out infinite;
   pointer-events: none;
 }
-/* Badges in top/bottom bands only – never overlap centered hero text */
-.hero-badge-1 { top: calc(12% + 40px); left: 6%;  animation-delay: 0s; }
-.hero-badge-2 { top: calc(12% + 40px); right: 6%; animation-delay: -2s; }
+/* Badges in top/bottom bands only – never overlap centered hero text (top badges pushed down 15px) */
+.hero-badge-1 { top: calc(12% + 40px + 15px); left: 6%;  animation-delay: 0s; }
+.hero-badge-2 { top: calc(12% + 40px + 15px); right: 6%; animation-delay: -2s; }
 .hero-badge-3 { bottom: calc(12% + 40px); left: 6%;  animation-delay: -4s; }
 .hero-badge-4 { bottom: calc(12% + 40px); right: 6%;  animation-delay: -6s; }
 @keyframes heroBadgeFloat {
@@ -76,8 +76,8 @@
     font-size: 0.75rem;
     padding: 0.35rem 0.75rem;
   }
-  .hero-badge-1 { top: calc(11% + 40px); left: 5%; }
-  .hero-badge-2 { top: calc(11% + 40px); right: 5%; }
+  .hero-badge-1 { top: calc(11% + 40px + 15px); left: 5%; }
+  .hero-badge-2 { top: calc(11% + 40px + 15px); right: 5%; }
   .hero-badge-3 { bottom: 11%; left: 5%; }
   .hero-badge-4 { bottom: 11%; right: 5%; }
 }
@@ -87,8 +87,8 @@
     font-size: 0.72rem;
     padding: 0.32rem 0.7rem;
   }
-  .hero-badge-1 { top: calc(10% + 40px); left: 4%; }
-  .hero-badge-2 { top: calc(10% + 40px); right: 4%; }
+  .hero-badge-1 { top: calc(10% + 40px + 15px); left: 4%; }
+  .hero-badge-2 { top: calc(10% + 40px + 15px); right: 4%; }
   .hero-badge-3 { bottom: 10%; left: 4%; }
   .hero-badge-4 { bottom: 10%; right: 4%; }
 }
@@ -398,8 +398,8 @@
     font-size: 0.7rem;
     padding: 0.3rem 0.65rem;
   }
-  .hero-badge-1 { top: calc(10% + 40px); left: 3%; }
-  .hero-badge-2 { top: calc(10% + 40px); right: 3%; }
+  .hero-badge-1 { top: calc(10% + 40px + 15px); left: 3%; }
+  .hero-badge-2 { top: calc(10% + 40px + 15px); right: 3%; }
   .hero-badge-3 { bottom: 10%; left: 3%; }
   .hero-badge-4 { bottom: 10%; right: 3%; }
 
@@ -450,8 +450,8 @@
     font-size: 0.68rem;
     padding: 0.28rem 0.58rem;
   }
-  .hero-badge-1 { top: calc(9% + 40px); left: 2.5%; }
-  .hero-badge-2 { top: calc(9% + 40px); right: 2.5%; }
+  .hero-badge-1 { top: calc(9% + 40px + 15px); left: 2.5%; }
+  .hero-badge-2 { top: calc(9% + 40px + 15px); right: 2.5%; }
   .hero-badge-3 { bottom: 9%; left: 2.5%; }
   .hero-badge-4 { bottom: 9%; right: 2.5%; }
 
@@ -498,8 +498,8 @@
     font-size: 0.62rem;
     padding: 0.22rem 0.48rem;
   }
-  .hero-badge-1 { top: calc(8% + 40px); left: 2%; }
-  .hero-badge-2 { top: calc(8% + 40px); right: 2%; }
+  .hero-badge-1 { top: calc(8% + 40px + 15px); left: 2%; }
+  .hero-badge-2 { top: calc(8% + 40px + 15px); right: 2%; }
   .hero-badge-3 { bottom: 8%; left: 2%; }
   .hero-badge-4 { bottom: 8%; right: 2%; }
 
@@ -540,8 +540,8 @@
     font-size: 0.58rem;
     padding: 0.2rem 0.4rem;
   }
-  .hero-badge-1 { top: calc(7% + 40px); left: 1.5%; }
-  .hero-badge-2 { top: calc(7% + 40px); right: 1.5%; }
+  .hero-badge-1 { top: calc(7% + 40px + 15px); left: 1.5%; }
+  .hero-badge-2 { top: calc(7% + 40px + 15px); right: 1.5%; }
   .hero-badge-3 { bottom: 7%; left: 1.5%; }
   .hero-badge-4 { bottom: 7%; right: 1.5%; }
 
