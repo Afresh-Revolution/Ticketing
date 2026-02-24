@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import './admin.css';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Get user role from localStorage
@@ -29,16 +28,9 @@ const AdminLayout = () => {
           <span className="admin-sidebar-toggle-bar" />
         </button>
         <div className="admin-logo">
-          <Logo variant="main" className="admin-logo-img" height={54} />
+          <Logo variant="main" className="admin-logo-img" height={32} />
         </div>
         <div className="admin-header-actions">
-          <NavLink
-            to="/admin/scanner"
-            className={`admin-btn admin-btn-scanner ${location.pathname === '/admin/scanner' ? 'active' : ''}`}
-            aria-label="Open Scanner"
-          >
-            Scan QR
-          </NavLink>
           <button 
             type="button" 
             className={`admin-btn admin-btn-role ${isSuperAdmin ? 'admin-btn-superadmin' : ''}`}
