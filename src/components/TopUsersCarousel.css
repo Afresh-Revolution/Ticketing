@@ -41,6 +41,7 @@
   width: max-content;
   animation: topUsersScroll 45s linear infinite;
   padding: 0 2rem;
+  margin-top: 20px;
 }
 
 .top-users-carousel-inner:hover {

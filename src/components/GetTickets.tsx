@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { apiUrl } from '../api/config'; // Ensure this path is correct
+import { useState, useEffect, useCallback } from 'react';
+import { Share2, Check } from 'lucide-react';
+import { apiUrl } from '../api/config';
 import '../FeaturesPage/css/GetTickets.css';
 
 interface TrendingEvent {
@@ -17,6 +18,25 @@ const GetTickets = () => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<TrendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [shareCopiedId, setShareCopiedId] = useState<string | null>(null);
+
+  const getEventShareUrl = useCallback((eventId: string) => {
+    const base = `${window.location.origin}${window.location.pathname || '/'}`.replace(/\/*$/, '/');
+    return `${base}#/event/${eventId}`;
+  }, []);
+
+  const handleShareEvent = useCallback(async (e: React.MouseEvent, eventId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = getEventShareUrl(eventId);
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopiedId(eventId);
+      setTimeout(() => setShareCopiedId(null), 2000);
+    } catch {
+      window.open(url, '_blank');
+    }
+  }, [getEventShareUrl]);
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -108,9 +128,24 @@ const GetTickets = () => {
                       <span className="price-amount">{formatPrice(event.price)}</span>
                     </div>
                   </div>
-                  <button className="btn-get-tickets" onClick={() => navigate(`/event/${event.id}`)}>
-                    Get Tickets
-                  </button>
+                  <div className="event-details-cta-row">
+                    <button className="btn-get-tickets" onClick={() => navigate(`/event/${event.id}`)}>
+                      Get Tickets
+                    </button>
+                    <button
+                      type="button"
+                      className="event-card-share-btn"
+                      onClick={(e) => handleShareEvent(e, event.id)}
+                      title="Share event"
+                      aria-label={shareCopiedId === event.id ? 'Link copied' : 'Share event'}
+                    >
+                      {shareCopiedId === event.id ? (
+                        <Check size={18} strokeWidth={2} aria-hidden />
+                      ) : (
+                        <Share2 size={18} strokeWidth={2} aria-hidden />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

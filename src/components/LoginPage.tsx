@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { signIn, forgotPassword, resetPassword, resendVerification } from '../api/auth';
 import '../login/page.css';
@@ -8,7 +8,9 @@ type View = 'login' | 'otp' | 'forgot-email' | 'forgot-otp' | 'forgot-password';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const from = (location.state as { from?: string } | null)?.from;
   const [view, setView] = useState<View>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +35,7 @@ const LoginPage = () => {
         setView('otp');
       } else if ('user' in result && 'token' in result) {
         login(result.user, result.token);
-        navigate('/events', { replace: true });
+        navigate(from || '/events', { replace: true });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign in failed.');
@@ -270,7 +272,7 @@ const LoginPage = () => {
 
             {view === 'login' && (
               <p className="auth-link">
-                Don&apos;t have an account? <Link to="/signup">Sign Up</Link>
+                Don&apos;t have an account? <Link to="/signup" state={from ? { from } : undefined}>Sign Up</Link>
               </p>
             )}
           </div>

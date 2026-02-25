@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { signUp } from '../api/auth';
 import '../login/page.css';
 
 const SignupPage = () => {
+  const location = useLocation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +41,7 @@ const SignupPage = () => {
           {signupSuccess ? (
             <div className="auth-form">
               <p className="auth-success">Account created! Check your email for a verification code. You will need it when you first sign in.</p>
-              <Link to="/login" className="btn btn-primary" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
+              <Link to="/login" state={location.state} className="btn btn-primary" style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}>
                 Go to Sign In
               </Link>
             </div>
@@ -98,7 +99,7 @@ const SignupPage = () => {
           </form>
           )}
           <p className="auth-link">
-            Already have an account? <Link to="/login">Sign In</Link>
+            Already have an account? <Link to="/login" state={location.state}>Sign In</Link>
           </p>
         </div>
         </div>

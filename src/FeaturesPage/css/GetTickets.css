@@ -79,6 +79,28 @@
   font-family: 'Arimo', sans-serif;
 }
 
+.event-details-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.event-card-share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.event-card-share-btn:hover {
+  color: #fff;
+}
+
 .event-details {
   padding: 1.5rem;
   display: flex;
