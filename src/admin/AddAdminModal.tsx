@@ -6,6 +6,7 @@ interface AddAdminModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  
 }
 
 const AddAdminModal = ({ isOpen, onClose, onSuccess }: AddAdminModalProps) => {
