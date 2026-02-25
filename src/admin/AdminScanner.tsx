@@ -33,9 +33,18 @@ const AdminScanner = () => {
         },
         body: JSON.stringify({ code: trimmed }),
       });
-      const data = await res.json();
-      setResult(data as VerifyResult);
-      if (data.valid) setCode('');
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403 || data.reason === 'not_your_event' || data.reason === 'not_authorized') {
+        setResult({
+          valid: false,
+          reason: 'not_authorized',
+          message: data.message || 'You can only scan tickets for events you created. Super Admin can scan all.',
+          eventTitle: data.eventTitle,
+        });
+      } else {
+        setResult(data as VerifyResult);
+        if (data.valid) setCode('');
+      }
     } catch (err) {
       setResult({ valid: false, reason: 'error', message: err instanceof Error ? err.message : 'Request failed' });
     } finally {
@@ -180,7 +189,7 @@ const AdminScanner = () => {
 
         <div className="admin-page-header">
           <h1 className="admin-page-title">Ticket Scanner</h1>
-          <p className="admin-scanner-subtitle">Verify tickets for your events. Open the camera to scan a QR code or enter the code below.</p>
+          <p className="admin-scanner-subtitle">Verify tickets for your events. You can only scan tickets for events you created; Super Admin can scan all. Open the camera or enter the code below.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="admin-scanner-form">
@@ -210,6 +219,9 @@ const AdminScanner = () => {
             <p className="admin-scanner-result-message">{result.message}</p>
             {result.fullName && <p><strong>Name:</strong> {result.fullName}</p>}
             {result.eventTitle && <p><strong>Event:</strong> {result.eventTitle}</p>}
+            {!result.valid && result.reason === 'not_authorized' && (
+              <p className="admin-scanner-result-hint">This ticket belongs to another organizer&apos;s event.</p>
+            )}
             {!result.valid && result.reason === 'already_used' && result.scanCount != null && result.totalQuantity != null && (
               <p>Used {result.scanCount} of {result.totalQuantity} scan(s).</p>
             )}
