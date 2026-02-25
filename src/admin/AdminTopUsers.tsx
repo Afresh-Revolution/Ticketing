@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -11,6 +12,10 @@ interface TopUser {
 }
 
 const AdminTopUsers = () => {
+  const navigate = useNavigate();
+  const userRole = localStorage.getItem('adminRole');
+  const isSuperAdmin = userRole === 'superadmin';
+
   const [list, setList] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -43,8 +48,12 @@ const AdminTopUsers = () => {
   }, []);
 
   useEffect(() => {
+    if (!isSuperAdmin) {
+      navigate('/admin', { replace: true });
+      return;
+    }
     fetchList();
-  }, [fetchList]);
+  }, [fetchList, isSuperAdmin, navigate]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +142,8 @@ const AdminTopUsers = () => {
       setError(e instanceof Error ? e.message : 'Failed to delete');
     }
   };
+
+  if (!isSuperAdmin) return null;
 
   return (
     <div className="admin-page">
