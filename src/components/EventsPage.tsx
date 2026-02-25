@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { Share2, Check } from "lucide-react";
 import { apiUrl } from "../api/config";
 import Navbar from "./Navbar";
 import Logo from "./Logo";
@@ -31,6 +32,25 @@ const EventsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [shareCopiedId, setShareCopiedId] = useState<string | null>(null);
+
+  const getEventShareUrl = useCallback((eventId: string) => {
+    const base = `${window.location.origin}${window.location.pathname || "/"}`.replace(/\/*$/, "/");
+    return `${base}#/event/${eventId}`;
+  }, []);
+
+  const handleShareEvent = useCallback(async (e: React.MouseEvent, eventId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const url = getEventShareUrl(eventId);
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareCopiedId(eventId);
+      setTimeout(() => setShareCopiedId(null), 2000);
+    } catch {
+      window.open(url, "_blank");
+    }
+  }, [getEventShareUrl]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -190,9 +210,24 @@ const EventsPage = () => {
                           ₦{event.price}
                         </strong>
                       </p>
-                      <Link to={`/event/${event.id}`} className="event-card-cta">
-                        Get Tickets
-                      </Link>
+                      <div className="event-card-cta-row">
+                        <Link to={`/event/${event.id}`} className="event-card-cta">
+                          Get Tickets
+                        </Link>
+                        <button
+                          type="button"
+                          className="event-card-share-btn"
+                          onClick={(e) => handleShareEvent(e, event.id)}
+                          title="Share event"
+                          aria-label={shareCopiedId === event.id ? "Link copied" : "Share event"}
+                        >
+                          {shareCopiedId === event.id ? (
+                            <Check size={18} strokeWidth={2} aria-hidden />
+                          ) : (
+                            <Share2 size={18} strokeWidth={2} aria-hidden />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>

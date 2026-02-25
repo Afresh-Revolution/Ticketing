@@ -254,6 +254,16 @@
   font-size: 1rem;
 }
 
+.my-tickets-card-highlight {
+  animation: my-tickets-card-highlight-pulse 0.6s ease-out;
+}
+
+@keyframes my-tickets-card-highlight-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(121, 26, 148, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(121, 26, 148, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(121, 26, 148, 0); }
+}
+
 .my-tickets-card-link {
   color: #b794f6;
   text-decoration: none;

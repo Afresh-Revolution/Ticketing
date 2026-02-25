@@ -9,6 +9,7 @@ import SignupPage from './components/SignupPage'
 import PaymentSuccess from './components/PaymentSuccess'
 import EventsPage from './components/EventsPage'
 import MyTicketsPage from './components/MyTicketsPage'
+import TicketShareRedirect from './components/TicketShareRedirect'
 import EventDetailPage from './components/EventDetailPage'
 import CheckoutPage from './components/CheckoutPage'
 import AdminLogin from './admin/AdminLogin'
@@ -41,6 +42,7 @@ function App() {
         <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
+        <Route path="/ticket/:orderId" element={<TicketShareRedirect />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedAdminRoute />}>

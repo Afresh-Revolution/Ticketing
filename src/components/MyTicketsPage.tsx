@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiUrl } from '../api/config';
@@ -37,12 +37,15 @@ interface Order {
 type Tab = 'upcoming' | 'past';
 
 const MyTicketsPage = () => {
-  const { isAuthenticated, token, user} = useAuth();
+  const { isAuthenticated, token, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
+  const orderCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const highlightOrderId = (location.state as { highlightOrderId?: string } | null)?.highlightOrderId;
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
@@ -123,6 +126,25 @@ const MyTicketsPage = () => {
     return `₦${amount.toLocaleString()}`;
   };
 
+  // When opened via share link, switch to tab that contains the order and scroll to it
+  useEffect(() => {
+    if (!highlightOrderId || loading || orders.length === 0) return;
+    const inUpcoming = upcomingOrders.some((o) => o.id === highlightOrderId);
+    const inPast = pastOrders.some((o) => o.id === highlightOrderId);
+    if (inPast && !inUpcoming) setActiveTab('past');
+  }, [highlightOrderId, loading, orders.length, upcomingOrders, pastOrders]);
+
+  useEffect(() => {
+    if (!highlightOrderId || loading || displayOrders.length === 0) return;
+    const el = orderCardRefs.current[highlightOrderId];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('my-tickets-card-highlight');
+      const t = setTimeout(() => el.classList.remove('my-tickets-card-highlight'), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [highlightOrderId, loading, displayOrders.length, activeTab]);
+
   if (!isAuthenticated) return null;
 
   return (
@@ -175,7 +197,11 @@ const MyTicketsPage = () => {
             ) : (
               <div className="my-tickets-list">
                 {displayOrders.map((order) => (
-                  <div key={order.id} className="my-tickets-card">
+                  <div
+                    key={order.id}
+                    ref={(el) => { orderCardRefs.current[order.id] = el; }}
+                    className="my-tickets-card"
+                  >
                     <div className="my-tickets-card-header">
                       {order.event.imageUrl && (
                         <img

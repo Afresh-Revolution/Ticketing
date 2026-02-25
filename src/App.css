@@ -40,3 +40,16 @@
 .read-the-docs {
   color: #888;
 }
+
+.ticket-share-redirect {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #181543;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Arimo', sans-serif;
+}
+.ticket-share-redirect p {
+  margin: 0;
+}
