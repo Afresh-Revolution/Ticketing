@@ -17,6 +17,7 @@ interface RecentSale {
   buyer_name: string;
   buyer_email: string;
   amount: number;
+  ticket_count: number;
   status: string;
   created_at: string;
   event_title: string;
@@ -308,6 +309,7 @@ const AdminDashboard = () => {
                   <th>Event</th>
                   <th>Buyer</th>
                   <th>Amount</th>
+                  <th>Ticket</th>
                   <th>Status</th>
                   <th>Date</th>
                 </tr>
@@ -321,6 +323,7 @@ const AdminDashboard = () => {
                       <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_email}</div>
                     </td>
                     <td>{formatCurrency(sale.amount)}</td>
+                    <td>{sale.ticket_count ?? 0}</td>
                     <td>
                       <span
                         className={`admin-status-badge ${sale.status === 'paid' ? 'admin-status-active' : 'admin-status-inactive'}`}
