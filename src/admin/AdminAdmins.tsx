@@ -8,8 +8,8 @@ interface AdminUser {
   name: string | null;
   role: string;
   emailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
 }
 
 type DeleteConfirm = { admin: AdminUser } | null;
@@ -48,8 +48,12 @@ const AdminAdmins = () => {
     }
   };
 
-  const formatDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (dateStr == null || dateStr === '') return '—';
+    const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
   const handleDeleteAdmin = async () => {
     if (!deleteConfirm) return;
