@@ -176,3 +176,54 @@ export async function createAdmin(adminData: CreateAdminData): Promise<AuthRespo
   }
   return data as AuthResponse;
 }
+
+export interface PasswordChangeStatus {
+  canChange: boolean;
+  nextChangeAllowedAt: string | null;
+  reason?: string;
+}
+
+export async function getPasswordChangeStatus(): Promise<PasswordChangeStatus> {
+  const res = await fetch(apiUrl('/api/admin/password-change-status'), {
+    headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error ?? 'Failed to load');
+  return data;
+}
+
+export async function verifyAdminPassword(currentPassword: string): Promise<{ verified: true }> {
+  const res = await fetch(apiUrl('/api/admin/verify-password'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+    },
+    body: JSON.stringify({ currentPassword }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error ?? 'Invalid current password');
+  return data;
+}
+
+export async function changeAdminPassword(
+  currentPassword: string,
+  newPassword: string,
+  confirmPassword: string
+): Promise<{ success: true; message: string }> {
+  const res = await fetch(apiUrl('/api/admin/change-password'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+    },
+    body: JSON.stringify({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error ?? 'Failed to change password');
+  return data;
+}

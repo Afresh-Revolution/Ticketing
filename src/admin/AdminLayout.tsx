@@ -1,15 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
+import { getPasswordChangeStatus } from '../api/auth';
+import ChangePasswordModal from './ChangePasswordModal';
 import './admin.css';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  // Get user role from localStorage
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [canChangePassword, setCanChangePassword] = useState(true);
+  const [nextPasswordChangeAt, setNextPasswordChangeAt] = useState<string | null>(null);
+
   const userRole = localStorage.getItem('adminRole');
   const isSuperAdmin = userRole === 'superadmin';
+
+  useEffect(() => {
+    getPasswordChangeStatus()
+      .then((s) => {
+        setCanChangePassword(s.canChange);
+        setNextPasswordChangeAt(s.nextChangeAllowedAt);
+      })
+      .catch(() => { setCanChangePassword(true); });
+  }, [passwordModalOpen]);
 
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -31,6 +44,16 @@ const AdminLayout = () => {
           <Logo variant="main" className="admin-logo-img" height={32} />
         </div>
         <div className="admin-header-actions">
+          <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
+            onClick={() => setPasswordModalOpen(true)}
+            disabled={!canChangePassword}
+            title={!canChangePassword && nextPasswordChangeAt ? `Next change allowed: ${new Date(nextPasswordChangeAt).toLocaleDateString()}` : 'Change password (once per month)'}
+            aria-label="Change password"
+          >
+            Change password
+          </button>
           <button 
             type="button" 
             className={`admin-btn admin-btn-role ${isSuperAdmin ? 'admin-btn-superadmin' : ''}`}
@@ -95,6 +118,15 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      <ChangePasswordModal
+        isOpen={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+        onSuccess={() => {
+          setCanChangePassword(false);
+          setNextPasswordChangeAt(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
+        }}
+      />
     </div>
   );
 };
