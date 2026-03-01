@@ -269,8 +269,8 @@ const EventsPage = () => {
               <a href="#">Browse Events</a>
               <a href="#">Upcoming Events</a>
               <a href="#">Popular Events</a>
-              <a href="#">Become an Organizer</a>
-              <a href="#">Create an Event</a>
+              <Link to="/organizer-form">Become an Organizer</Link>
+              <Link to="/organizer-form">Create an Event</Link>
             </div>
             <div className="events-footer-col">
               <h4>Support</h4>

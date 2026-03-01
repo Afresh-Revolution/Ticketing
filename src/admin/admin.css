@@ -691,6 +691,18 @@
 .admin-table-empty {
   text-align: center;
   padding: 3rem;
+}
+
+.admin-plans-hint {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--admin-text-muted);
+}
+
+.admin-plans-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
   color: var(--admin-text-muted);
   font-size: 0.95rem;
 }

@@ -227,3 +227,57 @@ export async function changeAdminPassword(
   if (!res.ok) throw new Error(data.error ?? 'Failed to change password');
   return data;
 }
+
+/** Organizer self-signup. Sends one-time OTP to email for verification. */
+export async function organizerSignup(
+  username: string,
+  email: string,
+  password: string
+): Promise<{ message: string }> {
+  try {
+    const res = await fetchWithTimeout(apiUrl('/api/auth/organizer-signup'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error ?? 'Failed to register as organizer');
+    return data as { message: string };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const isNetworkOrCert =
+      msg.includes('certificate') ||
+      msg.includes('SSL') ||
+      msg.includes('TLS') ||
+      msg.includes('network') ||
+      msg.includes('fetch') ||
+      msg.includes('Failed to fetch') ||
+      msg === 'The operation was aborted.';
+    if (isNetworkOrCert) {
+      throw new Error(
+        'Connection error (e.g. certificate or network). Try again or use a different network. If the problem continues, contact support.'
+      );
+    }
+    throw err;
+  }
+}
+
+/** Verify OTP for new organizer; enables admin login for that account. */
+export async function organizerVerifyOtp(email: string, otp: string): Promise<{ message: string }> {
+  try {
+    const res = await fetch(apiUrl('/api/auth/organizer-verify-otp'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error ?? 'Invalid or expired code');
+    return data as { message: string };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('certificate') || msg.includes('Failed to fetch') || msg.includes('network')) {
+      throw new Error('Connection error. Try again or use a different network.');
+    }
+    throw err;
+  }
+}

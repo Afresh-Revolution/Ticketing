@@ -13,7 +13,7 @@ const SupportPage = () => {
           <h2>Frequently Asked Questions</h2>
           <div className="faq-item" style={{ marginBottom: '1.5rem' }}>
             <h3>How do I create an event?</h3>
-            <p>To create an event, you need to sign up as an organizer and choose a membership plan.</p>
+            <p>To create an event, go to Become an Organizer to create your organizer account, then sign in to the admin dashboard.</p>
           </div>
           <div className="faq-item">
             <h3>How do receive my tickets?</h3>

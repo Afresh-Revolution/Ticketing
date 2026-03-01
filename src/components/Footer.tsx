@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import MembershipPlanModal from './MembershipPlanModal';
 import LegalModal from './LegalModal';
 import SupportModal from './SupportModal';
 import Logo from './Logo';
 import '../FeaturesPage/css/Footer.css';
 
 const Footer = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLegalOpen, setIsLegalOpen] = useState(false);
   const [legalSection, setLegalSection] = useState('');
   const [isSupportOpen, setIsSupportOpen] = useState(false);
@@ -67,8 +65,8 @@ const Footer = () => {
               <li><Link to="/events">Browse Events</Link></li>
               <li><Link to="/events?filter=upcoming">Upcoming Events</Link></li>
               <li><Link to="/events?filter=popular">Popular Events</Link></li>
-              <li><button className="footer-link-btn" onClick={() => setIsModalOpen(true)}>Become an Organizer</button></li>
-              <li><Link to="/events/create">Create an Event</Link></li>
+              <li><Link to="/organizer-form" className="footer-link-btn">Become an Organizer</Link></li>
+              <li><Link to="/organizer-form">Create an Event</Link></li>
             </ul>
           </div>
 
@@ -76,10 +74,10 @@ const Footer = () => {
           <div className="footer-column">
             <h3 className="footer-heading">Support</h3>
             <ul className="footer-links">
-              <li><button className="footer-link-btn" onClick={() => openSupport('')}>Help Center</button></li>
-              <li><button className="footer-link-btn" onClick={() => openSupport('faqs')}>FAQs</button></li>
-              <li><button className="footer-link-btn" onClick={() => openSupport('contact')}>Contact Support</button></li>
-              <li><button className="footer-link-btn" onClick={() => openSupport('report')}>Report an Issue</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openSupport('')}>Help Center</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openSupport('faqs')}>FAQs</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openSupport('contact')}>Contact Support</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openSupport('report')}>Report an Issue</button></li>
             </ul>
           </div>
 
@@ -87,10 +85,10 @@ const Footer = () => {
           <div className="footer-column">
             <h3 className="footer-heading">Legal</h3>
             <ul className="footer-links">
-              <li><button className="footer-link-btn" onClick={() => openLegal('terms')}>Terms & Conditions</button></li>
-              <li><button className="footer-link-btn" onClick={() => openLegal('privacy')}>Privacy Policy</button></li>
-              <li><button className="footer-link-btn" onClick={() => openLegal('refund')}>Refund Policy</button></li>
-              <li><button className="footer-link-btn" onClick={() => openLegal('cookie')}>Cookie Policy</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openLegal('terms')}>Terms & Conditions</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openLegal('privacy')}>Privacy Policy</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openLegal('refund')}>Refund Policy</button></li>
+              <li><button className="footer-link-btn" type="button" onClick={() => openLegal('cookie')}>Cookie Policy</button></li>
             </ul>
           </div>
         </div>
@@ -114,7 +112,6 @@ const Footer = () => {
         </div>
       </div>
     </footer>
-    <MembershipPlanModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     <LegalModal isOpen={isLegalOpen} onClose={() => setIsLegalOpen(false)} sectionId={legalSection} />
     <SupportModal isOpen={isSupportOpen} onClose={() => setIsSupportOpen(false)} sectionId={supportSection} />
     </>

@@ -7,6 +7,7 @@ import LandingPage from './components/LandingPage'
 import LoginPage from './components/LoginPage'
 import SignupPage from './components/SignupPage'
 import PaymentSuccess from './components/PaymentSuccess'
+import OrganizerFormPage from './components/OrganizerFormPage'
 import EventsPage from './components/EventsPage'
 import MyTicketsPage from './components/MyTicketsPage'
 import TicketShareRedirect from './components/TicketShareRedirect'
@@ -21,8 +22,6 @@ import AdminEditEvent from './admin/AdminEditEvent'
 import AdminSales from './admin/AdminSales'
 import AdminAdmins from './admin/AdminAdmins'
 import AdminScanner from './admin/AdminScanner'
-import AdminMemberships from './admin/AdminMemberships'
-import AdminMembershipPlans from './admin/AdminMembershipPlans'
 import AdminWithdraw from './admin/AdminWithdraw'
 import AdminTopUsers from './admin/AdminTopUsers'
 import './App.css'
@@ -44,6 +43,7 @@ function App() {
         <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/ticket/:orderId" element={<TicketShareRedirect />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/organizer-form" element={<OrganizerFormPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedAdminRoute />}>
           <Route index element={<AdminDashboard />} />
@@ -51,8 +51,6 @@ function App() {
           <Route path="events/create" element={<AdminCreateEvent />} />
           <Route path="events/edit/:id" element={<AdminEditEvent />} />
           <Route path="sales" element={<AdminSales />} />
-          <Route path="memberships" element={<AdminMemberships />} />
-          <Route path="membership-plans" element={<AdminMembershipPlans />} />
           <Route path="withdraw" element={<AdminWithdraw />} />
           <Route path="admins" element={<AdminAdmins />} />
           <Route path="scanner" element={<AdminScanner />} />
