@@ -24,7 +24,7 @@
   color: var(--admin-text);
 }
 
-/* Header – extra top padding for PWA safe area (notch/status bar) */
+/* Header – reduced top padding so navbar sits higher */
 .admin-header {
   position: sticky;
   top: 0;
@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.5rem 0.75rem;
+  padding: calc(0.35rem + env(safe-area-inset-top, 0px)) 1.5rem 0.5rem;
   background: var(--admin-sidebar);
   border-bottom: 1px solid var(--admin-border);
 }
@@ -1206,7 +1206,7 @@
   }
 
   .admin-header {
-    padding: calc(0.6rem + 29px + env(safe-area-inset-top, 0px)) 1rem 0.6rem;
+    padding: calc(0.35rem + 29px + env(safe-area-inset-top, 0px)) 1rem 0.5rem;
   }
 
   .admin-logo-text {
@@ -1392,7 +1392,7 @@
 /* ========== Responsive: Extra small ========== */
 @media (max-width: 480px) {
   .admin-header {
-    padding: calc(0.5rem + 29px + env(safe-area-inset-top, 0px)) 0.75rem 0.5rem;
+    padding: calc(0.3rem + 29px + env(safe-area-inset-top, 0px)) 0.75rem 0.4rem;
   }
 
   .admin-header-actions {
@@ -1824,6 +1824,32 @@
   padding: 1.5rem;
 }
 
+.admin-modal-body {
+  padding: 1.5rem;
+}
+
+.admin-modal-muted {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.admin-modal-success {
+  color: #86efac;
+  font-size: 0.95rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.admin-modal-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.35rem;
+}
+
 .admin-modal-field {
   margin-bottom: 1.25rem;
 }
@@ -1992,6 +2018,16 @@
   color: white !important;
   border: 1px solid rgba(139, 92, 246, 0.5);
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+/* Change password modal – input with eye toggle */
+.admin-change-password-input-wrap {
+  position: relative;
+  display: block;
+}
+
+.admin-change-password-input-wrap .admin-login-input {
+  padding-right: 44px;
 }
 
 /* Admin Password Toggle */
