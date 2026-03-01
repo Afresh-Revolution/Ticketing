@@ -97,16 +97,6 @@ const AdminLayout = () => {
               </NavLink>
             )}
             {isSuperAdmin && (
-              <NavLink to="/admin/memberships" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
-                Memberships
-              </NavLink>
-            )}
-            {isSuperAdmin && (
-              <NavLink to="/admin/membership-plans" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
-                Plans
-              </NavLink>
-            )}
-            {isSuperAdmin && (
               <NavLink to="/admin/admins" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
                 Admins
               </NavLink>

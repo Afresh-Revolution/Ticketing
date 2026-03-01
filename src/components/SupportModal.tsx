@@ -26,7 +26,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, sectionId 
           
           <div className="faq-item">
             <h4>How do I create an event?</h4>
-            <p>To create an event, you need to sign up as an organizer and choose a membership plan. Once subscribed, you can access the creator dashboard to set up your event.</p>
+            <p>To create an event, go to Become an Organizer to create your organizer account. After verifying your email, you can sign in to the admin dashboard and create events.</p>
           </div>
           
           <div className="faq-item">

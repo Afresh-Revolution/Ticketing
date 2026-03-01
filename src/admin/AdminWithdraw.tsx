@@ -43,7 +43,6 @@ interface KPI {
   totalGross: number;
   availableToWithdraw: number;
   totalFees: number;
-  membershipRevenue: number;
 }
 
 interface PageData {
@@ -388,13 +387,6 @@ const AdminWithdraw = () => {
                 <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.15rem' }}>
                   15% of all withdrawals
                 </span>
-              </div>
-            </div>
-            <div className="admin-kpi-card">
-              <div className="admin-kpi-icon" style={{ background: '#7c2d12', color: '#fdba74' }}>★</div>
-              <div className="admin-kpi-content">
-                <span className="admin-kpi-label">Membership Revenue</span>
-                <span className="admin-kpi-value">{fmt(kpi.membershipRevenue)}</span>
               </div>
             </div>
           </>

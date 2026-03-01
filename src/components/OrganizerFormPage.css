@@ -1,0 +1,191 @@
+.organizer-form-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(160deg, #1a0a2e 0%, #281851 50%, #1a0a2e 100%);
+}
+
+.organizer-form-card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(40, 24, 81, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.organizer-form-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.organizer-form-logo {
+  margin-bottom: 1rem;
+}
+
+.organizer-form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.organizer-form-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.organizer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.organizer-form-error {
+  background: rgba(255, 77, 79, 0.15);
+  color: #ff6b6b;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.organizer-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.organizer-form-field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.organizer-form-field input {
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 1rem;
+}
+
+.organizer-form-field input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.organizer-form-field input:focus {
+  outline: none;
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
+}
+
+.organizer-form-hint {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0.25rem 0 0 0;
+}
+
+.organizer-form-btn {
+  margin-top: 0.25rem;
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, #791a94 0%, #6b21a8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+.organizer-form-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8b2a9e 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+}
+
+.organizer-form-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.organizer-form-btn-primary {
+  margin-bottom: 0.5rem;
+}
+
+.organizer-form-back {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.organizer-form-back:hover {
+  color: #fff;
+}
+
+.organizer-form-verified {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.organizer-form-success-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1.25rem;
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.organizer-form-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.organizer-form-signin {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.organizer-form-signin a {
+  color: #a78bfa;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.organizer-form-signin a:hover {
+  text-decoration: underline;
+}
+
+.organizer-form-footer-link {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.organizer-form-footer-link:hover {
+  color: #fff;
+}
