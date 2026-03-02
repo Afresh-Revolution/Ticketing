@@ -76,6 +76,15 @@
   gap: 0.5rem 0.75rem;
 }
 
+/* Bar directly under navbar – change password */
+.admin-below-nav {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  background: var(--admin-bg);
+  border-bottom: 1px solid var(--admin-border);
+}
+
 .admin-btn {
   display: inline-flex;
   align-items: center;

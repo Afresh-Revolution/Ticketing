@@ -44,16 +44,6 @@ const AdminLayout = () => {
           <Logo variant="main" className="admin-logo-img" height={32} />
         </div>
         <div className="admin-header-actions">
-          <button
-            type="button"
-            className="admin-btn admin-btn-secondary"
-            onClick={() => setPasswordModalOpen(true)}
-            disabled={!canChangePassword}
-            title={!canChangePassword && nextPasswordChangeAt ? `Next change allowed: ${new Date(nextPasswordChangeAt).toLocaleDateString()}` : 'Change password (once per month)'}
-            aria-label="Change password"
-          >
-            Change password
-          </button>
           <button 
             type="button" 
             className={`admin-btn admin-btn-role ${isSuperAdmin ? 'admin-btn-superadmin' : ''}`}
@@ -66,6 +56,19 @@ const AdminLayout = () => {
           </button>
         </div>
       </header>
+
+      <div className="admin-below-nav">
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary"
+          onClick={() => setPasswordModalOpen(true)}
+          disabled={!canChangePassword}
+          title={!canChangePassword && nextPasswordChangeAt ? `Next change allowed: ${new Date(nextPasswordChangeAt).toLocaleDateString()}` : 'Change password (once per month)'}
+          aria-label="Change password"
+        >
+          Change password
+        </button>
+      </div>
 
       <div
         className={`admin-sidebar-overlay ${sidebarOpen ? 'admin-sidebar-overlay-open' : ''}`}
