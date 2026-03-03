@@ -26,7 +26,7 @@ const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, sectionId }) =
           <h3>Terms & Conditions</h3>
           <p>
             Welcome to Gatewav. By using our platform, you agree to comply with and be bound by the following terms and conditions of use. 
-            If you disagree with any part of these terms and conditions, please do not use our website.
+            If you disagree with any part of these terms and conditions, please do not use our website. A 15% service charge will be applied to all events.
           </p>
           <p>
             The content of the pages of this website is for your general information and use only. It is subject to change without notice.
