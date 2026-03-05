@@ -1,14 +1,35 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn, forgotPassword, resetPassword, type AuthResponse } from "../api/auth";
 import Logo from "../components/Logo";
 import "./admin.css";
 
-type View = "login" | "forgot-email" | "forgot-otp" | "forgot-password";
+type View = "login" | "forgot-email" | "forgot-otp" | "forgot-password" | "saved-session";
+
+function getStoredAdminDisplayName(): string | null {
+  try {
+    const raw = localStorage.getItem("adminUser");
+    if (!raw) return null;
+    const user = JSON.parse(raw) as { name?: string | null; email?: string };
+    return (user?.name && user.name.trim()) ? user.name.trim() : (user?.email && user.email.trim()) ? user.email.trim() : null;
+  } catch {
+    return null;
+  }
+}
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [view, setView] = useState<View>("login");
+  const [savedName, setSavedName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    if (token) {
+      const name = getStoredAdminDisplayName();
+      setSavedName(name);
+      setView("saved-session");
+    }
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -90,13 +111,26 @@ const AdminLogin = () => {
   };
 
   const titleByView =
-    view === "login"
-      ? "Admin Portal"
-      : view === "forgot-email"
-        ? "Forgot Password"
-        : view === "forgot-otp"
-          ? "Enter Reset Code"
-          : "Set New Password";
+    view === "saved-session"
+      ? "Welcome back"
+      : view === "login"
+        ? "Admin Portal"
+        : view === "forgot-email"
+          ? "Forgot Password"
+          : view === "forgot-otp"
+            ? "Enter Reset Code"
+            : "Set New Password";
+
+  const subtitleByView =
+    view === "saved-session"
+      ? "You're signed in. Continue to your dashboard below."
+      : view === "login"
+        ? "Sign in to access the admin dashboard"
+        : view === "forgot-email"
+          ? "Enter your email to receive a reset code"
+          : view === "forgot-otp"
+            ? "Enter the 6-digit code from your email"
+            : "Enter the code and your new password";
 
   return (
     <div className="admin-login-container">
@@ -106,16 +140,40 @@ const AdminLogin = () => {
             <Logo variant="main" className="admin-login-logo-img" height={72} />
           </div>
           <h1 className="admin-login-title">{titleByView}</h1>
-          <p className="admin-login-subtitle">
-            {view === "login"
-              ? "Sign in to access the admin dashboard"
-              : view === "forgot-email"
-                ? "Enter your email to receive a reset code"
-                : view === "forgot-otp"
-                  ? "Enter the 6-digit code from your email"
-                  : "Enter the code and your new password"}
-          </p>
+          <p className="admin-login-subtitle">{subtitleByView}</p>
         </div>
+
+        {view === "saved-session" && (
+          <div className="admin-login-form">
+            <p className="admin-login-saved-greeting">
+              Hello{savedName ? `, ${savedName}` : ""}
+            </p>
+            <p className="admin-login-saved-subtitle">
+              Continue to your dashboard
+            </p>
+            <button
+              type="button"
+              className="admin-login-button"
+              onClick={() => navigate("/admin")}
+            >
+              Go to Dashboard
+            </button>
+            <button
+              type="button"
+              className="admin-login-back"
+              style={{ marginTop: "0.75rem" }}
+              onClick={() => {
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminUser");
+                localStorage.removeItem("adminRole");
+                setView("login");
+                setSavedName(null);
+              }}
+            >
+              Sign in as different account
+            </button>
+          </div>
+        )}
 
         {view === "login" && (
           <form className="admin-login-form" onSubmit={handleSubmit}>

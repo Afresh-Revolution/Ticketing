@@ -22,6 +22,23 @@ interface RecentSale {
   event_title: string;
 }
 
+function normalizeRecentSales(raw: unknown): RecentSale[] {
+  const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && 'recentSales' in raw)
+    ? (raw as { recentSales?: unknown }).recentSales
+    : [];
+  const list = Array.isArray(arr) ? arr : [];
+  return list.map((s: Record<string, unknown>) => ({
+    id: String(s.id ?? s.order_id ?? ''),
+    buyer_name: String(s.buyer_name ?? s.buyerName ?? ''),
+    buyer_email: String(s.buyer_email ?? s.buyerEmail ?? ''),
+    amount: Number(s.amount ?? 0),
+    ticket_count: Number(s.ticket_count ?? s.ticketCount ?? 0),
+    status: String(s.status ?? ''),
+    created_at: String(s.created_at ?? s.createdAt ?? ''),
+    event_title: String(s.event_title ?? s.eventTitle ?? ''),
+  }));
+}
+
 const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -38,13 +55,33 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('adminToken');
-        const res = await fetch(apiUrl('/api/admin/dashboard'), {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(apiUrl('/api/admin/dashboard'), { headers });
         if (!res.ok) throw new Error('Failed to load dashboard data');
         const data = await res.json();
-        setStats(data.stats);
-        setRecentSales(data.recentSales);
+        const rawStats = data.stats ?? data;
+        if (rawStats && typeof rawStats === 'object' && 'totalRevenue' in rawStats) {
+          setStats(rawStats as DashboardStats);
+        } else if (rawStats && typeof rawStats === 'object') {
+          setStats({
+            totalRevenue: Number((rawStats as Record<string, unknown>).totalRevenue ?? 0),
+            ticketRevenue: Number((rawStats as Record<string, unknown>).ticketRevenue ?? 0),
+            ticketsSold: Number((rawStats as Record<string, unknown>).ticketsSold ?? 0),
+            totalEvents: Number((rawStats as Record<string, unknown>).totalEvents ?? 0),
+            activeEvents: Number((rawStats as Record<string, unknown>).activeEvents ?? 0),
+          });
+        }
+        const rawSales = data.recentSales ?? data.recent_sales ?? data.sales ?? [];
+        let sales = normalizeRecentSales(rawSales);
+        if (sales.length === 0 && token) {
+          const salesRes = await fetch(apiUrl('/api/admin/sales'), { headers });
+          if (salesRes.ok) {
+            const salesData = await salesRes.json();
+            const all = Array.isArray(salesData) ? salesData : (salesData?.sales ?? salesData?.data ?? []);
+            sales = normalizeRecentSales(all).slice(0, 20);
+          }
+        }
+        setRecentSales(sales);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Could not load dashboard');
       } finally {
