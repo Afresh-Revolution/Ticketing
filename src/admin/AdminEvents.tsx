@@ -14,6 +14,7 @@ interface AdminEvent {
   capacity?: number;
   sold?: number;
   isTrending: boolean;
+  isPublished: boolean;
   createdByName?: string;
 }
 
@@ -43,6 +44,7 @@ const AdminEvents = () => {
     capacity?: number;
     sold?: number;
     isTrending?: boolean;
+    isPublished?: boolean;
     createdByName?: string;
   }): AdminEvent => ({
     id: e.id,
@@ -54,6 +56,7 @@ const AdminEvents = () => {
     capacity: e.capacity,
     sold: e.sold,
     isTrending: Boolean(e.isTrending),
+    isPublished: e.isPublished !== false,
     createdByName: e.createdByName,
   });
 
@@ -137,6 +140,38 @@ const AdminEvents = () => {
     }
   };
 
+  const handleToggleVisibility = async (
+    eventId: string,
+    currentPublished: boolean,
+  ) => {
+    const nextPublished = !currentPublished;
+    setEvents((prev) =>
+      prev.map((e) =>
+        e.id === eventId ? { ...e, isPublished: nextPublished } : e,
+      ),
+    );
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(apiUrl(`/api/admin/events/${eventId}/visibility`), {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isPublished: nextPublished }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+    } catch (err) {
+      console.error("Failed to toggle visibility:", err);
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.id === eventId ? { ...e, isPublished: currentPublished } : e,
+        ),
+      );
+      alert("Failed to update visibility. Try again.");
+    }
+  };
+
   if (loading) return <div className="admin-page">Loading events...</div>;
 
   return (
@@ -190,6 +225,34 @@ const AdminEvents = () => {
                 </div>
                 <span className="admin-event-price">₦{event.price}</span>
                 <div className="admin-event-actions">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleToggleVisibility(event.id, event.isPublished)
+                    }
+                    className={
+                      event.isPublished
+                        ? "admin-btn-visibility-on"
+                        : "admin-btn-visibility-off"
+                    }
+                    title={
+                      event.isPublished
+                        ? "Visible on site – click to hide"
+                        : "Hidden from site – click to show"
+                    }
+                    style={{
+                      marginRight: "8px",
+                      padding: "4px 8px",
+                      fontSize: "0.85rem",
+                      border: "1px solid currentColor",
+                      borderRadius: "4px",
+                      background: event.isPublished ? "#22c55e" : "#94a3b8",
+                      color: "white",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {event.isPublished ? "Visible" : "Hidden"}
+                  </button>
                   {isSuperAdmin && (
                     <button
                       type="button"
