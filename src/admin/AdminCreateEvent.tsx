@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
@@ -21,11 +21,23 @@ const defaultPool = (): TicketPool => ({
   description: '',
 });
 
+type Me = { id: number; role?: string } | null;
+
 const AdminCreateEvent = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
+  const [me, setMe] = useState<Me>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return;
+    fetch(apiUrl('/api/admin/me'), { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setMe(data != null ? { id: Number(data.id), role: data.role } : null))
+      .catch(() => setMe(null));
+  }, []);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -59,15 +71,36 @@ const AdminCreateEvent = () => {
     setError('');
 
     try {
-      // 1. Construct the location string
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        setError('You must be logged in to create an event.');
+        return;
+      }
+
+      const meRes = await fetch(apiUrl('/api/admin/me'), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!meRes.ok) {
+        setError('Session invalid. Please log out and sign in again.');
+        return;
+      }
+      const me = (await meRes.json()) as { id: number; role?: string };
+      if (Number(me.id) === 0) {
+        setError(
+          'You are logged in as Super Admin. To create events that appear on your own dashboard, log out and sign in with your admin email and password, then create the event again.'
+        );
+        return;
+      }
+      const createdBy = Number(me.id);
+      if (Number.isNaN(createdBy) || createdBy <= 0) {
+        setError('Could not determine your account. Please log out and sign in again.');
+        return;
+      }
+
       let locationString = formData.venue;
       if (formData.city) locationString += `, ${formData.city}`;
 
-      // 2. Prepare the payload
-      // Note: Backend expects 'date' combined
       const dateTimeString = `${formData.startDate}T${formData.startTime}:00`;
-
-      // Get price from the first pool for display price
       const displayPrice = pools.length > 0 ? pools[0].price : '0';
 
       const ticketTypes = pools.map((p) => ({
@@ -90,17 +123,16 @@ const AdminCreateEvent = () => {
         currency: 'NGN',
         imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
         ticketTypes,
+        createdBy,
       };
 
-      const token = localStorage.getItem('adminToken');
-      
       const res = await fetch(apiUrl('/api/events'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -109,7 +141,6 @@ const AdminCreateEvent = () => {
         throw new Error(data.error || 'Failed to create event');
       }
 
-      // Success!
       navigate('/admin/events');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -118,9 +149,21 @@ const AdminCreateEvent = () => {
     }
   };
 
+  const isSuperAdminSession = me != null && Number(me.id) === 0;
+
   return (
     <div className="admin-page">
       <h1 className="admin-page-title">Create Event</h1>
+      {isSuperAdminSession && (
+        <p className="admin-create-as" style={{ marginBottom: '1rem', opacity: 0.9, fontSize: '0.95rem' }}>
+          Creating under account: <strong>Super Admin</strong>. Events appear on that account’s dashboard. To use a different account, log out and sign in with that admin.
+        </p>
+      )}
+      {me != null && !isSuperAdminSession && (
+        <p className="admin-create-as" style={{ marginBottom: '1rem', opacity: 0.9, fontSize: '0.95rem' }}>
+          Creating under your admin account. This event will appear on your dashboard and withdrawals.
+        </p>
+      )}
 
       {error && (
         <div className="admin-error-message" style={{ marginBottom: '1rem', color: '#fca5a5', background: 'rgba(220, 38, 38, 0.1)', padding: '1rem', borderRadius: '8px' }}>
