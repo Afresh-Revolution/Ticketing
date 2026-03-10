@@ -53,7 +53,10 @@ const AdminEditEvent = () => {
     if (!id) return;
     const fetchEvent = async () => {
       try {
-        const res = await fetch(apiUrl(`/api/events/${id}`));
+        const token = localStorage.getItem('adminToken');
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        // Use admin endpoint so normal admins only load their own events
+        const res = await fetch(apiUrl(`/api/admin/events/${id}`), { headers });
         if (!res.ok) throw new Error('Event not found');
         const data = await res.json();
         const d = new Date(data.date);

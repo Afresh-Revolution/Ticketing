@@ -64,20 +64,12 @@ const AdminEvents = () => {
 
       let list: AdminEvent[] = [];
 
+      // Only use admin-scoped events (each admin sees only their own; superadmin sees all)
       const adminRes = await fetch(apiUrl("/api/admin/events"), { headers });
       if (adminRes.ok) {
         const adminData = await adminRes.json();
         const raw = Array.isArray(adminData) ? adminData : adminData?.events ?? adminData?.data ?? [];
         list = raw.map((e: unknown) => mapToAdminEvent(e as Parameters<typeof mapToAdminEvent>[0]));
-      }
-
-      if (list.length === 0) {
-        const publicRes = await fetch(apiUrl("/api/events"), { headers });
-        if (publicRes.ok) {
-          const publicData = await publicRes.json();
-          const raw = Array.isArray(publicData) ? publicData : publicData?.events ?? publicData?.data ?? [];
-          list = raw.map((e: unknown) => mapToAdminEvent(e as Parameters<typeof mapToAdminEvent>[0]));
-        }
       }
 
       setEvents(list);
