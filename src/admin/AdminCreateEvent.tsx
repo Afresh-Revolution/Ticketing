@@ -85,14 +85,8 @@ const AdminCreateEvent = () => {
         return;
       }
       const me = (await meRes.json()) as { id: number; role?: string };
-      if (Number(me.id) === 0) {
-        setError(
-          'You are logged in as Super Admin. To create events that appear on your own dashboard, log out and sign in with your admin email and password, then create the event again.'
-        );
-        return;
-      }
       const createdBy = Number(me.id);
-      if (Number.isNaN(createdBy) || createdBy <= 0) {
+      if (!Number.isNaN(createdBy) && createdBy < 0) {
         setError('Could not determine your account. Please log out and sign in again.');
         return;
       }
@@ -111,7 +105,7 @@ const AdminCreateEvent = () => {
         quantity: parseInt(p.quantity, 10) || 0,
       }));
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         title: formData.title,
         description: formData.description,
         date: dateTimeString,
@@ -123,8 +117,10 @@ const AdminCreateEvent = () => {
         currency: 'NGN',
         imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
         ticketTypes,
-        createdBy,
       };
+      if (createdBy != null && !Number.isNaN(createdBy) && createdBy > 0) {
+        payload.createdBy = createdBy;
+      }
 
       const res = await fetch(apiUrl('/api/events'), {
         method: 'POST',
@@ -154,14 +150,11 @@ const AdminCreateEvent = () => {
   return (
     <div className="admin-page">
       <h1 className="admin-page-title">Create Event</h1>
-      {isSuperAdminSession && (
+      {me != null && (
         <p className="admin-create-as" style={{ marginBottom: '1rem', opacity: 0.9, fontSize: '0.95rem' }}>
-          Creating under account: <strong>Super Admin</strong>. Events appear on that account’s dashboard. To use a different account, log out and sign in with that admin.
-        </p>
-      )}
-      {me != null && !isSuperAdminSession && (
-        <p className="admin-create-as" style={{ marginBottom: '1rem', opacity: 0.9, fontSize: '0.95rem' }}>
-          Creating under your admin account. This event will appear on your dashboard and withdrawals.
+          {isSuperAdminSession
+            ? 'Creating as Super Admin. This event will appear on your dashboard and you can mark it trending from Events.'
+            : 'Creating under your admin account. This event will appear on your dashboard and withdrawals.'}
         </p>
       )}
 
