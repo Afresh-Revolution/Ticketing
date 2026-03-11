@@ -112,31 +112,34 @@ const AdminEvents = () => {
     eventId: string,
     currentStatus: boolean,
   ) => {
-    if (!isSuperAdmin) return;
-
-    // Optimistic update
+    const nextTrending = !currentStatus;
     setEvents((prev) =>
       prev.map((e) =>
-        e.id === eventId ? { ...e, isTrending: !currentStatus } : e,
+        e.id === eventId ? { ...e, isTrending: nextTrending } : e,
       ),
     );
-
     try {
       const token = localStorage.getItem("adminToken");
-      await fetch(apiUrl(`/api/events/${eventId}/trending`), {
+      const res = await fetch(apiUrl(`/api/events/${eventId}/trending`), {
         method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ isTrending: nextTrending }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Request failed: ${res.status}`);
+      }
     } catch (err) {
-      // Revert on error
       console.error("Failed to toggle trending:", err);
       setEvents((prev) =>
         prev.map((e) =>
           e.id === eventId ? { ...e, isTrending: currentStatus } : e,
         ),
       );
+      alert(err instanceof Error ? err.message : "Failed to update trending. Try again.");
     }
   };
 
@@ -253,32 +256,27 @@ const AdminEvents = () => {
                   >
                     {event.isPublished ? "Visible" : "Hidden"}
                   </button>
-                  {isSuperAdmin && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleToggleTrending(event.id, event.isTrending)
-                      }
-                      className={
-                        event.isTrending
-                          ? "admin-btn-uptrending"
-                          : "admin-btn-trending"
-                      }
-                      title={
-                        event.isTrending
-                          ? "Remove from Trending"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleToggleTrending(event.id, event.isTrending)
+                    }
+                    className={
+                      event.isTrending
+                        ? "admin-btn-uptrending"
+                        : "admin-btn-trending"
+                    }
+                    title={
+                      event.isTrending
+                        ? "Remove from Trending"
+                        : isSuperAdmin
+                          ? "Add to Trending (any event)"
                           : "Add to Trending"
-                      }
-                      style={{
-                        color: event.isTrending ? "#f59e0b" : "#9ca3af",
-                        background: "transparent",
-                        border: "1px solid currentColor",
-                        marginRight: "8px",
-                      }}
-                    >
-                      ★
-                    </button>
-                  )}
+                    }
+                    style={{ marginRight: "8px" }}
+                  >
+                    ★
+                  </button>
                   <button
                     type="button"
                     aria-label="Edit event"

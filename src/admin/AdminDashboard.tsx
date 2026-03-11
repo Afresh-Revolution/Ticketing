@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import AddAdminModal from './AddAdminModal';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -40,8 +39,6 @@ function normalizeRecentSales(raw: unknown): RecentSale[] {
 }
 
 const AdminDashboard = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,25 +137,7 @@ const AdminDashboard = () => {
     <div className="admin-page">
       <div className="admin-page-header">
         <h1 className="admin-page-title">Dashboard Overview</h1>
-        {isSuperAdmin && (
-          <button
-            type="button"
-            className="admin-btn-add-admin"
-            onClick={() => setIsModalOpen(true)}
-          >
-            + Add Admin
-          </button>
-        )}
       </div>
-
-      {successMessage && (
-        <div className="admin-success-message">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-          </svg>
-          {successMessage}
-        </div>
-      )}
 
       {error && (
         <div className="admin-error-message" style={{ color: '#f87171', padding: '1rem', marginBottom: '1rem' }}>
@@ -231,15 +210,6 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
-
-      <AddAdminModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          setSuccessMessage('Admin created successfully!');
-          setTimeout(() => setSuccessMessage(''), 3000);
-        }}
-      />
     </div>
   );
 };

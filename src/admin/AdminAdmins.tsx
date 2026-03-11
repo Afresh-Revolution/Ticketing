@@ -8,6 +8,7 @@ interface AdminUser {
   name: string | null;
   role: string;
   emailVerified: boolean;
+  suspended: boolean;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
@@ -18,11 +19,20 @@ const AdminAdmins = () => {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
   const [deleting, setDeleting] = useState(false);
+  const [suspendingId, setSuspendingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAdmins();
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      fetch(apiUrl('/api/admin/me'), { headers: { Authorization: `Bearer ${token}` } })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((me) => setCurrentUserId(me != null ? String(me.id) : null))
+        .catch(() => setCurrentUserId(null));
+    }
   }, []);
 
   const fetchAdmins = async () => {
@@ -77,6 +87,30 @@ const AdminAdmins = () => {
     }
   };
 
+  const handleSuspend = async (admin: AdminUser) => {
+    const nextSuspended = !admin.suspended;
+    setSuspendingId(admin.id);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(apiUrl(`/api/admin/admins/${admin.id}/suspend`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ suspended: nextSuspended }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Failed to update status');
+      }
+      setAdmins((prev) =>
+        prev.map((a) => (a.id === admin.id ? { ...a, suspended: nextSuspended } : a))
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update status');
+    } finally {
+      setSuspendingId(null);
+    }
+  };
+
   return (
     <div className="admin-page">
       <div className="admin-admins-container">
@@ -97,49 +131,98 @@ const AdminAdmins = () => {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Status</th>
                 <th>Email verified</th>
                 <th>Created</th>
-                <th style={{ width: '100px', textAlign: 'right' }}>Actions</th>
+                <th style={{ width: '180px', textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="admin-table-empty">
+                  <td colSpan={7} className="admin-table-empty">
                     Loading…
                   </td>
                 </tr>
               ) : admins.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="admin-table-empty">
+                  <td colSpan={7} className="admin-table-empty">
                     No admin accounts found.
                   </td>
                 </tr>
               ) : (
-                admins.map((admin) => (
-                  <tr key={admin.id}>
-                    <td>{admin.name ?? '—'}</td>
-                    <td>{admin.email}</td>
-                    <td>
-                      <span className={`admin-role-badge ${admin.role === 'superadmin' ? 'admin-role-superadmin' : 'admin-role-admin'}`}>
-                        {admin.role}
-                      </span>
-                    </td>
-                    <td>{admin.emailVerified ? 'Yes' : 'No'}</td>
-                    <td>{formatDate(admin.createdAt)}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        className="admin-admins-delete-btn"
-                        onClick={() => setDeleteConfirm({ admin })}
-                        title="Delete this admin account"
-                        aria-label="Delete admin"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                admins.map((admin) => {
+                  const isSelf = currentUserId != null && String(admin.id) === currentUserId;
+                  const isSuperAdminRow = admin.role === 'superadmin';
+                  const canSuspend = !isSelf && !isSuperAdminRow;
+                  const canDelete = !isSelf && !isSuperAdminRow;
+                  return (
+                    <tr key={admin.id}>
+                      <td>{admin.name ?? '—'}</td>
+                      <td>{admin.email}</td>
+                      <td>
+                        <span className={`admin-role-badge ${admin.role === 'superadmin' ? 'admin-role-superadmin' : 'admin-role-admin'}`}>
+                          {admin.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={admin.suspended ? 'admin-status-suspended' : 'admin-status-active'}
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {admin.suspended ? 'Suspended' : 'Active'}
+                        </span>
+                      </td>
+                      <td>{admin.emailVerified ? 'Yes' : 'No'}</td>
+                      <td>{formatDate(admin.createdAt)}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        {canSuspend && (
+                          <button
+                            type="button"
+                            className="admin-admins-suspend-btn"
+                            onClick={() => handleSuspend(admin)}
+                            disabled={suspendingId === admin.id}
+                            title={admin.suspended ? 'Unsuspend this admin' : 'Suspend this admin'}
+                            aria-label={admin.suspended ? 'Unsuspend' : 'Suspend'}
+                            style={{
+                              marginRight: '8px',
+                              padding: '4px 10px',
+                              fontSize: '0.85rem',
+                              border: '1px solid currentColor',
+                              borderRadius: '4px',
+                              background: admin.suspended ? '#22c55e' : '#f59e0b',
+                              color: '#fff',
+                              cursor: suspendingId === admin.id ? 'wait' : 'pointer',
+                            }}
+                          >
+                            {suspendingId === admin.id ? '…' : admin.suspended ? 'Unsuspend' : 'Suspend'}
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            className="admin-admins-delete-btn"
+                            onClick={() => setDeleteConfirm({ admin })}
+                            title="Delete this admin account"
+                            aria-label="Delete admin"
+                          >
+                            Delete
+                          </button>
+                        )}
+                        {!canSuspend && !canDelete && (isSelf || isSuperAdminRow) && (
+                          <span style={{ fontSize: '0.85rem', color: 'var(--admin-muted, #94a3b8)' }}>
+                            {isSelf ? 'You' : '—'}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

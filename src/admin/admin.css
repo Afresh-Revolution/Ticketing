@@ -2133,6 +2133,48 @@
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+.admin-status-suspended {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Trending button – not trending (add to trending) */
+.admin-btn-trending {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: transparent;
+  color: #9ca3af;
+  border: 1px solid #9ca3af;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.admin-btn-trending:hover {
+  color: #f59e0b;
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* Trending button – currently trending (remove from trending) */
+.admin-btn-uptrending {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.admin-btn-uptrending:hover {
+  background: rgba(245, 158, 11, 0.35);
+  color: #d97706;
+  border-color: #d97706;
+}
+
 .admin-btn-add-admin {
   background: var(--admin-accent);
   color: white;
