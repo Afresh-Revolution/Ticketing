@@ -256,27 +256,27 @@ const AdminEvents = () => {
                   >
                     {event.isPublished ? "Visible" : "Hidden"}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleToggleTrending(event.id, event.isTrending)
-                    }
-                    className={
-                      event.isTrending
-                        ? "admin-btn-uptrending"
-                        : "admin-btn-trending"
-                    }
-                    title={
-                      event.isTrending
-                        ? "Remove from Trending"
-                        : isSuperAdmin
-                          ? "Add to Trending (any event)"
-                          : "Add to Trending"
-                    }
-                    style={{ marginRight: "8px" }}
-                  >
-                    ★
-                  </button>
+                  {isSuperAdmin && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleToggleTrending(event.id, event.isTrending)
+                      }
+                      className={
+                        event.isTrending
+                          ? "admin-btn-uptrending"
+                          : "admin-btn-trending"
+                      }
+                      title={
+                        event.isTrending
+                          ? "Remove from Trending"
+                          : "Add to Trending (any event)"
+                      }
+                      style={{ marginRight: "8px" }}
+                    >
+                      ★
+                    </button>
+                  )}
                   <button
                     type="button"
                     aria-label="Edit event"
