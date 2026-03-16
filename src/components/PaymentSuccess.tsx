@@ -3,7 +3,7 @@ import "./PaymentSuccess.css";
 
 const PaymentSuccess = () => {
   const location = useLocation();
-  const state = location.state as { amount?: number; eventTitle?: string; orderId?: string } | null;
+  const state = location.state as { amount?: number; eventTitle?: string; orderId?: string; email?: string } | null;
 
   return (
     <div className="payment-success-page">
@@ -28,6 +28,11 @@ const PaymentSuccess = () => {
         {state?.amount != null && (
           <p className="payment-success-amount">
             {state.amount === 0 ? 'Free ticket' : `Amount Paid: ₦${state.amount.toLocaleString()}`}
+          </p>
+        )}
+        {state?.email && (
+          <p className="payment-success-email">
+            Your ticket has been sent to <strong>{state.email}</strong>. Check your inbox (and spam folder).
           </p>
         )}
         {state?.orderId && (

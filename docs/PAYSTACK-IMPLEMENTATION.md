@@ -160,6 +160,7 @@ const PayButton = ({ plan }: { plan: Plan }) => {
 - **Behaviour:** Updates the order to `status: 'paid'` and sets `reference` on the order. **Transaction is not verified with Paystack API** in the current code (see comment in controller). For production you should:
   1. Call Paystack: `GET https://api.paystack.co/transaction/verify/${reference}` with `Authorization: Bearer PAYSTACK_SECRET_KEY`.
   2. Check `status === 'success'` and amount matches before updating the order to `paid`.
+  3. **Send the ticket to the buyer’s email** (order’s `email`): include ticket code, event details, and optionally a QR code so the user receives their ticket by email. For free orders, the backend should send the ticket email when creating the order (status `paid`); for paid orders, send it after successful verify.
 
 ### Relevant code (order controller)
 

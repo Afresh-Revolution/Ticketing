@@ -22,7 +22,7 @@ interface Order {
   status: string;
   createdAt: string;
   ticketCode?: string | null;
-  event: {
+  event?: {
     title: string;
     description: string;
     date: string;
@@ -30,11 +30,21 @@ interface Order {
     imageUrl: string;
     category: string;
     startTime: string;
-  };
+  } | null;
   items: OrderItem[];
 }
 
 type Tab = 'upcoming' | 'past';
+
+function normalizeOrdersList(data: unknown): Order[] {
+  if (Array.isArray(data)) return data as Order[];
+  if (data && typeof data === 'object') {
+    const o = data as { orders?: unknown[]; data?: unknown[] };
+    if (Array.isArray(o.orders)) return o.orders as Order[];
+    if (Array.isArray(o.data)) return o.data as Order[];
+  }
+  return [];
+}
 
 const MyTicketsPage = () => {
   const { isAuthenticated, token, user } = useAuth();
@@ -57,14 +67,17 @@ const MyTicketsPage = () => {
       try {
         setLoading(true);
         setError('');
-        const res = await fetch(apiUrl('/api/user/orders'), {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers = { Authorization: `Bearer ${token}` };
+        let res = await fetch(apiUrl('/api/user/orders'), { headers });
+        if (res.status === 404) {
+          res = await fetch(apiUrl('/api/orders'), { headers });
+        }
         if (!res.ok) {
           throw new Error(res.status === 401 ? 'Please sign in to view your tickets.' : 'Failed to load tickets.');
         }
         const data = await res.json();
-        setOrders(Array.isArray(data) ? data : []);
+        const list = normalizeOrdersList(data);
+        setOrders(list);
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load your tickets.');
         setOrders([]);
@@ -81,7 +94,10 @@ const MyTicketsPage = () => {
     const upcoming: Order[] = [];
     const past: Order[] = [];
     for (const order of orders) {
-      const eventDate = new Date(order.event.date);
+      const dateStr = order.event?.date ?? order.createdAt;
+      if (!dateStr) continue;
+      const eventDate = new Date(dateStr);
+      if (isNaN(eventDate.getTime())) continue;
       if (eventDate > now) {
         upcoming.push(order);
       } else {
@@ -190,6 +206,9 @@ const MyTicketsPage = () => {
                   </svg>
                 </div>
                 <p className="my-tickets-empty-text">No tickets found</p>
+                <p className="my-tickets-empty-hint">
+                  Make sure you’re signed in with the same account you used to buy. Your ticket is also sent to your email after purchase.
+                </p>
                 {activeTab === 'upcoming' && orders.length === 0 && (
                   <Link to="/events" className="my-tickets-cta">Browse events</Link>
                 )}
@@ -203,17 +222,17 @@ const MyTicketsPage = () => {
                     className="my-tickets-card"
                   >
                     <div className="my-tickets-card-header">
-                      {order.event.imageUrl && (
+                      {order.event?.imageUrl && (
                         <img
                           src={order.event.imageUrl}
-                          alt={order.event.title}
+                          alt={order.event?.title ?? 'Event'}
                           className="my-tickets-card-img"
                         />
                       )}
                       <div className="my-tickets-card-info">
-                        <h3>{order.event.title}</h3>
-                        <p className="my-tickets-venue">{order.event.venue}</p>
-                        <p className="my-tickets-date">{formatDate(order.event.date)}</p>
+                        <h3>{order.event?.title ?? 'Event'}</h3>
+                        <p className="my-tickets-venue">{order.event?.venue ?? '—'}</p>
+                        <p className="my-tickets-date">{formatDate(order.event?.date ?? order.createdAt)}</p>
                       </div>
                     </div>
                     <div className="my-tickets-card-items">
