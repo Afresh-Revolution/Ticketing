@@ -23,8 +23,9 @@ type PaystackReference = { reference?: string; trxref?: string } | string;
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, token, user } = useAuth();
   const createdOrderIdRef = useRef<string | null>(null);
+  const orderEmailRef = useRef<string | null>(null);
 
   const state = (location.state as CheckoutState) || {};
   const totalPrice = state.totalPrice ?? 0;
@@ -59,6 +60,13 @@ const CheckoutPage = () => {
     }
   }, [isAuthenticated, navigate, location]);
 
+  // Pre-fill email and name from logged-in user so order and ticket email are correct
+  useEffect(() => {
+    if (!user) return;
+    if (user.email) setEmail((prev) => (prev ? prev : user.email ?? ""));
+    if (user.name) setFullName((prev) => (prev ? prev : user.name ?? ""));
+  }, [user?.email, user?.name]);
+
   const onSuccess = (reference: PaystackReference) => {
     verifyPayment(reference);
   };
@@ -91,9 +99,12 @@ const CheckoutPage = () => {
     const orderId = createdOrderIdRef.current;
     if (orderId && ref) {
       try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        // Backend should verify with Paystack, set order to paid, and send ticket to order email
         const res = await fetch(apiUrl("/api/orders/verify"), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ reference: ref, orderId }),
         });
         if (!res.ok) {
@@ -105,12 +116,15 @@ const CheckoutPage = () => {
         createdOrderIdRef.current = null;
       }
     }
+    const emailForSuccess = orderEmailRef.current ?? undefined;
+    orderEmailRef.current = null;
     navigate("/payment-success", {
       state: {
         amount: totalPrice,
         eventTitle: state.eventTitle,
         orderId: orderId || undefined,
         reference: ref,
+        email: emailForSuccess,
       },
     });
   };
@@ -170,6 +184,7 @@ const CheckoutPage = () => {
       }
 
       const createdOrder = await res.json();
+      orderEmailRef.current = trimmedEmail;
 
       // Free tickets: backend already set status to paid and sent ticket email; go to success
       if (isFreeOrder) {
@@ -179,6 +194,7 @@ const CheckoutPage = () => {
             eventTitle: state.eventTitle,
             orderId: createdOrder?.id,
             reference: createdOrder?.reference,
+            email: trimmedEmail,
           },
         });
         setLoading(false);
@@ -199,6 +215,7 @@ const CheckoutPage = () => {
       }
 
       createdOrderIdRef.current = createdOrder?.id || null;
+      orderEmailRef.current = trimmedEmail;
       setPaystackConfig({
         reference: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         email: email.trim(),

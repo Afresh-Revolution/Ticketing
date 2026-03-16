@@ -131,7 +131,16 @@
 .my-tickets-empty-text {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 0.5rem;
+}
+
+.my-tickets-empty-hint {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.55);
   margin: 0 0 1.5rem;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Loading & error */
