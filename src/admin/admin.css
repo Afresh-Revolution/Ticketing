@@ -1804,6 +1804,10 @@
   border-radius: 16px;
   width: 100%;
   max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
   animation: slideUpModal 0.3s ease-out;
 }
@@ -1821,6 +1825,7 @@
 
 .admin-modal-header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 1.5rem 1rem 1.5rem;
@@ -1856,10 +1861,12 @@
 
 .admin-modal-form {
   padding: 1.5rem;
+  overflow-y: auto;
 }
 
 .admin-modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
 }
 
 .admin-modal-muted {
@@ -2564,4 +2571,417 @@
 
 .admin-hint-link:hover {
   color: #c4b5fd;
+}
+
+/* ========== Walk-In Sales ========== */
+
+/* Add Walk-in button */
+.admin-btn-walkin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.admin-btn-walkin:hover {
+  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+}
+
+.admin-btn-walkin:active {
+  transform: translateY(0);
+}
+
+.admin-btn-walkin-icon {
+  font-size: 1.1rem;
+}
+
+/* Revenue badge inline with title */
+.admin-walkin-revenue-badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #a78bfa;
+  margin-left: 0.5rem;
+}
+
+/* Revenue KPI strip */
+.admin-sales-kpi-strip {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(30, 26, 56, 0.6);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-sales-kpi-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-sales-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-text-muted);
+}
+
+.admin-sales-kpi-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--admin-text);
+}
+
+.admin-sales-kpi-walkin {
+  color: #a78bfa;
+}
+
+.admin-sales-kpi-total {
+  color: #22c55e;
+}
+
+.admin-sales-kpi-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--admin-border);
+  flex-shrink: 0;
+}
+
+/* Walk-in sales section */
+.admin-walkin-section {
+  background: rgba(30, 26, 56, 0.5);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.admin-walkin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.admin-walkin-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--admin-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-walkin-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 0.5rem;
+  border-radius: 12px;
+  background: rgba(139, 92, 246, 0.3);
+  color: #c4b5fd;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-walkin-table-wrap {
+  border-top: 1px solid var(--admin-border);
+  padding: 0 1.25rem 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-walkin-table-wrap .admin-table {
+  margin-top: 0.5rem;
+}
+
+.admin-walkin-name {
+  font-weight: 500;
+}
+
+.admin-walkin-row-paid {
+  background: rgba(34, 197, 94, 0.04);
+}
+
+/* Toggle switch – inline in table */
+.admin-walkin-status-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  border: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.admin-walkin-status-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.admin-walkin-status-pending:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.admin-walkin-status-paid {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.admin-walkin-status-paid:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+.admin-walkin-status-toggle:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Toggle track + thumb */
+.admin-walkin-toggle-track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+}
+
+.admin-walkin-status-paid .admin-walkin-toggle-track {
+  background: rgba(34, 197, 94, 0.5);
+}
+
+.admin-walkin-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.admin-walkin-status-paid .admin-walkin-toggle-thumb {
+  transform: translateX(14px);
+}
+
+.admin-walkin-toggle-label {
+  font-size: 0.78rem;
+}
+
+/* Large toggle in modal form */
+.admin-walkin-status-field {
+  margin-bottom: 1rem;
+}
+
+.admin-walkin-status-switch-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-walkin-status-toggle-lg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.admin-walkin-status-toggle-lg.admin-walkin-status-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+}
+
+.admin-walkin-status-toggle-lg.admin-walkin-status-pending:hover {
+  background: rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+}
+
+.admin-walkin-status-toggle-lg.admin-walkin-status-paid {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  border: 1.5px solid rgba(34, 197, 94, 0.4);
+}
+
+.admin-walkin-status-toggle-lg.admin-walkin-status-paid:hover {
+  background: rgba(34, 197, 94, 0.25);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.15);
+}
+
+.admin-walkin-toggle-track-lg {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.admin-walkin-status-paid .admin-walkin-toggle-track-lg {
+  background: rgba(34, 197, 94, 0.5);
+}
+
+.admin-walkin-toggle-thumb-lg {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.admin-walkin-status-paid .admin-walkin-toggle-thumb-lg {
+  transform: translateX(20px);
+}
+
+.admin-walkin-toggle-label-lg {
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+.admin-walkin-status-hint {
+  font-size: 0.8rem;
+  color: var(--admin-text-muted);
+  opacity: 0.7;
+}
+
+/* Delete button in table */
+.admin-walkin-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.35rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.admin-walkin-delete-btn:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+
+/* Walk-in modal wider */
+.admin-walkin-modal {
+  max-width: 560px;
+}
+
+.admin-walkin-modal-icon {
+  font-size: 1.3rem;
+  margin-right: 0.35rem;
+}
+
+/* Submit button accent */
+.admin-btn-walkin-submit {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.admin-btn-walkin-submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
+}
+
+/* Responsive: walk-in on mobile */
+@media (max-width: 768px) {
+  .admin-sales-kpi-strip {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .admin-sales-kpi-divider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .admin-sales-kpi-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+  }
+
+  .admin-btn-walkin {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  .admin-walkin-table-wrap .admin-table {
+    min-width: 680px;
+  }
+
+  .admin-walkin-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-walkin-modal {
+    max-width: 100%;
+  }
+
+  .admin-walkin-status-switch-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-walkin-revenue-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+
+  .admin-sales-kpi-value {
+    font-size: 1rem;
+  }
 }
