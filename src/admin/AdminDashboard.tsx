@@ -14,6 +14,7 @@ interface RecentSale {
   id: string;
   buyer_name: string;
   buyer_email: string;
+  buyer_phone?: string;
   amount: number;
   ticket_count: number;
   status: string;
@@ -30,6 +31,7 @@ function normalizeRecentSales(raw: unknown): RecentSale[] {
     id: String(s.id ?? s.order_id ?? ''),
     buyer_name: String(s.buyer_name ?? s.buyerName ?? ''),
     buyer_email: String(s.buyer_email ?? s.buyerEmail ?? ''),
+    buyer_phone: String(s.buyer_phone ?? s.buyerPhone ?? ''),
     amount: Number(s.amount ?? 0),
     ticket_count: Number(s.ticket_count ?? s.ticketCount ?? 0),
     status: String(s.status ?? ''),
@@ -192,6 +194,9 @@ const AdminDashboard = () => {
                     <td>
                       <div>{sale.buyer_name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_email}</div>
+                      {sale.buyer_phone && (
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_phone}</div>
+                      )}
                     </td>
                     <td>{formatCurrency(sale.amount)}</td>
                     <td>{sale.ticket_count ?? 0}</td>

@@ -23,6 +23,23 @@
   box-sizing: border-box;
 }
 
+.events-back-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.events-back-btn:hover {
+  border-color: #9e7bee;
+  color: #d9c8ff;
+}
+
 /* Search – brought down for clearer hierarchy and PWA */
 .events-search-section {
   background-color: #36195c;

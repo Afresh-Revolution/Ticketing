@@ -7,6 +7,7 @@ interface Sale {
   event_id: string;
   buyer_name: string;
   buyer_email: string;
+  buyer_phone?: string | null;
   amount: number;
   status: string;
   created_at: string;
@@ -38,6 +39,20 @@ const formatCurrency = (amount: number) =>
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const formatExportDateTime = (dateStr: string) => {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr || '';
+  return d.toLocaleString('en-NG', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+};
 
 function groupSalesByEvent(sales: Sale[]): { eventId: string; eventTitle: string; sales: Sale[] }[] {
   const byEvent = new Map<string, Sale[]>();
@@ -166,12 +181,13 @@ const AdminSales = () => {
   };
 
   const downloadEventExcel = (eventTitle: string, eventSales: Sale[]) => {
-    const headers = ['Transaction ID', 'Buyer', 'Email', 'Date', 'Amount', 'Status'];
+    const headers = ['Transaction ID', 'Buyer', 'Email', 'Phone', 'Date', 'Amount', 'Status'];
     const rows = eventSales.map((s) => [
       s.id,
       `"${(s.buyer_name || '').replace(/"/g, '""')}"`,
       `"${(s.buyer_email || '').replace(/"/g, '""')}"`,
-      formatDate(s.created_at),
+      `="${(s.buyer_phone || '').replace(/"/g, '""')}"`,
+      `"${formatExportDateTime(s.created_at).replace(/"/g, '""')}"`,
       s.amount,
       s.status,
     ]);
@@ -458,6 +474,7 @@ const AdminSales = () => {
                               <td>
                                 <div>{sale.buyer_name}</div>
                                 <div className="admin-sales-buyer-email">{sale.buyer_email}</div>
+                                {sale.buyer_phone && <div className="admin-sales-buyer-email">{sale.buyer_phone}</div>}
                               </td>
                               <td>{formatDate(sale.created_at)}</td>
                               <td>{formatCurrency(sale.amount)}</td>
