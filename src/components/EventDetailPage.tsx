@@ -125,6 +125,14 @@ const EventDetailPage = () => {
       </div>
 
       <main className="event-detail-main">
+        <button
+          type="button"
+          className="event-detail-back-btn"
+          onClick={() => navigate("/events")}
+          aria-label="Back to events"
+        >
+          ← Back to events
+        </button>
         <h1 className="event-detail-title">{event.title}</h1>
 
         <div className="event-detail-layout">

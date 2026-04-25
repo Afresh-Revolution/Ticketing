@@ -32,7 +32,7 @@ const LandingPage = () => {
               Browse events, secure your tickets in seconds, and get instant confirmation.
               Whether you're into music, tech, art, or nightlife, find and book the best events all in one place.
             </p>
-            <button className="btn btn-primary" onClick={() => navigate('/signup')}>
+            <button className="btn btn-primary" onClick={() => navigate('/events')}>
               Find Events →
             </button>
           </div>

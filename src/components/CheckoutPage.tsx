@@ -23,7 +23,7 @@ type PaystackReference = { reference?: string; trxref?: string } | string;
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, token, user } = useAuth();
+  const { token, user } = useAuth();
   const createdOrderIdRef = useRef<string | null>(null);
   const orderEmailRef = useRef<string | null>(null);
 
@@ -34,6 +34,7 @@ const CheckoutPage = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [showCancelOptions, setShowCancelOptions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [paystackConfig, setPaystackConfig] = useState<{
@@ -53,14 +54,7 @@ const CheckoutPage = () => {
   const configToUse = paystackConfig ?? defaultConfig;
   const initializePayment = usePaystackPayment(configToUse);
 
-  // Auth guard: redirect to login when not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } });
-    }
-  }, [isAuthenticated, navigate, location]);
-
-  // Pre-fill email and name from logged-in user so order and ticket email are correct
+  // Pre-fill email and name from logged-in user when available.
   useEffect(() => {
     if (!user) return;
     if (user.email) setEmail((prev) => (prev ? prev : user.email ?? ""));
@@ -83,12 +77,16 @@ const CheckoutPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run only when paystackConfig is set
   }, [paystackConfig]);
 
-  const handleBack = () => {
+  const handleAddTickets = () => {
     if (state.eventId) {
-      navigate(`/event/${state.eventId}`);
-    } else {
-      navigate("/events");
+      navigate(`/event/${state.eventId}#event-detail-tickets-heading`);
+      return;
     }
+    navigate("/events");
+  };
+
+  const handleCancelCheckout = () => {
+    navigate("/events");
   };
 
   const verifyPayment = async (reference: PaystackReference): Promise<void> => {
@@ -130,10 +128,6 @@ const CheckoutPage = () => {
   };
 
   const isFreeOrder = totalPrice === 0;
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,17 +237,16 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-page">
       <header className="checkout-header">
-        <button
-          type="button"
-          className="checkout-back"
-          onClick={handleBack}
-          aria-label="Back"
-        >
-          <span className="checkout-back-arrow" aria-hidden>
-            ←
-          </span>
-          <span className="checkout-title">Checkout</span>
-        </button>
+        <div className="checkout-header-inner">
+          <button
+            type="button"
+            className="checkout-back"
+            onClick={() => setShowCancelOptions(true)}
+            aria-label="Cancel checkout"
+          >
+            <span className="checkout-title">Cancel Checkout</span>
+          </button>
+        </div>
       </header>
 
       <main className="checkout-main">
@@ -362,6 +355,23 @@ const CheckoutPage = () => {
           </div>
         </form>
       </main>
+
+      {showCancelOptions && (
+        <div className="checkout-cancel-overlay" onClick={() => setShowCancelOptions(false)}>
+          <div className="checkout-cancel-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="checkout-cancel-title">Cancel checkout?</h3>
+            <p className="checkout-cancel-text">Choose what you want to do next.</p>
+            <div className="checkout-cancel-actions">
+              <button type="button" className="checkout-cancel-btn checkout-cancel-btn-add" onClick={handleAddTickets}>
+                Add Tickets
+              </button>
+              <button type="button" className="checkout-cancel-btn checkout-cancel-btn-cancel" onClick={handleCancelCheckout}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

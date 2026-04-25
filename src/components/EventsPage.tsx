@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Share2, Check } from "lucide-react";
 import { apiUrl } from "../api/config";
 import Navbar from "./Navbar";
@@ -28,6 +28,7 @@ interface Event {
 }
 
 const EventsPage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [events, setEvents] = useState<Event[]>([]);
@@ -105,6 +106,15 @@ const EventsPage = () => {
       <Navbar />
 
       <main className="events-main">
+        <button
+          type="button"
+          className="events-back-btn"
+          onClick={() => navigate("/")}
+          aria-label="Back to landing page"
+        >
+          ← Back to landing
+        </button>
+
         <section className="events-search-section">
           <div className="events-search-row">
             <div className="events-search-bar">
