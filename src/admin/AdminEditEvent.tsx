@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect } from 'react';
+import { useState, type FormEvent, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
@@ -27,6 +27,10 @@ const AdminEditEvent = () => {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [imageUploadError, setImageUploadError] = useState('');
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
 
   const [formData, setFormData] = useState({
@@ -104,6 +108,52 @@ const AdminEditEvent = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleImageUpload = async (file: File) => {
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      setImageUploadError('You must be logged in to upload an image.');
+      return;
+    }
+
+    setUploadingImage(true);
+    setUploadProgress(0);
+    setImageUploadError('');
+    try {
+      const data = new FormData();
+      data.append('image', file);
+      const payload = await new Promise<{ imageUrl?: string }>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', apiUrl('/api/events/upload-image'));
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percent);
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Image upload failed'));
+        xhr.onload = () => {
+          const body = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadProgress(100);
+            resolve(body);
+            return;
+          }
+          reject(new Error(body.error || 'Image upload failed'));
+        };
+
+        xhr.send(data);
+      });
+      setFormData((prev) => ({ ...prev, imageUrl: payload.imageUrl ?? '' }));
+    } catch (e) {
+      setImageUploadError(e instanceof Error ? e.message : 'Image upload failed');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -387,15 +437,52 @@ const AdminEditEvent = () => {
 
         <section className="admin-section">
           <h2 className="admin-section-title">Event Media</h2>
-          <label className="admin-label">Image URL (Optional)</label>
-          <input
-            type="text"
-            name="imageUrl"
-            className="admin-input"
-            placeholder="https://..."
-            value={formData.imageUrl}
-            onChange={handleChange}
-          />
+          <p className="admin-input-hint">
+            Upload any image type below.
+          </p>
+          <div className="admin-upload-zone">
+            <div className="admin-upload-icon">🖼</div>
+            <p>{uploadingImage ? 'Uploading image...' : 'Select an image file (PNG, JPG, WEBP, GIF, SVG, etc.)'}</p>
+            <button
+              type="button"
+              className="admin-btn-primary"
+              disabled={uploadingImage}
+              onClick={() => imageInputRef.current?.click()}
+            >
+              {uploadingImage ? 'Uploading...' : 'Upload Image'}
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              disabled={uploadingImage}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  void handleImageUpload(file);
+                }
+                e.currentTarget.value = '';
+              }}
+            />
+          </div>
+          {formData.imageUrl && !uploadingImage && (
+            <p className="admin-input-hint" style={{ color: '#86efac' }}>
+              Image uploaded successfully.
+            </p>
+          )}
+          {uploadingImage && (
+            <div className="admin-upload-progress-wrap">
+              <div className="admin-upload-progress-label">
+                <span>Uploading image...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="admin-upload-progress-track">
+                <div className="admin-upload-progress-fill" style={{ width: `${uploadProgress}%` }} />
+              </div>
+            </div>
+          )}
+          {imageUploadError && <p className="admin-input-hint" style={{ color: '#fca5a5' }}>{imageUploadError}</p>}
         </section>
 
         <div className="admin-form-actions">
