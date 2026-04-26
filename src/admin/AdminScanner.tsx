@@ -4,8 +4,8 @@ import { apiUrl } from '../api/config';
 import './admin.css';
 
 type VerifyResult =
-  | { valid: true; message: string; fullName?: string; eventTitle?: string; scanCount?: number; totalQuantity?: number; fullyUsed?: boolean }
-  | { valid: false; reason: string; message: string; fullName?: string; eventTitle?: string; scanCount?: number; totalQuantity?: number };
+  | { valid: true; message: string; fullName?: string; eventTitle?: string; ticketType?: string; scanCount?: number; totalQuantity?: number; fullyUsed?: boolean }
+  | { valid: false; reason: string; message: string; fullName?: string; eventTitle?: string; ticketType?: string; scanCount?: number; totalQuantity?: number };
 
 const AdminScanner = () => {
   const [code, setCode] = useState('');
@@ -219,6 +219,7 @@ const AdminScanner = () => {
             <p className="admin-scanner-result-message">{result.message}</p>
             {result.fullName && <p><strong>Name:</strong> {result.fullName}</p>}
             {result.eventTitle && <p><strong>Event:</strong> {result.eventTitle}</p>}
+            {result.ticketType && <p><strong>Ticket Type:</strong> {result.ticketType}</p>}
             {!result.valid && result.reason === 'not_authorized' && (
               <p className="admin-scanner-result-hint">This ticket belongs to another organizer&apos;s event.</p>
             )}
