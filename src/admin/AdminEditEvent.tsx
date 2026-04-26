@@ -59,44 +59,68 @@ const AdminEditEvent = () => {
       try {
         const token = localStorage.getItem('adminToken');
         const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-        // Use admin endpoint so normal admins only load their own events
+        // Use admin endpoint for access control, then enrich with public event payload for full editable details.
         const res = await fetch(apiUrl(`/api/admin/events/${id}`), { headers });
         if (!res.ok) throw new Error('Event not found');
-        const data = await res.json();
-        const d = new Date(data.date);
-        const startDate = d.toISOString().slice(0, 10);
-        const startTime = d.toTimeString().slice(0, 5);
+        const adminData = await res.json();
+
+        let fullEventData = adminData;
+        try {
+          const publicRes = await fetch(apiUrl(`/api/events/${id}`));
+          if (publicRes.ok) {
+            const publicData = await publicRes.json();
+            fullEventData = {
+              ...publicData,
+              ...adminData,
+              tickets: adminData.tickets ?? publicData.tickets ?? publicData.ticketTypes,
+              ticketTypes: adminData.ticketTypes ?? publicData.ticketTypes ?? publicData.tickets,
+            };
+          }
+        } catch {
+          // Keep admin payload only if public detail fetch fails.
+        }
+
+        const rawDate = fullEventData.date ? new Date(fullEventData.date) : null;
+        const isValidDate = rawDate instanceof Date && !Number.isNaN(rawDate.getTime());
+        const startDate = isValidDate ? rawDate.toLocaleDateString('en-CA') : '';
+        const startTime = (fullEventData.startTime || (isValidDate ? rawDate.toTimeString().slice(0, 5) : '') || '12:00').slice(0, 5);
+
+        const locationText = String(fullEventData.location ?? '').trim();
+        const locationParts = locationText ? locationText.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+        const inferredCity = locationParts.length > 1 ? locationParts[1] : '';
         setFormData({
-          title: data.title ?? '',
-          description: data.description ?? '',
-          category: data.category ?? '',
+          title: fullEventData.title ?? '',
+          description: fullEventData.description ?? '',
+          category: fullEventData.category ?? '',
           eventType: '',
           startDate,
-          startTime: data.startTime ?? startTime,
+          startTime,
           endDate: startDate,
-          endTime: data.startTime ?? startTime,
+          endTime: startTime,
           timezone: 'Africa/Lagos',
-          venue: data.venue ?? '',
-          address: '',
-          city: '',
-          state: '',
-          country: 'Nigeria',
-          capacity: '500',
+          venue: fullEventData.venue ?? '',
+          address: fullEventData.address ?? '',
+          city: fullEventData.city ?? inferredCity,
+          state: fullEventData.state ?? '',
+          country: fullEventData.country ?? 'Nigeria',
+          capacity: String(fullEventData.capacity ?? '500'),
           minTickets: '1',
-          imageUrl: data.imageUrl ?? '',
+          imageUrl: fullEventData.imageUrl ?? '',
         });
-        const tickets = data.tickets ?? data.ticketTypes ?? [];
+        const tickets = fullEventData.tickets ?? fullEventData.ticketTypes ?? [];
         if (tickets.length > 0) {
           setPools(
-            tickets.map((t: { id: string; name?: string; description?: string; price?: number; quantity?: number; type?: string }) => ({
-              id: t.id,
-              ticketName: t.name ?? 'Ticket',
+            tickets.map((t: { id: string; name?: string; ticketName?: string; description?: string; price?: number; quantity?: number; type?: string }) => ({
+              id: t.id ?? crypto.randomUUID(),
+              ticketName: t.name ?? t.ticketName ?? 'Ticket',
               ticketType: (t.type === 'free' ? 'free' : 'paid') as 'paid' | 'free',
               price: String(t.price ?? 0),
               quantity: String(t.quantity ?? 0),
               description: t.description ?? '',
             }))
           );
+        } else {
+          setPools([defaultPool()]);
         }
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : 'Failed to load event');
