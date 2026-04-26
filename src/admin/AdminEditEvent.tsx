@@ -191,7 +191,7 @@ const AdminEditEvent = () => {
       };
 
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(apiUrl(`/api/events/${id}`), {
+      const res = await fetch(apiUrl(`/api/admin/events/${id}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
