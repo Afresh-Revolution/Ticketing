@@ -8,6 +8,7 @@ interface Sale {
   buyer_name: string;
   buyer_email: string;
   buyer_phone?: string | null;
+  ticket_breakdown?: string;
   amount: number;
   status: string;
   created_at: string;
@@ -181,12 +182,13 @@ const AdminSales = () => {
   };
 
   const downloadEventExcel = (eventTitle: string, eventSales: Sale[]) => {
-    const headers = ['Transaction ID', 'Buyer', 'Email', 'Phone', 'Date', 'Amount', 'Status'];
+    const headers = ['Transaction ID', 'Buyer', 'Email', 'Phone', 'Ticket Types', 'Date', 'Amount', 'Status'];
     const rows = eventSales.map((s) => [
       s.id,
       `"${(s.buyer_name || '').replace(/"/g, '""')}"`,
       `"${(s.buyer_email || '').replace(/"/g, '""')}"`,
       `="${(s.buyer_phone || '').replace(/"/g, '""')}"`,
+      `"${(s.ticket_breakdown || '').replace(/"/g, '""')}"`,
       `"${formatExportDateTime(s.created_at).replace(/"/g, '""')}"`,
       s.amount,
       s.status,
@@ -475,6 +477,7 @@ const AdminSales = () => {
                                 <div>{sale.buyer_name}</div>
                                 <div className="admin-sales-buyer-email">{sale.buyer_email}</div>
                                 {sale.buyer_phone && <div className="admin-sales-buyer-email">{sale.buyer_phone}</div>}
+                                {sale.ticket_breakdown && <div className="admin-sales-buyer-email">{sale.ticket_breakdown}</div>}
                               </td>
                               <td>{formatDate(sale.created_at)}</td>
                               <td>{formatCurrency(sale.amount)}</td>
