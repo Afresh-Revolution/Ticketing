@@ -12,6 +12,35 @@ type TicketPool = {
   description: string;
 };
 
+type EventTicket = {
+  id?: string;
+  name?: string;
+  ticketName?: string;
+  description?: string;
+  price?: number;
+  quantity?: number;
+  type?: string;
+};
+
+type EventApiResponse = {
+  id?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  date?: string;
+  startTime?: string;
+  venue?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  capacity?: string | number;
+  imageUrl?: string;
+  location?: string;
+  tickets?: EventTicket[];
+  ticketTypes?: EventTicket[];
+};
+
 const defaultPool = (): TicketPool => ({
   id: crypto.randomUUID(),
   ticketName: 'General Admission',
@@ -32,6 +61,14 @@ const AdminEditEvent = () => {
   const [imageUploadError, setImageUploadError] = useState('');
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
+
+  const authHeaders = (): HeadersInit => {
+    const token = localStorage.getItem('adminToken');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+  const buildCandidateUrls = (path: string): string[] => {
+    return [apiUrl(path)];
+  };
 
   const [formData, setFormData] = useState({
     title: '',
@@ -57,27 +94,46 @@ const AdminEditEvent = () => {
     if (!id) return;
     const fetchEvent = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
-        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        const headers = authHeaders();
         // Use admin endpoint for access control, then enrich with public event payload for full editable details.
-        const res = await fetch(apiUrl(`/api/admin/events/${id}`), { headers });
-        if (!res.ok) throw new Error('Event not found');
-        const adminData = await res.json();
+        let adminData: EventApiResponse = {};
+        let adminLoaded = false;
+        for (const url of buildCandidateUrls(`/api/admin/events/${id}`)) {
+          const adminRes = await fetch(url, { headers });
+          if (adminRes.ok) {
+            adminData = (await adminRes.json()) as EventApiResponse;
+            adminLoaded = true;
+            break;
+          }
+          if (adminRes.status !== 404) {
+            throw new Error('Failed to load event');
+          }
+        }
 
-        let fullEventData = adminData;
+        let fullEventData: EventApiResponse = adminData;
         try {
-          const publicRes = await fetch(apiUrl(`/api/events/${id}`));
-          if (publicRes.ok) {
-            const publicData = await publicRes.json();
-            fullEventData = {
-              ...publicData,
-              ...adminData,
-              tickets: adminData.tickets ?? publicData.tickets ?? publicData.ticketTypes,
-              ticketTypes: adminData.ticketTypes ?? publicData.ticketTypes ?? publicData.tickets,
-            };
+          for (const url of buildCandidateUrls(`/api/events/${id}`)) {
+            const publicRes = await fetch(url);
+            if (publicRes.ok) {
+              const publicData = (await publicRes.json()) as EventApiResponse;
+              fullEventData = {
+                ...publicData,
+                ...adminData,
+                tickets: adminData.tickets ?? publicData.tickets ?? publicData.ticketTypes,
+                ticketTypes: adminData.ticketTypes ?? publicData.ticketTypes ?? publicData.tickets,
+              };
+              break;
+            }
+            if (publicRes.status !== 404) {
+              break;
+            }
           }
         } catch {
           // Keep admin payload only if public detail fetch fails.
+        }
+
+        if (!adminLoaded && !fullEventData.id) {
+          throw new Error('Event not found');
         }
 
         const rawDate = fullEventData.date ? new Date(fullEventData.date) : null;
@@ -107,10 +163,10 @@ const AdminEditEvent = () => {
           minTickets: '1',
           imageUrl: fullEventData.imageUrl ?? '',
         });
-        const tickets = fullEventData.tickets ?? fullEventData.ticketTypes ?? [];
+        const tickets: EventTicket[] = fullEventData.tickets ?? fullEventData.ticketTypes ?? [];
         if (tickets.length > 0) {
           setPools(
-            tickets.map((t: { id: string; name?: string; ticketName?: string; description?: string; price?: number; quantity?: number; type?: string }) => ({
+            tickets.map((t) => ({
               id: t.id ?? crypto.randomUUID(),
               ticketName: t.name ?? t.ticketName ?? 'Ticket',
               ticketType: (t.type === 'free' ? 'free' : 'paid') as 'paid' | 'free',
@@ -213,19 +269,48 @@ const AdminEditEvent = () => {
         imageUrl: formData.imageUrl || undefined,
         ticketTypes,
       };
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...authHeaders(),
+      };
 
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(apiUrl(`/api/admin/events/${id}`), {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const updateAttempts: Array<{ method: 'PATCH' | 'PUT'; path: string }> = [
+        { method: 'PATCH', path: `/api/admin/events/${id}` },
+        { method: 'PUT', path: `/api/admin/events/${id}` },
+        { method: 'PATCH', path: `/api/events/${id}` },
+        { method: 'PUT', path: `/api/events/${id}` },
+      ];
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to update event');
+      let lastError = 'Failed to update event';
+      let updated = false;
+
+      for (const attempt of updateAttempts) {
+        for (const url of buildCandidateUrls(attempt.path)) {
+          const res = await fetch(url, {
+            method: attempt.method,
+            headers,
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json().catch(() => ({} as { error?: string }));
+          if (res.ok) {
+            updated = true;
+            break;
+          }
+
+          lastError = data?.error || `${attempt.method} ${attempt.path} failed`;
+          if (res.status !== 404) {
+            break;
+          }
+        }
+        if (updated) {
+          break;
+        }
+      }
+
+      if (!updated) {
+        throw new Error(lastError);
+      }
       navigate('/admin/events');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong');

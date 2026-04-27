@@ -1,6 +1,6 @@
-// Use HTTP for local backend in dev to avoid "self-signed certificate in certificate chain"
-const defaultBase =
-  import.meta.env.DEV ? 'http://localhost:3000' : 'https://ticketing-back.onrender.com';
+// Use Render backend by default in both dev and production.
+// You can still override with VITE_API_URL in your environment when needed.
+const defaultBase = 'https://ticketing-back.onrender.com';
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? defaultBase;
 
 export function apiUrl(path: string): string {
