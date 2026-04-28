@@ -26,6 +26,7 @@ const AdminEvents = () => {
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
   const [deleting, setDeleting] = useState(false);
+  const [actionError, setActionError] = useState("");
   const userRole = localStorage.getItem("adminRole");
   const isSuperAdmin = userRole === "superadmin";
 
@@ -91,6 +92,7 @@ const AdminEvents = () => {
   const handleConfirmDelete = async () => {
     if (!deleteConfirm) return;
     setDeleting(true);
+    setActionError("");
     try {
       const token = localStorage.getItem("adminToken");
       const res = await fetch(apiUrl(`/api/events/${deleteConfirm.eventId}`), {
@@ -102,7 +104,7 @@ const AdminEvents = () => {
       setDeleteConfirm(null);
     } catch (err) {
       console.error("Delete failed:", err);
-      alert("Failed to delete event. You may not have permission.");
+      setActionError("Failed to delete event. You may not have permission.");
     } finally {
       setDeleting(false);
     }
@@ -113,6 +115,7 @@ const AdminEvents = () => {
     currentStatus: boolean,
   ) => {
     const nextTrending = !currentStatus;
+    setActionError("");
     setEvents((prev) =>
       prev.map((e) =>
         e.id === eventId ? { ...e, isTrending: nextTrending } : e,
@@ -139,7 +142,7 @@ const AdminEvents = () => {
           e.id === eventId ? { ...e, isTrending: currentStatus } : e,
         ),
       );
-      alert(err instanceof Error ? err.message : "Failed to update trending. Try again.");
+      setActionError(err instanceof Error ? err.message : "Failed to update trending. Try again.");
     }
   };
 
@@ -148,6 +151,7 @@ const AdminEvents = () => {
     currentPublished: boolean,
   ) => {
     const nextPublished = !currentPublished;
+    setActionError("");
     setEvents((prev) =>
       prev.map((e) =>
         e.id === eventId ? { ...e, isPublished: nextPublished } : e,
@@ -171,7 +175,7 @@ const AdminEvents = () => {
           e.id === eventId ? { ...e, isPublished: currentPublished } : e,
         ),
       );
-      alert("Failed to update visibility. Try again.");
+      setActionError("Failed to update visibility. Try again.");
     }
   };
 
@@ -186,6 +190,11 @@ const AdminEvents = () => {
             + Create Event
           </Link>
         </div>
+        {actionError && (
+          <div className="admin-form-error" style={{ marginBottom: "0.75rem" }}>
+            {actionError}
+          </div>
+        )}
 
         <div className="admin-event-list admin-event-list-inside">
           {events.length === 0 ? (

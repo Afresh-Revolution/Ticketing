@@ -2589,6 +2589,56 @@
   line-height: 1.5;
 }
 
+/* Coupons */
+.admin-coupon-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-coupons-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.admin-coupon-card {
+  background: var(--admin-input);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+}
+
+.admin-coupon-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.admin-coupon-code {
+  margin: 0;
+  color: var(--admin-accent-bright);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+
+.admin-coupon-name {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+}
+
+.admin-coupon-event {
+  margin: 0;
+  color: var(--admin-text-muted);
+  font-size: 0.85rem;
+}
+
+.admin-coupon-meta {
+  margin: 0.6rem 0 0 0;
+  color: var(--admin-text-muted);
+  font-size: 0.83rem;
+}
+
 .admin-hint-link {
   color: #a78bfa;
   text-decoration: underline;

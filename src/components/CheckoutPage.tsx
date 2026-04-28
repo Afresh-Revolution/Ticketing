@@ -19,6 +19,24 @@ interface CheckoutState {
 import { useAuth } from "../contexts/AuthContext";
 
 type PaystackReference = { reference?: string; trxref?: string } | string;
+type CouponPreview = {
+  valid: boolean;
+  coupon: {
+    id: string;
+    code: string;
+    name: string;
+    discountType: "percentage" | "fixed";
+    discountValue: number;
+  };
+  originalAmount: number;
+  discountAmount: number;
+  finalAmount: number;
+};
+
+function toSafeNumber(value: unknown, fallback = 0): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -37,6 +55,10 @@ const CheckoutPage = () => {
   const [showCancelOptions, setShowCancelOptions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
   const [paystackConfig, setPaystackConfig] = useState<{
     reference: string;
     email: string;
@@ -53,6 +75,7 @@ const CheckoutPage = () => {
   };
   const configToUse = paystackConfig ?? defaultConfig;
   const initializePayment = usePaystackPayment(configToUse);
+  const discountedTotal = toSafeNumber(couponPreview?.finalAmount, totalPrice);
 
   // Pre-fill email and name from logged-in user when available.
   useEffect(() => {
@@ -76,6 +99,18 @@ const CheckoutPage = () => {
     setPaystackConfig(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run only when paystackConfig is set
   }, [paystackConfig]);
+
+  useEffect(() => {
+    const normalized = couponCode.trim().toUpperCase();
+    if (!normalized) {
+      setCouponPreview(null);
+      setCouponError("");
+      return;
+    }
+    if (couponPreview && couponPreview.coupon?.code !== normalized) {
+      setCouponPreview(null);
+    }
+  }, [couponCode]);
 
   const handleAddTickets = () => {
     if (state.eventId) {
@@ -118,7 +153,7 @@ const CheckoutPage = () => {
     orderEmailRef.current = null;
     navigate("/payment-success", {
       state: {
-        amount: totalPrice,
+        amount: discountedTotal,
         eventTitle: state.eventTitle,
         orderId: orderId || undefined,
         reference: ref,
@@ -127,7 +162,72 @@ const CheckoutPage = () => {
     });
   };
 
-  const isFreeOrder = totalPrice === 0;
+  const isFreeOrder = discountedTotal === 0;
+
+  const applyCoupon = async () => {
+    setCouponError("");
+    const normalizedCode = couponCode.trim().toUpperCase();
+    if (!normalizedCode) {
+      setCouponError("Enter a coupon code first");
+      return;
+    }
+    if (!state.eventId) {
+      setCouponError("Event details are missing");
+      return;
+    }
+    setCouponApplying(true);
+    try {
+      const res = await fetch(apiUrl("/api/orders/coupon-preview"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: state.eventId,
+          code: normalizedCode,
+          totalAmount: Number(totalPrice),
+          couponCode: normalizedCode,
+        }),
+      });
+      const data = await res.json().catch(() => ({} as { error?: string }));
+      if (!res.ok) {
+        throw new Error(data.error || "Coupon is invalid or expired");
+      }
+      const pricing = (data as { pricing?: { originalAmount?: unknown; discountAmount?: unknown; finalAmount?: unknown } }).pricing;
+      const normalizedPreview: CouponPreview = {
+        valid: true,
+        coupon: {
+          id: String((data as { coupon?: { id?: unknown } }).coupon?.id ?? ""),
+          code: String((data as { coupon?: { code?: unknown } }).coupon?.code ?? normalizedCode),
+          name: String((data as { coupon?: { name?: unknown } }).coupon?.name ?? "Coupon"),
+          discountType:
+            (data as { coupon?: { discountType?: unknown } }).coupon?.discountType === "fixed"
+              ? "fixed"
+              : "percentage",
+          discountValue: toSafeNumber((data as { coupon?: { discountValue?: unknown } }).coupon?.discountValue, 0),
+        },
+        originalAmount: toSafeNumber(
+          pricing?.originalAmount ?? (data as { originalAmount?: unknown }).originalAmount,
+          Number(totalPrice)
+        ),
+        discountAmount: toSafeNumber(
+          pricing?.discountAmount ?? (data as { discountAmount?: unknown }).discountAmount,
+          0
+        ),
+        finalAmount: toSafeNumber(
+          pricing?.finalAmount ?? (data as { finalAmount?: unknown }).finalAmount,
+          Number(totalPrice)
+        ),
+      };
+      if (!normalizedPreview.coupon.code) {
+        throw new Error("Coupon response is invalid. Please try again.");
+      }
+      setCouponPreview(normalizedPreview);
+    } catch (err) {
+      setCouponPreview(null);
+      setCouponError(err instanceof Error ? err.message : "Coupon is invalid or expired");
+    } finally {
+      setCouponApplying(false);
+    }
+  };
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,6 +246,7 @@ const CheckoutPage = () => {
       if (!trimmedEmail || !trimmedEmail.includes("@")) {
         throw new Error("Please enter a valid email address");
       }
+      // Keep totalAmount as pre-discount amount; backend applies coupon rules.
       const totalAmount = Number(totalPrice);
       if (Number.isNaN(totalAmount) || totalAmount < 0) {
         throw new Error("Invalid total amount");
@@ -154,11 +255,13 @@ const CheckoutPage = () => {
       const orderPayload = {
         eventId: state.eventId,
         items: state.items,
+        originalAmount: totalAmount,
         totalAmount,
         fullName: trimmedName,
         email: trimmedEmail,
         phone: (phone || "").trim(),
         address: (address || "").trim(),
+        couponCode: couponPreview?.coupon?.code || undefined,
       };
 
       const headers: Record<string, string> = {
@@ -179,12 +282,13 @@ const CheckoutPage = () => {
 
       const createdOrder = await res.json();
       orderEmailRef.current = trimmedEmail;
+      const payableAmount = Number(createdOrder?.totalAmount ?? discountedTotal);
 
       // Free tickets: backend already set status to paid and sent ticket email; go to success
-      if (isFreeOrder) {
+      if (payableAmount <= 0) {
         navigate("/payment-success", {
           state: {
-            amount: totalPrice,
+            amount: payableAmount,
             eventTitle: state.eventTitle,
             orderId: createdOrder?.id,
             reference: createdOrder?.reference,
@@ -196,7 +300,7 @@ const CheckoutPage = () => {
       }
 
       // Paid: open Paystack
-      const amountKobo = Math.round(totalPrice * 100);
+      const amountKobo = Math.round(payableAmount * 100);
       if (amountKobo < 100) {
         throw new Error(
           "Amount must be at least ₦1. Please select at least one ticket.",
@@ -348,10 +452,54 @@ const CheckoutPage = () => {
                   </svg>
                   {loading
                     ? "Processing..."
-                    : `Pay ₦${totalPrice.toLocaleString()}`}
+                    : `Pay ₦${toSafeNumber(discountedTotal).toLocaleString()}`}
                 </>
               )}
             </button>
+          </div>
+
+          <div className="checkout-summary">
+            <div className="checkout-coupon-wrap">
+              <label htmlFor="checkout-coupon" className="checkout-coupon-label">
+                Coupon Code (optional)
+              </label>
+              <div className="checkout-coupon-row">
+                <input
+                  id="checkout-coupon"
+                  type="text"
+                  className="checkout-input"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="checkout-coupon-btn"
+                  onClick={applyCoupon}
+                  disabled={couponApplying}
+                >
+                  {couponApplying ? "Applying..." : "Apply"}
+                </button>
+              </div>
+              {couponError && <p className="checkout-coupon-error">{couponError}</p>}
+              {couponPreview && (
+                <p className="checkout-coupon-success">
+                  Applied {couponPreview.coupon?.code || couponCode.trim().toUpperCase()} ({couponPreview.coupon?.name || "Coupon"})
+                </p>
+              )}
+            </div>
+
+            {couponPreview && (
+              <div className="checkout-summary-row">
+                <span>Discount</span>
+                <span>-₦{toSafeNumber(couponPreview.discountAmount).toLocaleString()}</span>
+              </div>
+            )}
+
+            <div className="checkout-summary-row checkout-summary-row-total">
+              <span>Total to pay</span>
+              <span>₦{toSafeNumber(discountedTotal).toLocaleString()}</span>
+            </div>
           </div>
         </form>
       </main>

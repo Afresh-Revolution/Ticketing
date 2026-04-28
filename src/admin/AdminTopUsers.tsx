@@ -11,6 +11,8 @@ interface TopUser {
   sortOrder: number;
 }
 
+type DeleteConfirm = TopUser | null;
+
 const AdminTopUsers = () => {
   const navigate = useNavigate();
   const userRole = localStorage.getItem('adminRole');
@@ -26,6 +28,8 @@ const AdminTopUsers = () => {
   const [editName, setEditName] = useState('');
   const [editTitle, setEditTitle] = useState('');
   const [editImageUrl, setEditImageUrl] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const getToken = () => localStorage.getItem('adminToken');
 
@@ -81,7 +85,7 @@ const AdminTopUsers = () => {
       setName('');
       setTitle('');
       setImageUrl('');
-      fetchList();
+      await fetchList();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add');
     }
@@ -129,17 +133,20 @@ const AdminTopUsers = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Remove this user from the carousel?')) return;
     setError('');
+    setDeleting(true);
     try {
       const res = await fetch(apiUrl(`/api/admin/top-users/${id}`), {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (!res.ok) throw new Error('Failed to delete');
+      setDeleteConfirm(null);
       fetchList();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to delete');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -246,7 +253,7 @@ const AdminTopUsers = () => {
                       <td>{u.sortOrder}</td>
                       <td>
                         <button type="button" className="admin-btn admin-btn-sm" onClick={() => startEdit(u)}>Edit</button>
-                        <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => handleDelete(u.id)}>Delete</button>
+                        <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => setDeleteConfirm(u)}>Delete</button>
                       </td>
                     </>
                   )}
@@ -254,6 +261,38 @@ const AdminTopUsers = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className="admin-modal-overlay" onClick={() => !deleting && setDeleteConfirm(null)}>
+          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Delete top user</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => !deleting && setDeleteConfirm(null)}
+                disabled={deleting}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="admin-modal-form">
+              <p className="admin-delete-confirm-message">
+                Remove <strong>"{deleteConfirm.name}"</strong> from the carousel?
+              </p>
+              <div className="admin-modal-actions">
+                <button type="button" className="admin-btn-cancel" onClick={() => !deleting && setDeleteConfirm(null)} disabled={deleting}>
+                  Cancel
+                </button>
+                <button type="button" className="admin-btn-danger" onClick={() => handleDelete(deleteConfirm.id)} disabled={deleting}>
+                  {deleting ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
