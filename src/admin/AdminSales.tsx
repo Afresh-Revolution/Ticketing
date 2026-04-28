@@ -89,6 +89,8 @@ const AdminSales = () => {
   const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ eventId: string; eventTitle: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [walkInDeleteConfirm, setWalkInDeleteConfirm] = useState<WalkInSale | null>(null);
+  const [deletingWalkIn, setDeletingWalkIn] = useState(false);
 
   /* Walk-in state */
   const [walkInSales, setWalkInSales] = useState<WalkInSale[]>([]);
@@ -175,7 +177,7 @@ const AdminSales = () => {
       setDeleteConfirm(null);
       await fetchSales();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete sales');
+      setError(err instanceof Error ? err.message : 'Failed to delete sales');
     } finally {
       setDeleting(false);
     }
@@ -257,22 +259,29 @@ const AdminSales = () => {
       if (!res.ok) throw new Error('Failed to update status');
       await Promise.all([fetchWalkInSales(), fetchWalkInRevenue()]);
     } catch {
-      alert('Failed to update status');
+      setError('Failed to update status');
     } finally {
       setTogglingId(null);
     }
   };
 
   const deleteWalkIn = async (id: number) => {
-    if (!confirm('Delete this walk-in sale record?')) return;
+    setDeletingWalkIn(true);
     try {
-      await fetch(apiUrl(`/api/admin/walk-in-sales/${id}`), {
+      const res = await fetch(apiUrl(`/api/admin/walk-in-sales/${id}`), {
         method: 'DELETE',
         headers: authHeaders,
       });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Failed to delete walk-in sale');
+      }
+      setWalkInDeleteConfirm(null);
       await Promise.all([fetchWalkInSales(), fetchWalkInRevenue()]);
-    } catch {
-      alert('Failed to delete');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete');
+    } finally {
+      setDeletingWalkIn(false);
     }
   };
 
@@ -396,7 +405,7 @@ const AdminSales = () => {
                           <button
                             type="button"
                             className="admin-walkin-delete-btn"
-                            onClick={() => deleteWalkIn(ws.id)}
+                            onClick={() => setWalkInDeleteConfirm(ws)}
                             title="Delete"
                           >
                             🗑️
@@ -531,6 +540,48 @@ const AdminSales = () => {
                   disabled={deleting}
                 >
                   {deleting ? 'Deleting…' : 'Delete all sales'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {walkInDeleteConfirm && (
+        <div className="admin-modal-overlay" onClick={() => !deletingWalkIn && setWalkInDeleteConfirm(null)}>
+          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Delete walk-in sale</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => !deletingWalkIn && setWalkInDeleteConfirm(null)}
+                disabled={deletingWalkIn}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="admin-modal-form">
+              <p className="admin-delete-confirm-message">
+                Delete walk-in sale record for <strong>{walkInDeleteConfirm.fullName}</strong>?
+              </p>
+              <div className="admin-modal-actions">
+                <button
+                  type="button"
+                  className="admin-btn-cancel"
+                  onClick={() => !deletingWalkIn && setWalkInDeleteConfirm(null)}
+                  disabled={deletingWalkIn}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn-danger"
+                  onClick={() => deleteWalkIn(walkInDeleteConfirm.id)}
+                  disabled={deletingWalkIn}
+                >
+                  {deletingWalkIn ? 'Deleting…' : 'Delete walk-in sale'}
                 </button>
               </div>
             </div>

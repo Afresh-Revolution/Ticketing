@@ -24,6 +24,7 @@ import AdminAdmins from './admin/AdminAdmins'
 import AdminScanner from './admin/AdminScanner'
 import AdminWithdraw from './admin/AdminWithdraw'
 import AdminTopUsers from './admin/AdminTopUsers'
+import AdminCoupons from './admin/AdminCoupons'
 import './App.css'
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path="events/create" element={<AdminCreateEvent />} />
           <Route path="events/edit/:id" element={<AdminEditEvent />} />
           <Route path="sales" element={<AdminSales />} />
+          <Route path="coupons" element={<AdminCoupons />} />
           <Route path="withdraw" element={<AdminWithdraw />} />
           <Route path="admins" element={<AdminAdmins />} />
           <Route path="scanner" element={<AdminScanner />} />

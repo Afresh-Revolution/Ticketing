@@ -81,7 +81,7 @@ const AdminAdmins = () => {
       setDeleteConfirm(null);
       await fetchAdmins();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete admin');
+      setError(err instanceof Error ? err.message : 'Failed to delete admin');
     } finally {
       setDeleting(false);
     }
@@ -105,7 +105,7 @@ const AdminAdmins = () => {
         prev.map((a) => (a.id === admin.id ? { ...a, suspended: nextSuspended } : a))
       );
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update status');
+      setError(err instanceof Error ? err.message : 'Failed to update status');
     } finally {
       setSuspendingId(null);
     }
