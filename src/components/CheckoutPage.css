@@ -325,6 +325,13 @@
   background: #9538f0;
 }
 
+.checkout-transfer-hint {
+  margin: 0.65rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .checkout-pay-icon {
   width: 18px;
   height: 18px;

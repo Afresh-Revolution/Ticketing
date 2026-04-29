@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { usePaystackPayment } from "react-paystack";
 import { apiUrl } from "../api/config";
 import "./CheckoutPage.css";
 
@@ -18,7 +17,8 @@ interface CheckoutState {
 
 import { useAuth } from "../contexts/AuthContext";
 
-type PaystackReference = { reference?: string; trxref?: string } | string;
+const PENDING_CHECKOUT_KEY = "pendingCheckout";
+
 type CouponPreview = {
   valid: boolean;
   coupon: {
@@ -45,7 +45,20 @@ const CheckoutPage = () => {
   const createdOrderIdRef = useRef<string | null>(null);
   const orderEmailRef = useRef<string | null>(null);
 
-  const state = (location.state as CheckoutState) || {};
+  const pendingCheckout =
+    (() => {
+      try {
+        const raw = localStorage.getItem(PENDING_CHECKOUT_KEY);
+        return raw ? (JSON.parse(raw) as {
+          checkoutState?: CheckoutState;
+          attendee?: { fullName?: string; email?: string; phone?: string; address?: string };
+          couponCode?: string;
+        }) : null;
+      } catch {
+        return null;
+      }
+    })();
+  const state = (location.state as CheckoutState) || pendingCheckout?.checkoutState || {};
   const totalPrice = state.totalPrice ?? 0;
 
   const [fullName, setFullName] = useState("");
@@ -59,22 +72,6 @@ const CheckoutPage = () => {
   const [couponApplying, setCouponApplying] = useState(false);
   const [couponError, setCouponError] = useState("");
   const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
-  const [paystackConfig, setPaystackConfig] = useState<{
-    reference: string;
-    email: string;
-    amount: number;
-    publicKey: string;
-  } | null>(null);
-
-  const publicKey = (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "";
-  const defaultConfig = {
-    reference: new Date().getTime().toString(),
-    email: "",
-    amount: 100,
-    publicKey: publicKey || "pk_test_placeholder",
-  };
-  const configToUse = paystackConfig ?? defaultConfig;
-  const initializePayment = usePaystackPayment(configToUse);
   const discountedTotal = toSafeNumber(couponPreview?.finalAmount, totalPrice);
 
   // Pre-fill email and name from logged-in user when available.
@@ -84,21 +81,16 @@ const CheckoutPage = () => {
     if (user.name) setFullName((prev) => (prev ? prev : user.name ?? ""));
   }, [user?.email, user?.name]);
 
-  const onSuccess = (reference: PaystackReference) => {
-    verifyPayment(reference);
-  };
-
-  const onClose = () => {
-    setLoading(false);
-    setPaystackConfig(null);
-  };
-
   useEffect(() => {
-    if (!paystackConfig) return;
-    initializePayment({ onSuccess, onClose });
-    setPaystackConfig(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run only when paystackConfig is set
-  }, [paystackConfig]);
+    if (!pendingCheckout?.attendee) return;
+    setFullName((prev) => prev || pendingCheckout.attendee?.fullName || "");
+    setEmail((prev) => prev || pendingCheckout.attendee?.email || "");
+    setPhone((prev) => prev || pendingCheckout.attendee?.phone || "");
+    setAddress((prev) => prev || pendingCheckout.attendee?.address || "");
+    setCouponCode((prev) => prev || pendingCheckout.couponCode || "");
+    // only for first mount hydration
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const normalized = couponCode.trim().toUpperCase();
@@ -122,44 +114,6 @@ const CheckoutPage = () => {
 
   const handleCancelCheckout = () => {
     navigate("/events");
-  };
-
-  const verifyPayment = async (reference: PaystackReference): Promise<void> => {
-    const ref =
-      typeof reference === "string"
-        ? reference
-        : (reference?.reference ?? reference?.trxref ?? "");
-    const orderId = createdOrderIdRef.current;
-    if (orderId && ref) {
-      try {
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-        // Backend should verify with Paystack, set order to paid, and send ticket to order email
-        const res = await fetch(apiUrl("/api/orders/verify"), {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ reference: ref, orderId }),
-        });
-        if (!res.ok) {
-          console.error("Verify failed:", await res.text());
-        }
-      } catch (e) {
-        console.error("Verify error:", e);
-      } finally {
-        createdOrderIdRef.current = null;
-      }
-    }
-    const emailForSuccess = orderEmailRef.current ?? undefined;
-    orderEmailRef.current = null;
-    navigate("/payment-success", {
-      state: {
-        amount: discountedTotal,
-        eventTitle: state.eventTitle,
-        orderId: orderId || undefined,
-        reference: ref,
-        email: emailForSuccess,
-      },
-    });
   };
 
   const isFreeOrder = discountedTotal === 0;
@@ -299,27 +253,55 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Paid: open Paystack
-      const amountKobo = Math.round(payableAmount * 100);
-      if (amountKobo < 100) {
+      // Paid: initialize payment on backend and redirect to Paystack
+      if (payableAmount < 1) {
         throw new Error(
           "Amount must be at least ₦1. Please select at least one ticket.",
         );
       }
-      if (!publicKey || publicKey === "pk_test_placeholder") {
-        throw new Error(
-          "Payment is not configured. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file.",
-        );
+      const callbackUrl = `${window.location.origin}/#/payment-success?orderId=${encodeURIComponent(
+        String(createdOrder?.id || ""),
+      )}&amount=${encodeURIComponent(String(payableAmount))}&eventTitle=${encodeURIComponent(
+        String(state.eventTitle || ""),
+      )}&email=${encodeURIComponent(trimmedEmail)}&eventId=${encodeURIComponent(String(state.eventId || ""))}`;
+      const initRes = await fetch(apiUrl("/api/orders/initialize-payment"), {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          orderId: createdOrder?.id,
+          callbackUrl,
+        }),
+      });
+      const initData = await initRes.json().catch(
+        () => ({} as { error?: string; message?: string; authorizationUrl?: string; authorization_url?: string })
+      );
+      const authorizationUrl = initData.authorizationUrl || initData.authorization_url;
+      if (!initRes.ok || !authorizationUrl) {
+        throw new Error(initData.error || initData.message || "Failed to start payment");
       }
 
       createdOrderIdRef.current = createdOrder?.id || null;
       orderEmailRef.current = trimmedEmail;
-      setPaystackConfig({
-        reference: `order_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-        email: email.trim(),
-        amount: amountKobo,
-        publicKey,
-      });
+      localStorage.setItem(
+        PENDING_CHECKOUT_KEY,
+        JSON.stringify({
+          checkoutState: {
+            totalPrice,
+            eventId: state.eventId,
+            eventTitle: state.eventTitle,
+            items: state.items,
+          },
+          attendee: {
+            fullName: trimmedName,
+            email: trimmedEmail,
+            phone: (phone || "").trim(),
+            address: (address || "").trim(),
+          },
+          couponCode: couponPreview?.coupon?.code || couponCode.trim() || "",
+        })
+      );
+      window.location.assign(authorizationUrl);
+      return;
     } catch (err: unknown) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Payment processing failed");
@@ -456,6 +438,11 @@ const CheckoutPage = () => {
                 </>
               )}
             </button>
+            {!isFreeOrder && (
+              <p className="checkout-transfer-hint">
+                If bank transfer fails or expires, retry and choose Card, Bank, or USSD for faster confirmation.
+              </p>
+            )}
           </div>
 
           <div className="checkout-summary">

@@ -41,6 +41,8 @@ const formatCurrency = (amount: number) =>
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
+const ONLINE_SALE_STATUS_OPTIONS = ['pending', 'paid'] as const;
+
 const formatExportDateTime = (dateStr: string) => {
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr || '';
@@ -91,6 +93,8 @@ const AdminSales = () => {
   const [deleting, setDeleting] = useState(false);
   const [walkInDeleteConfirm, setWalkInDeleteConfirm] = useState<WalkInSale | null>(null);
   const [deletingWalkIn, setDeletingWalkIn] = useState(false);
+  const [updatingSaleStatusId, setUpdatingSaleStatusId] = useState<string | null>(null);
+  const [resendingSaleId, setResendingSaleId] = useState<string | null>(null);
 
   /* Walk-in state */
   const [walkInSales, setWalkInSales] = useState<WalkInSale[]>([]);
@@ -180,6 +184,46 @@ const AdminSales = () => {
       setError(err instanceof Error ? err.message : 'Failed to delete sales');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleOnlineSaleStatusChange = async (saleId: string, status: string) => {
+    if (!ONLINE_SALE_STATUS_OPTIONS.includes(status as (typeof ONLINE_SALE_STATUS_OPTIONS)[number])) return;
+    setUpdatingSaleStatusId(saleId);
+    try {
+      const res = await fetch(apiUrl(`/api/admin/sales/${saleId}/status`), {
+        method: 'PATCH',
+        headers: authHeaders,
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Failed to update status');
+      }
+      await fetchSales();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update sale status');
+    } finally {
+      setUpdatingSaleStatusId(null);
+    }
+  };
+
+  const handleResendTicket = async (sale: Sale) => {
+    setResendingSaleId(sale.id);
+    try {
+      const res = await fetch(apiUrl(`/api/admin/sales/${sale.id}/resend`), {
+        method: 'POST',
+        headers: authHeaders,
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'Failed to resend ticket');
+      }
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resend ticket');
+    } finally {
+      setResendingSaleId(null);
     }
   };
 
@@ -476,6 +520,7 @@ const AdminSales = () => {
                             <th>Date</th>
                             <th>Amount</th>
                             <th>Status</th>
+                            <th>Resend</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -490,7 +535,32 @@ const AdminSales = () => {
                               </td>
                               <td>{formatDate(sale.created_at)}</td>
                               <td>{formatCurrency(sale.amount)}</td>
-                              <td>{sale.status}</td>
+                              <td>
+                                <select
+                                  className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}
+                                  value={sale.status}
+                                  onChange={(e) => handleOnlineSaleStatusChange(sale.id, e.target.value)}
+                                  disabled={updatingSaleStatusId === sale.id}
+                                  aria-label="Update sale status"
+                                >
+                                  {ONLINE_SALE_STATUS_OPTIONS.map((status) => (
+                                    <option key={status} value={status}>
+                                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="admin-sales-resend-btn"
+                                  onClick={() => handleResendTicket(sale)}
+                                  disabled={resendingSaleId === sale.id || sale.status.toLowerCase() !== 'paid'}
+                                  title={sale.status.toLowerCase() === 'paid' ? 'Resend ticket email' : 'Set status to Paid first'}
+                                >
+                                  {resendingSaleId === sale.id ? 'Sending…' : 'Resend'}
+                                </button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>

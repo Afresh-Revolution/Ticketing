@@ -23,6 +23,8 @@ interface RecentSale {
   event_title: string;
 }
 
+const ONLINE_SALE_STATUS_OPTIONS = ['pending', 'paid'] as const;
+
 function normalizeRecentSales(raw: unknown): RecentSale[] {
   const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && 'recentSales' in raw)
     ? (raw as { recentSales?: unknown }).recentSales
@@ -47,6 +49,9 @@ const AdminDashboard = () => {
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [infoMessage, setInfoMessage] = useState('');
+  const [updatingSaleStatusId, setUpdatingSaleStatusId] = useState<string | null>(null);
+  const [resendingSaleId, setResendingSaleId] = useState<string | null>(null);
 
   const userRole = localStorage.getItem('adminRole');
   const isSuperAdmin = userRole === 'superadmin';
@@ -91,6 +96,54 @@ const AdminDashboard = () => {
     };
     fetchDashboard();
   }, []);
+
+  const handleRecentSaleStatusChange = async (saleId: string, status: string) => {
+    if (!ONLINE_SALE_STATUS_OPTIONS.includes(status as (typeof ONLINE_SALE_STATUS_OPTIONS)[number])) return;
+    setUpdatingSaleStatusId(saleId);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+      const res = await fetch(apiUrl(`/api/admin/sales/${saleId}/status`), {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json().catch(() => ({} as { error?: string; emailError?: string; message?: string }));
+      if (!res.ok) throw new Error(data.error || 'Failed to update sale status');
+      setRecentSales((prev) => prev.map((sale) => (sale.id === saleId ? { ...sale, status } : sale)));
+      setInfoMessage(data.emailError || data.message || 'Sale status updated');
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update sale status');
+      setInfoMessage('');
+    } finally {
+      setUpdatingSaleStatusId(null);
+    }
+  };
+
+  const handleRecentSaleResend = async (sale: RecentSale) => {
+    setResendingSaleId(sale.id);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(apiUrl(`/api/admin/sales/${sale.id}/resend`), {
+        method: 'POST',
+        headers,
+      });
+      const data = await res.json().catch(() => ({} as { error?: string; message?: string }));
+      if (!res.ok) throw new Error(data.error || 'Failed to resend ticket');
+      setInfoMessage(data.message || 'Ticket resent successfully');
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resend ticket');
+      setInfoMessage('');
+    } finally {
+      setResendingSaleId(null);
+    }
+  };
 
   const formatCurrency = (amount: number) =>
     `₦${amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -148,6 +201,11 @@ const AdminDashboard = () => {
           {error}
         </div>
       )}
+      {!error && infoMessage && (
+        <div className="admin-error-message" style={{ color: '#facc15', padding: '1rem', marginBottom: '1rem' }}>
+          {infoMessage}
+        </div>
+      )}
 
       <div className="admin-kpi-grid">
         {kpis.map((kpi) => (
@@ -186,6 +244,7 @@ const AdminDashboard = () => {
                   <th>Amount</th>
                   <th>Ticket</th>
                   <th>Status</th>
+                  <th>Resend</th>
                   <th>Date</th>
                 </tr>
               </thead>
@@ -206,11 +265,30 @@ const AdminDashboard = () => {
                     <td>{formatCurrency(sale.amount)}</td>
                     <td>{sale.ticket_count ?? 0}</td>
                     <td>
-                      <span
-                        className={`admin-status-badge ${sale.status === 'paid' ? 'admin-status-active' : 'admin-status-inactive'}`}
+                      <select
+                        className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}
+                        value={sale.status}
+                        onChange={(e) => handleRecentSaleStatusChange(sale.id, e.target.value)}
+                        disabled={updatingSaleStatusId === sale.id}
+                        aria-label="Update recent sale status"
                       >
-                        {sale.status}
-                      </span>
+                        {ONLINE_SALE_STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="admin-sales-resend-btn"
+                        onClick={() => handleRecentSaleResend(sale)}
+                        disabled={resendingSaleId === sale.id || sale.status.toLowerCase() !== 'paid'}
+                        title={sale.status.toLowerCase() === 'paid' ? 'Resend ticket email' : 'Set status to Paid first'}
+                      >
+                        {resendingSaleId === sale.id ? 'Sending…' : 'Resend'}
+                      </button>
                     </td>
                     <td>{formatDate(sale.created_at)}</td>
                   </tr>
