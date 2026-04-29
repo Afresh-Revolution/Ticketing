@@ -876,6 +876,55 @@
   margin-top: 0.5rem;
 }
 
+.admin-sales-status-select {
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--admin-text);
+  min-width: 92px;
+  outline: none;
+}
+
+.admin-sales-status-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-sales-status-pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.admin-sales-status-paid {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.admin-sales-resend-btn {
+  border: 1px solid rgba(124, 58, 237, 0.5);
+  background: rgba(124, 58, 237, 0.2);
+  color: #ddd6fe;
+  border-radius: 8px;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-sales-resend-btn:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.35);
+}
+
+.admin-sales-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Scanner page */
 .admin-scanner-container {
   background: #36195c;
