@@ -95,14 +95,29 @@ const AdminEditEvent = () => {
     const fetchEvent = async () => {
       try {
         const headers = authHeaders();
-        // Use admin endpoint for access control, then enrich with public event payload for full editable details.
+        // Load public event payload first to avoid edit page failure when admin lookup is restricted.
+        let fullEventData: EventApiResponse = {};
+        try {
+          for (const url of buildCandidateUrls(`/api/events/${id}`)) {
+            const publicRes = await fetch(url);
+            if (publicRes.ok) {
+              const publicData = (await publicRes.json()) as EventApiResponse;
+              fullEventData = publicData;
+              break;
+            }
+            if (publicRes.status !== 404) {
+              throw new Error('Failed to load event');
+            }
+          }
+        } catch {
+          // We still try admin endpoint below.
+        }
+
         let adminData: EventApiResponse = {};
-        let adminLoaded = false;
         for (const url of buildCandidateUrls(`/api/admin/events/${id}`)) {
           const adminRes = await fetch(url, { headers });
           if (adminRes.ok) {
             adminData = (await adminRes.json()) as EventApiResponse;
-            adminLoaded = true;
             break;
           }
           if (adminRes.status !== 404) {
@@ -110,60 +125,45 @@ const AdminEditEvent = () => {
           }
         }
 
-        let fullEventData: EventApiResponse = adminData;
-        try {
-          for (const url of buildCandidateUrls(`/api/events/${id}`)) {
-            const publicRes = await fetch(url);
-            if (publicRes.ok) {
-              const publicData = (await publicRes.json()) as EventApiResponse;
-              fullEventData = {
-                ...publicData,
-                ...adminData,
-                tickets: adminData.tickets ?? publicData.tickets ?? publicData.ticketTypes,
-                ticketTypes: adminData.ticketTypes ?? publicData.ticketTypes ?? publicData.tickets,
-              };
-              break;
-            }
-            if (publicRes.status !== 404) {
-              break;
-            }
-          }
-        } catch {
-          // Keep admin payload only if public detail fetch fails.
-        }
+        const mergedEvent: EventApiResponse = {
+          ...fullEventData,
+          ...adminData,
+          tickets: adminData.tickets ?? fullEventData.tickets ?? fullEventData.ticketTypes,
+          ticketTypes: adminData.ticketTypes ?? fullEventData.ticketTypes ?? fullEventData.tickets,
+        };
 
-        if (!adminLoaded && !fullEventData.id) {
+        if (!mergedEvent.id) {
           throw new Error('Event not found');
         }
 
-        const rawDate = fullEventData.date ? new Date(fullEventData.date) : null;
+        const rawDate = mergedEvent.date ? new Date(mergedEvent.date) : null;
         const isValidDate = rawDate instanceof Date && !Number.isNaN(rawDate.getTime());
         const startDate = isValidDate ? rawDate.toLocaleDateString('en-CA') : '';
-        const startTime = (fullEventData.startTime || (isValidDate ? rawDate.toTimeString().slice(0, 5) : '') || '12:00').slice(0, 5);
+        const startTime = (mergedEvent.startTime || (isValidDate ? rawDate.toTimeString().slice(0, 5) : '') || '12:00').slice(0, 5);
 
-        const locationText = String(fullEventData.location ?? '').trim();
+        const locationText = String(mergedEvent.location ?? '').trim();
         const locationParts = locationText ? locationText.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
         const inferredCity = locationParts.length > 1 ? locationParts[1] : '';
         setFormData({
-          title: fullEventData.title ?? '',
-          description: fullEventData.description ?? '',
-          category: fullEventData.category ?? '',
+          title: mergedEvent.title ?? '',
+          description: mergedEvent.description ?? '',
+          category: mergedEvent.category ?? '',
           eventType: '',
           startDate,
           startTime,
           endDate: startDate,
           endTime: startTime,
           timezone: 'Africa/Lagos',
-          venue: fullEventData.venue ?? '',
-          address: fullEventData.address ?? '',
-          city: fullEventData.city ?? inferredCity,
-          state: fullEventData.state ?? '',
-          country: fullEventData.country ?? 'Nigeria',
-          capacity: String(fullEventData.capacity ?? '500'),
+          venue: mergedEvent.venue ?? '',
+          address: mergedEvent.address ?? '',
+          city: mergedEvent.city ?? inferredCity,
+          state: mergedEvent.state ?? '',
+          country: mergedEvent.country ?? 'Nigeria',
+          capacity: String(mergedEvent.capacity ?? '500'),
           minTickets: '1',
-          imageUrl: fullEventData.imageUrl ?? '',
+          imageUrl: mergedEvent.imageUrl ?? '',
         });
-        const tickets: EventTicket[] = fullEventData.tickets ?? fullEventData.ticketTypes ?? [];
+        const tickets: EventTicket[] = mergedEvent.tickets ?? mergedEvent.ticketTypes ?? [];
         if (tickets.length > 0) {
           setPools(
             tickets.map((t) => ({
@@ -239,6 +239,8 @@ const AdminEditEvent = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!id) return;
+    const submitStartedAt = Date.now();
+    const minSavingMs = 500;
     setLoading(true);
     setSubmitError('');
 
@@ -275,10 +277,12 @@ const AdminEditEvent = () => {
       };
 
       const updateAttempts: Array<{ method: 'PATCH' | 'PUT'; path: string }> = [
-        { method: 'PATCH', path: `/api/admin/events/${id}` },
-        { method: 'PUT', path: `/api/admin/events/${id}` },
+        // Prefer public/admin-auth events endpoint because it supports full event + ticketTypes updates.
         { method: 'PATCH', path: `/api/events/${id}` },
         { method: 'PUT', path: `/api/events/${id}` },
+        // Fallback for older admin-only API variants.
+        { method: 'PATCH', path: `/api/admin/events/${id}` },
+        { method: 'PUT', path: `/api/admin/events/${id}` },
       ];
 
       let lastError = 'Failed to update event';
@@ -310,6 +314,10 @@ const AdminEditEvent = () => {
 
       if (!updated) {
         throw new Error(lastError);
+      }
+      const elapsed = Date.now() - submitStartedAt;
+      if (elapsed < minSavingMs) {
+        await new Promise((resolve) => setTimeout(resolve, minSavingMs - elapsed));
       }
       navigate('/admin/events');
     } catch (err) {
