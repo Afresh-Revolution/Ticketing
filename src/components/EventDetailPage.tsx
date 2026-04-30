@@ -117,9 +117,12 @@ const EventDetailPage = () => {
       <Navbar />
 
       <div className="event-detail-hero-wrap">
-        <div
+        <button
+          type="button"
           className="event-detail-hero"
           style={{ backgroundImage: `url(${event.heroImage})` }}
+          onClick={() => window.open(event.heroImage, "_blank", "noopener,noreferrer")}
+          aria-label="Open full event image"
         />
         <span className="event-detail-hero-tag">{event.category.toUpperCase()}</span>
       </div>
