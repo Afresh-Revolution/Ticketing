@@ -18,6 +18,14 @@ interface CheckoutState {
 import { useAuth } from "../contexts/AuthContext";
 
 const PENDING_CHECKOUT_KEY = "pendingCheckout";
+const MANUAL_PAYMENT_ACCOUNT_NAME =
+  (import.meta.env.VITE_MANUAL_PAYMENT_ACCOUNT_NAME as string | undefined) || "AFRESH BIZ & ENT LTD";
+const MANUAL_PAYMENT_ACCOUNT_NUMBER =
+  (import.meta.env.VITE_MANUAL_PAYMENT_ACCOUNT_NUMBER as string | undefined) || "5080265397";
+const MANUAL_PAYMENT_BANK_NAME =
+  (import.meta.env.VITE_MANUAL_PAYMENT_BANK_NAME as string | undefined) || "Fidelity bank";
+const MANUAL_PAYMENT_CONTACT_URL =
+  (import.meta.env.VITE_MANUAL_PAYMENT_CONTACT_URL as string | undefined) || "https://wa.link/7lo5b5";
 
 type CouponPreview = {
   valid: boolean;
@@ -72,6 +80,11 @@ const CheckoutPage = () => {
   const [couponApplying, setCouponApplying] = useState(false);
   const [couponError, setCouponError] = useState("");
   const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
+  const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
+  const [copiedDetailKey, setCopiedDetailKey] = useState<string | null>(null);
+  const [manualOrderId, setManualOrderId] = useState<string>("");
+  const [manualPaidLoading, setManualPaidLoading] = useState(false);
+  const [manualHoldSeconds, setManualHoldSeconds] = useState(0);
   const discountedTotal = toSafeNumber(couponPreview?.finalAmount, totalPrice);
 
   // Pre-fill email and name from logged-in user when available.
@@ -253,35 +266,15 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Paid: initialize payment on backend and redirect to Paystack
+      // Paid: manual transfer flow (order is created, user pays to bank details and confirms on WhatsApp).
       if (payableAmount < 1) {
         throw new Error(
           "Amount must be at least ₦1. Please select at least one ticket.",
         );
       }
-      const callbackUrl = `${window.location.origin}/#/payment-success?orderId=${encodeURIComponent(
-        String(createdOrder?.id || ""),
-      )}&amount=${encodeURIComponent(String(payableAmount))}&eventTitle=${encodeURIComponent(
-        String(state.eventTitle || ""),
-      )}&email=${encodeURIComponent(trimmedEmail)}&eventId=${encodeURIComponent(String(state.eventId || ""))}`;
-      const initRes = await fetch(apiUrl("/api/orders/initialize-payment"), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          orderId: createdOrder?.id,
-          callbackUrl,
-        }),
-      });
-      const initData = await initRes.json().catch(
-        () => ({} as { error?: string; message?: string; authorizationUrl?: string; authorization_url?: string })
-      );
-      const authorizationUrl = initData.authorizationUrl || initData.authorization_url;
-      if (!initRes.ok || !authorizationUrl) {
-        throw new Error(initData.error || initData.message || "Failed to start payment");
-      }
-
       createdOrderIdRef.current = createdOrder?.id || null;
       orderEmailRef.current = trimmedEmail;
+      setManualOrderId(String(createdOrder?.id || ""));
       localStorage.setItem(
         PENDING_CHECKOUT_KEY,
         JSON.stringify({
@@ -300,12 +293,57 @@ const CheckoutPage = () => {
           couponCode: couponPreview?.coupon?.code || couponCode.trim() || "",
         })
       );
-      window.location.assign(authorizationUrl);
+      setShowManualPaymentModal(true);
+      setCopiedDetailKey(null);
+      setLoading(false);
       return;
     } catch (err: unknown) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Payment processing failed");
       setLoading(false);
+    }
+  };
+
+  const copyDetail = async (key: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedDetailKey(key);
+      window.setTimeout(() => {
+        setCopiedDetailKey((prev) => (prev === key ? null : prev));
+      }, 1800);
+    } catch {
+      setError("Could not copy detail. Please copy manually.");
+    }
+  };
+
+  useEffect(() => {
+    if (manualHoldSeconds <= 0) return;
+    const timer = window.setInterval(() => {
+      setManualHoldSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [manualHoldSeconds]);
+
+  const handlePaidClick = async () => {
+    if (!manualOrderId || manualPaidLoading) return;
+    setManualPaidLoading(true);
+    setError("");
+    try {
+      const res = await fetch(apiUrl("/api/orders/manual-payment-notify"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: manualOrderId,
+          email: email.trim(),
+        }),
+      });
+      const data = await res.json().catch(() => ({} as { error?: string }));
+      if (!res.ok) throw new Error(data.error || "Failed to send payment confirmation");
+      setManualHoldSeconds(120);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send payment confirmation");
+    } finally {
+      setManualPaidLoading(false);
     }
   };
 
@@ -502,6 +540,103 @@ const CheckoutPage = () => {
               </button>
               <button type="button" className="checkout-cancel-btn checkout-cancel-btn-cancel" onClick={handleCancelCheckout}>
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showManualPaymentModal && (
+        <div className="checkout-cancel-overlay" onClick={() => setShowManualPaymentModal(false)}>
+          <div className="checkout-cancel-modal checkout-manual-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="checkout-cancel-title">Manual Payment Details</h3>
+            <p className="checkout-cancel-text">
+              Transfer <strong>₦{toSafeNumber(discountedTotal).toLocaleString()}</strong> to the account below.
+            </p>
+            <div className="checkout-manual-detail-list">
+              <div className="checkout-manual-detail-item">
+                <div>
+                  <span className="checkout-manual-detail-label">Account Name</span>
+                  <span className="checkout-manual-detail-value">{MANUAL_PAYMENT_ACCOUNT_NAME}</span>
+                </div>
+                <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("name", MANUAL_PAYMENT_ACCOUNT_NAME)} aria-label="Copy account name">
+                  <span className="checkout-manual-copy-icon" aria-hidden>
+                    {copiedDetailKey === "name" ? "✓" : "⧉"}
+                  </span>
+                </button>
+              </div>
+              {copiedDetailKey === "name" && <span className="checkout-manual-copied-badge">Detail copied</span>}
+              <div className="checkout-manual-detail-item">
+                <div>
+                  <span className="checkout-manual-detail-label">Account Number</span>
+                  <span className="checkout-manual-detail-value">{MANUAL_PAYMENT_ACCOUNT_NUMBER}</span>
+                </div>
+                <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("number", MANUAL_PAYMENT_ACCOUNT_NUMBER)} aria-label="Copy account number">
+                  <span className="checkout-manual-copy-icon" aria-hidden>
+                    {copiedDetailKey === "number" ? "✓" : "⧉"}
+                  </span>
+                </button>
+              </div>
+              {copiedDetailKey === "number" && <span className="checkout-manual-copied-badge">Detail copied</span>}
+              <div className="checkout-manual-detail-item">
+                <div>
+                  <span className="checkout-manual-detail-label">Bank</span>
+                  <span className="checkout-manual-detail-value">{MANUAL_PAYMENT_BANK_NAME}</span>
+                </div>
+                <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("bank", MANUAL_PAYMENT_BANK_NAME)} aria-label="Copy bank name">
+                  <span className="checkout-manual-copy-icon" aria-hidden>
+                    {copiedDetailKey === "bank" ? "✓" : "⧉"}
+                  </span>
+                </button>
+              </div>
+              {copiedDetailKey === "bank" && <span className="checkout-manual-copied-badge">Detail copied</span>}
+              {manualOrderId && (
+                <>
+                  <div className="checkout-manual-detail-item">
+                    <div>
+                      <span className="checkout-manual-detail-label">Order ID</span>
+                      <span className="checkout-manual-detail-value">{manualOrderId}</span>
+                    </div>
+                    <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("order", manualOrderId)} aria-label="Copy order id">
+                      <span className="checkout-manual-copy-icon" aria-hidden>
+                        {copiedDetailKey === "order" ? "✓" : "⧉"}
+                      </span>
+                    </button>
+                  </div>
+                  {copiedDetailKey === "order" && <span className="checkout-manual-copied-badge">Detail copied</span>}
+                </>
+              )}
+            </div>
+            <p className="checkout-cancel-text">
+              After successful payment, contact William by clicking this:{" "}
+              <a href={MANUAL_PAYMENT_CONTACT_URL} target="_blank" rel="noreferrer" className="checkout-manual-link">
+                {MANUAL_PAYMENT_CONTACT_URL}
+              </a>
+            </p>
+            {manualHoldSeconds > 0 && (
+              <p className="checkout-cancel-text checkout-manual-hold-text">
+                Payment notice sent. Keep this page open for{" "}
+                <strong>
+                  {Math.floor(manualHoldSeconds / 60)}:{String(manualHoldSeconds % 60).padStart(2, "0")}
+                </strong>{" "}
+                to confirm your ticket, or check your email in 10 minutes.
+              </p>
+            )}
+            <div className="checkout-cancel-actions">
+              <button
+                type="button"
+                className="checkout-cancel-btn checkout-cancel-btn-add"
+                onClick={handlePaidClick}
+                disabled={manualPaidLoading || manualHoldSeconds > 0}
+              >
+                {manualPaidLoading ? "Sending..." : manualHoldSeconds > 0 ? "Paid (Sent)" : "Paid"}
+              </button>
+              <button
+                type="button"
+                className="checkout-cancel-btn checkout-cancel-btn-cancel"
+                onClick={() => setShowManualPaymentModal(false)}
+                disabled={manualHoldSeconds > 0}
+              >
+                Close
               </button>
             </div>
           </div>
