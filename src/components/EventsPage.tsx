@@ -178,7 +178,20 @@ const EventsPage = () => {
 
             <div className="events-grid">
               {filteredEvents.map((event) => (
-                <article key={event.id} className="event-card">
+                <article
+                  key={event.id}
+                  className="event-card"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => navigate(`/event/${event.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(`/event/${event.id}`);
+                    }
+                  }}
+                  aria-label={`Open ${event.title}`}
+                >
                   <div className="event-card-image-wrap">
                     <img src={event.image} alt="" className="event-card-image" />
                     <span className="event-date-tag">{event.date}</span>

@@ -93,7 +93,20 @@ const GetTickets = () => {
         
         <div className="events-grid">
           {events.map((event) => (
-            <div key={event.id} className="event-card">
+            <div
+              key={event.id}
+              className="event-card"
+              role="link"
+              tabIndex={0}
+              onClick={() => navigate(`/event/${event.id}`)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(`/event/${event.id}`);
+                }
+              }}
+              aria-label={`Open ${event.title}`}
+            >
               <div className="event-image-wrapper">
                 <img 
                   src={event.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
@@ -129,7 +142,13 @@ const GetTickets = () => {
                     </div>
                   </div>
                   <div className="event-details-cta-row">
-                    <button className="btn-get-tickets" onClick={() => navigate(`/event/${event.id}`)}>
+                    <button
+                      className="btn-get-tickets"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/event/${event.id}`);
+                      }}
+                    >
                       Get Tickets
                     </button>
                     <button

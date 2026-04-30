@@ -46,6 +46,7 @@
   overflow: hidden;
   transition: transform 0.3s ease, background 0.3s ease;
   position: relative;
+  cursor: pointer;
 }
 
 .event-card:hover {

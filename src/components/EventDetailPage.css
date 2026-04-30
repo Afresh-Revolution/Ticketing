@@ -19,11 +19,13 @@
 .event-detail-hero {
   position: absolute;
   inset: 0;
+  border: 0;
+  width: 100%;
   background-size: cover;
   background-position: center;
-  filter: blur(4px);
-  -webkit-filter: blur(4px);
-  transform: scale(1.05);
+  cursor: zoom-in;
+  background-repeat: no-repeat;
+  background-color: transparent;
 }
 
 .event-detail-hero::after {
