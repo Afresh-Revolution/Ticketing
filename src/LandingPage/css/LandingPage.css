@@ -1,4 +1,5 @@
 @import "./landing-tokens.css";
+@import "./landing-reveal.css";
 
 .landing-page {
   min-height: 100vh;
@@ -20,7 +21,9 @@
   position: relative;
   width: 100%;
   padding-top: var(--navbar-total-height, 56px);
-  overflow: clip;
+  /* clip X only — overflow-y was cutting hero headline descenders / typewriter lines */
+  overflow-x: clip;
+  overflow-y: visible;
   background: var(--lp-bg-deep);
 }
 
@@ -91,18 +94,6 @@
 
 .lp-hero-inner {
   max-width: 100%;
-  animation: lpFadeUp 0.85s var(--lp-ease-out) both;
-}
-
-@keyframes lpFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .lp-hero-eyebrow {
@@ -130,47 +121,97 @@
   font-family: var(--lp-font-display);
   font-weight: 800;
   font-size: clamp(2.35rem, 5.5vw, 3.75rem);
-  line-height: 1.05;
+  /* Tight line-height clips heavy display fonts — keep room for ascenders/descenders */
+  line-height: 1.18;
   letter-spacing: -0.03em;
   color: var(--lp-ink);
-  animation: lpHeroTitleReveal 0.9s var(--lp-ease-out) both;
+  /* Slots: stable vertical rhythm; tall enough for 2 full lines + Syne descenders */
+  --lp-hero-line1-h: clamp(3rem, 7.5vw, 4.25rem);
+  --lp-hero-type-slot-h: clamp(7.25rem, 18vw, 11rem);
 }
 
 .lp-hero-title-line {
   display: block;
-  animation: lpHeroTitleLineIn 0.9s var(--lp-ease-out) both;
+  min-height: var(--lp-hero-line1-h);
+  line-height: 1.2;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
-.lp-hero-title-gradient {
+.lp-hero-title-gradient-row {
   display: block;
+  position: relative;
+  /* Fixed band: typewriter paints inside overlay so flow is stable */
+  height: var(--lp-hero-type-slot-h);
+  /* Clip caret/glow so it cannot paint over the lede or buttons below */
+  overflow: hidden;
+  contain: paint;
+  box-sizing: border-box;
+}
+
+.lp-hero-title-gradient-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-start;
+  gap: 0.06em;
+  min-width: 0;
+  box-sizing: border-box;
+  line-height: 1.22;
+  overflow: hidden;
+  /* Breathing room so last-line descenders are not clipped by the slot edge */
+  padding-bottom: 0.12em;
+}
+
+@media (max-width: 520px) {
+  .lp-hero-title {
+    --lp-hero-type-slot-h: clamp(8rem, 42vw, 11.5rem);
+    --lp-hero-line1-h: clamp(3.1rem, 9vw, 4.5rem);
+  }
+}
+
+.lp-hero-title-gradient-text {
   background: linear-gradient(105deg, var(--lp-ink) 0%, var(--lp-accent) 45%, var(--lp-cyan) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: lpHeroTitleLineIn 0.95s var(--lp-ease-out) 0.08s both;
 }
 
-@keyframes lpHeroTitleReveal {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
+/* Bar caret — avoids tall “|” glyph metrics + glow painting outside the typewriter slot */
+.lp-hero-type-cursor {
+  display: inline-block;
+  flex-shrink: 0;
+  align-self: center;
+  width: 3px;
+  height: 0.62em;
+  min-height: 12px;
+  margin-left: 0.12em;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(250, 232, 255, 0.98), rgba(168, 85, 247, 0.88));
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+  animation: lpTypeCursorBlink 0.85s step-end infinite;
+}
+
+@keyframes lpTypeCursorBlink {
+  0%,
+  50% {
     opacity: 1;
-    transform: translateY(0);
+  }
+  51%,
+  100% {
+    opacity: 0.15;
   }
 }
 
-@keyframes lpHeroTitleLineIn {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
+@media (prefers-reduced-motion: reduce) {
+  .lp-hero-type-cursor {
+    animation: none;
+    opacity: 0.85;
   }
 }
 

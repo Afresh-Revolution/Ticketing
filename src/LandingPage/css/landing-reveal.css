@@ -1,0 +1,116 @@
+/**
+ * Landing page load animations — directional reveals + stagger delays.
+ * Used on hero and other immediate children of `.landing-page`.
+ */
+
+@keyframes lpRevealLR {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes lpRevealRL {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes lpRevealTB {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lpRevealBU {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lp-reveal {
+  animation-duration: 0.78s;
+  animation-timing-function: var(--lp-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  animation-fill-mode: both;
+  animation-delay: var(--lp-reveal-delay, 0ms);
+}
+
+.lp-reveal--lr {
+  animation-name: lpRevealLR;
+}
+.lp-reveal--rl {
+  animation-name: lpRevealRL;
+}
+.lp-reveal--tb {
+  animation-name: lpRevealTB;
+}
+.lp-reveal--bu {
+  animation-name: lpRevealBU;
+}
+
+.lp-d0 {
+  --lp-reveal-delay: 0ms;
+}
+.lp-d1 {
+  --lp-reveal-delay: 70ms;
+}
+.lp-d2 {
+  --lp-reveal-delay: 140ms;
+}
+.lp-d3 {
+  --lp-reveal-delay: 210ms;
+}
+.lp-d4 {
+  --lp-reveal-delay: 280ms;
+}
+.lp-d5 {
+  --lp-reveal-delay: 350ms;
+}
+.lp-d6 {
+  --lp-reveal-delay: 420ms;
+}
+.lp-d7 {
+  --lp-reveal-delay: 490ms;
+}
+.lp-d8 {
+  --lp-reveal-delay: 560ms;
+}
+.lp-d9 {
+  --lp-reveal-delay: 630ms;
+}
+.lp-d10 {
+  --lp-reveal-delay: 700ms;
+}
+.lp-d11 {
+  --lp-reveal-delay: 770ms;
+}
+.lp-d12 {
+  --lp-reveal-delay: 840ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

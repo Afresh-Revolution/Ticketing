@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiUrl } from '../api/config';
+import ScrollReveal from './ScrollReveal';
 import './TopUsersCarousel.css';
 
 export interface TopUser {
@@ -31,7 +32,9 @@ const TopUsersCarousel = () => {
       }
     }
     fetchUsers();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (loading) return null;
@@ -41,35 +44,37 @@ const TopUsersCarousel = () => {
 
   return (
     <section className="top-users-carousel-wrap" aria-labelledby="top-users-carousel-heading">
-      <div className="top-users-carousel-intro">
-        <span className="top-users-carousel-label">Community</span>
-        <h2 id="top-users-carousel-heading" className="top-users-carousel-title">
-          Top Users
-        </h2>
-      </div>
-      <div className="top-users-carousel-marquee">
-        <div className="top-users-carousel-fade top-users-carousel-fade-left" aria-hidden />
-        <div className="top-users-carousel-fade top-users-carousel-fade-right" aria-hidden />
-        <div className="top-users-carousel-track" ref={scrollRef}>
-          <div className="top-users-carousel-inner">
-          {duplicated.map((user, index) => (
-            <div key={`${user.id}-${index}`} className="top-users-carousel-card">
-              <div className="top-users-carousel-card-avatar">
-                {user.imageUrl ? (
-                  <img src={user.imageUrl} alt="" />
-                ) : (
-                  <span className="top-users-carousel-card-initial">{user.name.charAt(0).toUpperCase()}</span>
-                )}
-              </div>
-              <div className="top-users-carousel-card-info">
-                <span className="top-users-carousel-card-name">{user.name}</span>
-                {user.title && <span className="top-users-carousel-card-title">{user.title}</span>}
+      <ScrollReveal stagger className="scroll-reveal-mix tuc-reveal-stack" animation="fadeIn">
+        <>
+          <span className="top-users-carousel-label">Community</span>
+          <h2 id="top-users-carousel-heading" className="top-users-carousel-title">
+            Top Users
+          </h2>
+          <div className="top-users-carousel-marquee">
+            <div className="top-users-carousel-fade top-users-carousel-fade-left" aria-hidden />
+            <div className="top-users-carousel-fade top-users-carousel-fade-right" aria-hidden />
+            <div className="top-users-carousel-track" ref={scrollRef}>
+              <div className="top-users-carousel-inner">
+                {duplicated.map((user, index) => (
+                  <div key={`${user.id}-${index}`} className="top-users-carousel-card">
+                    <div className="top-users-carousel-card-avatar">
+                      {user.imageUrl ? (
+                        <img src={user.imageUrl} alt="" />
+                      ) : (
+                        <span className="top-users-carousel-card-initial">{user.name.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div className="top-users-carousel-card-info">
+                      <span className="top-users-carousel-card-name">{user.name}</span>
+                      {user.title && <span className="top-users-carousel-card-title">{user.title}</span>}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
           </div>
-        </div>
-      </div>
+        </>
+      </ScrollReveal>
     </section>
   );
 };

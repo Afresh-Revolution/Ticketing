@@ -1,48 +1,148 @@
 /**
- * Scroll-triggered animations – one consistent fadeInUp across the site
+ * Scroll-triggered animations — directional variants + mixed stagger.
  */
 
-/* Initial state (before in view) – same for all scroll reveals */
 .scroll-reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition:
+    opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Visible state (when .in-view is added by JS) */
+/* Default / fade up */
+.scroll-reveal[data-animate="fadeInUp"],
+.scroll-reveal:not([data-animate]) {
+  transform: translateY(28px);
+}
+
+.scroll-reveal[data-animate="fadeIn"] {
+  transform: none;
+}
+
+.scroll-reveal[data-animate="slideLeft"] {
+  transform: translateX(-40px);
+}
+
+.scroll-reveal[data-animate="slideRight"] {
+  transform: translateX(40px);
+}
+
+.scroll-reveal[data-animate="fadeInDown"] {
+  transform: translateY(-26px);
+}
+
+.scroll-reveal[data-animate="scaleIn"] {
+  transform: scale(0.94);
+}
+
 .scroll-reveal.in-view {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
-/* Stagger children – same fadeInUp motion */
+/* Stagger children — default: fade up */
 .scroll-reveal-stagger > * {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(26px);
+  transition:
+    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.scroll-reveal-stagger.in-view > *:nth-child(1) { transition-delay: 0.05s; }
-.scroll-reveal-stagger.in-view > *:nth-child(2) { transition-delay: 0.1s; }
-.scroll-reveal-stagger.in-view > *:nth-child(3) { transition-delay: 0.15s; }
-.scroll-reveal-stagger.in-view > *:nth-child(4) { transition-delay: 0.2s; }
-.scroll-reveal-stagger.in-view > *:nth-child(5) { transition-delay: 0.25s; }
-.scroll-reveal-stagger.in-view > *:nth-child(6) { transition-delay: 0.3s; }
+.scroll-reveal-stagger.in-view > *:nth-child(1) {
+  transition-delay: 0.04s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(2) {
+  transition-delay: 0.1s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(3) {
+  transition-delay: 0.16s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(4) {
+  transition-delay: 0.22s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(5) {
+  transition-delay: 0.28s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(6) {
+  transition-delay: 0.34s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(7) {
+  transition-delay: 0.4s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(8) {
+  transition-delay: 0.46s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(9) {
+  transition-delay: 0.52s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(10) {
+  transition-delay: 0.58s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(11) {
+  transition-delay: 0.64s;
+}
+.scroll-reveal-stagger.in-view > *:nth-child(12) {
+  transition-delay: 0.7s;
+}
 
 .scroll-reveal-stagger.in-view > * {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Mixed-direction stagger (left / right / up / down by row) */
+.scroll-reveal-stagger.scroll-reveal-mix > * {
+  opacity: 0;
+  transform: translateX(-28px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal-stagger.scroll-reveal-mix > *:nth-child(4n + 2) {
+  transform: translateX(28px);
+}
+
+.scroll-reveal-stagger.scroll-reveal-mix > *:nth-child(4n + 3) {
+  transform: translateY(-22px);
+}
+
+.scroll-reveal-stagger.scroll-reveal-mix > *:nth-child(4n + 4) {
+  transform: translateY(22px);
+}
+
+.scroll-reveal-stagger.scroll-reveal-mix.in-view > * {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* Keyframes for one-off or fancy effects */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes fadeInUp {
@@ -101,13 +201,22 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 /* Optional: apply animation on load (no scroll) */

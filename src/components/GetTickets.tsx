@@ -136,7 +136,7 @@ const GetTickets = () => {
     return (
       <section className="get-tickets">
         <div className="gt-inner">
-          <h2 className="gt-heading">Trending now</h2>
+          <h2 className="gt-heading">Selling now</h2>
           <p className="gt-sub">Loading hottest events…</p>
         </div>
       </section>
@@ -148,7 +148,7 @@ const GetTickets = () => {
       <section className="get-tickets">
         <div className="gt-inner">
           <span className="gt-label">Events</span>
-          <h2 className="gt-heading">Trending now</h2>
+          <h2 className="gt-heading">Selling now</h2>
           <p className="gt-sub gt-sub-empty">
             No events to highlight yet. Browse the full calendar — new shows are added all the time.
           </p>
@@ -164,7 +164,7 @@ const GetTickets = () => {
     <section className="get-tickets">
       <div className="gt-inner">
         <span className="gt-label">Hot this week</span>
-        <h2 className="gt-heading">Trending now</h2>
+        <h2 className="gt-heading">Selling now</h2>
         <p className="gt-sub">Do not miss the events everyone is talking about — curated picks, refreshed often.</p>
         
         <div className="gt-grid">

@@ -27,27 +27,34 @@ import AdminWithdraw from './admin/AdminWithdraw'
 import AdminTopUsers from './admin/AdminTopUsers'
 import AdminCoupons from './admin/AdminCoupons'
 import './App.css'
+import { getRouteTransitionVariant, type RouteTransitionVariant } from './routeTransitions'
 
 function AnimatedRoutes() {
   const location = useLocation()
   const [displayLocation, setDisplayLocation] = useState(location)
   const [transitionStage, setTransitionStage] = useState<'fade-in' | 'fade-out'>('fade-in')
+  const [transitionVariant, setTransitionVariant] = useState<RouteTransitionVariant>(() =>
+    getRouteTransitionVariant(location.pathname)
+  )
 
   useEffect(() => {
-    if (location !== displayLocation) {
-      const id = window.setTimeout(() => setTransitionStage('fade-out'), 0)
+    if (location.pathname !== displayLocation.pathname) {
+      const id = window.setTimeout(() => {
+        setTransitionVariant(getRouteTransitionVariant(location.pathname))
+        setTransitionStage('fade-out')
+      }, 0)
       return () => window.clearTimeout(id)
     }
     return undefined
-  }, [location, displayLocation])
+  }, [location.pathname, displayLocation.pathname])
 
   return (
     <div
-      className={`route-fade-wrap ${transitionStage}`}
+      className={`route-fade-wrap route-t-${transitionVariant} ${transitionStage}`}
       onAnimationEnd={() => {
         if (transitionStage === 'fade-out') {
-          setTransitionStage('fade-in')
           setDisplayLocation(location)
+          setTransitionStage('fade-in')
         }
       }}
     >

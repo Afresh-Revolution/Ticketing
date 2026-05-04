@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import LegalModal from './LegalModal';
 import SupportModal from './SupportModal';
 import Logo from './Logo';
+import ScrollReveal from './ScrollReveal';
 import '../FeaturesPage/css/Footer.css';
 
 const Footer = () => {
@@ -25,7 +26,8 @@ const Footer = () => {
     <>
     <footer className="footer">
       <div className="footer-content">
-        <div className="footer-main">
+        <ScrollReveal stagger className="scroll-reveal-mix footer-main" animation="fadeIn">
+          <>
           {/* Company Info Column */}
           <div className="footer-column company-info">
             <div className="footer-logo">
@@ -65,8 +67,6 @@ const Footer = () => {
               <li><Link to="/events">Browse Events</Link></li>
               <li><Link to="/events?filter=upcoming">Upcoming Events</Link></li>
               <li><Link to="/events?filter=popular">Popular Events</Link></li>
-              <li><Link to="/organizer-form" className="footer-link-btn">Become an Organizer</Link></li>
-              <li><Link to="/organizer-form">Create an Event</Link></li>
             </ul>
           </div>
 
@@ -91,24 +91,26 @@ const Footer = () => {
               <li><button className="footer-link-btn" type="button" onClick={() => openLegal('cookie')}>Cookie Policy</button></li>
             </ul>
           </div>
-        </div>
+          </>
+        </ScrollReveal>
 
         {/* Footer Bottom */}
         <div className="footer-bottom">
-          <div className="footer-bottom-content">
-            <p className="copyright"><Link to="/admin/login" className="copyright-admin-link" aria-label="Admin">©</Link> 2026 Gatewav. All rights reserved.</p>
-            <div className="payment-info">
-              <span className="secure-payment">SECURE PAYMENT</span>
-              <div className="payment-icons">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                <span>VISA</span>
-                <span>MC</span>
-                <span>Paystack</span>
+          <ScrollReveal stagger className="scroll-reveal-mix footer-bottom-content" animation="fadeIn">
+            <>
+              <p className="copyright">© 2026 Gatewav. All rights reserved.</p>
+              <div className="payment-info">
+                <span className="secure-payment">SECURE PAYMENT</span>
+                <div className="payment-icons">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span>VISA</span>
+                  <span>MC</span>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          </ScrollReveal>
         </div>
       </div>
     </footer>
