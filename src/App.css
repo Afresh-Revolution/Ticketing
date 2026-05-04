@@ -3,45 +3,142 @@
   margin: 0;
   padding: 0;
   text-align: left;
+  overflow-x: hidden;
 }
 
 .route-fade-wrap {
   width: 100%;
   min-height: 100vh;
-  animation-duration: 200ms;
-  animation-timing-function: ease;
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   animation-fill-mode: both;
+  will-change: transform, opacity;
 }
 
-.route-fade-wrap.fade-in {
-  animation-name: routeFadeIn;
+/* ——— Left → right enter (exit old to the right) ——— */
+.route-fade-wrap.fade-in.route-t-lr {
+  animation-name: routeFadeInLR;
+}
+.route-fade-wrap.fade-out.route-t-lr {
+  animation-name: routeFadeOutLR;
 }
 
-.route-fade-wrap.fade-out {
-  animation-name: routeFadeOut;
-}
-
-@keyframes routeFadeIn {
+@keyframes routeFadeInLR {
   from {
     opacity: 0;
+    transform: translateX(-44px);
   }
   to {
     opacity: 1;
+    transform: translateX(0);
   }
 }
 
-@keyframes routeFadeOut {
+@keyframes routeFadeOutLR {
   from {
     opacity: 1;
+    transform: translateX(0);
   }
   to {
     opacity: 0;
+    transform: translateX(44px);
+  }
+}
+
+/* ——— Right → left enter ——— */
+.route-fade-wrap.fade-in.route-t-rl {
+  animation-name: routeFadeInRL;
+}
+.route-fade-wrap.fade-out.route-t-rl {
+  animation-name: routeFadeOutRL;
+}
+
+@keyframes routeFadeInRL {
+  from {
+    opacity: 0;
+    transform: translateX(44px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes routeFadeOutRL {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-44px);
+  }
+}
+
+/* ——— Top → bottom enter ——— */
+.route-fade-wrap.fade-in.route-t-tb {
+  animation-name: routeFadeInTB;
+}
+.route-fade-wrap.fade-out.route-t-tb {
+  animation-name: routeFadeOutTB;
+}
+
+@keyframes routeFadeInTB {
+  from {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes routeFadeOutTB {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+}
+
+/* ——— Bottom → top enter ——— */
+.route-fade-wrap.fade-in.route-t-bt {
+  animation-name: routeFadeInBT;
+}
+.route-fade-wrap.fade-out.route-t-bt {
+  animation-name: routeFadeOutBT;
+}
+
+@keyframes routeFadeInBT {
+  from {
+    opacity: 0;
+    transform: translateY(36px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes routeFadeOutBT {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-36px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .route-fade-wrap {
     animation: none !important;
+    will-change: auto;
   }
 }
 

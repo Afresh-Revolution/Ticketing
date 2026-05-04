@@ -46,10 +46,18 @@
   color: var(--lp-muted, rgba(244, 240, 255, 0.72));
 }
 
-.bf-grid {
+.bf-reveal-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(1rem, 2.5vw, 1.5rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bf-reveal-grid > .bf-label,
+.bf-reveal-grid > .bf-heading,
+.bf-reveal-grid > .bf-lede {
+  grid-column: 1 / -1;
 }
 
 .bf-card {
@@ -118,13 +126,13 @@
 }
 
 @media (max-width: 968px) {
-  .bf-grid {
+  .bf-reveal-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .bf-grid {
+  .bf-reveal-grid {
     grid-template-columns: 1fr;
   }
 

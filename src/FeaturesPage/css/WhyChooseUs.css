@@ -55,12 +55,20 @@
   color: var(--lp-muted, rgba(244, 240, 255, 0.72));
 }
 
-.wc-grid {
+.wc-reveal-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: clamp(1.25rem, 3vw, 2rem);
   max-width: 720px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wc-reveal-grid > .wc-label,
+.wc-reveal-grid > .wc-heading,
+.wc-reveal-grid > .wc-sub {
+  grid-column: 1 / -1;
 }
 
 .wc-col {
@@ -98,7 +106,7 @@
 }
 
 @media (max-width: 768px) {
-  .wc-grid {
+  .wc-reveal-grid {
     grid-template-columns: 1fr;
   }
 }

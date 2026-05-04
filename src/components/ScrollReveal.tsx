@@ -2,7 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 
 type ScrollRevealProps = {
   children: ReactNode;
-  animation?: 'fadeIn' | 'slideUp' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'fadeInUp';
+  animation?: 'fadeIn' | 'slideUp' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'fadeInUp' | 'fadeInDown';
   stagger?: boolean;
   className?: string;
   rootMargin?: string;

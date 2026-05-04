@@ -34,6 +34,14 @@
   margin: 0 auto;
 }
 
+.rtj-reveal-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .ready-to-join-title {
   margin: 0 0 1rem;
   font-family: var(--lp-font-display, "Syne", sans-serif);
