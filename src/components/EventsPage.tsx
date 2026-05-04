@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Share2, Check } from "lucide-react";
 import { apiUrl } from "../api/config";
+import { shareEvent } from "../utils/shareEvent";
 import Navbar from "./Navbar";
 import Logo from "./Logo";
 import "./EventsPage.css";
@@ -40,17 +40,19 @@ const EventsPage = () => {
     return `${base}#/event/${eventId}`;
   }, []);
 
-  const handleShareEvent = useCallback(async (e: React.MouseEvent, eventId: string) => {
+  const handleShareEvent = useCallback(async (e: React.MouseEvent, eventId: string, title: string, imageUrl: string) => {
     e.preventDefault();
     e.stopPropagation();
     const url = getEventShareUrl(eventId);
-    try {
-      await navigator.clipboard.writeText(url);
-      setShareCopiedId(eventId);
-      setTimeout(() => setShareCopiedId(null), 2000);
-    } catch {
-      window.open(url, "_blank");
-    }
+    await shareEvent({
+      title,
+      url,
+      imageUrl,
+      onCopySuccess: () => {
+        setShareCopiedId(eventId);
+        setTimeout(() => setShareCopiedId(null), 2000);
+      },
+    });
   }, [getEventShareUrl]);
 
   useEffect(() => {
@@ -240,15 +242,23 @@ const EventsPage = () => {
                         <button
                           type="button"
                           className="event-card-share-btn"
-                          onClick={(e) => handleShareEvent(e, event.id)}
+                          onClick={(e) => handleShareEvent(e, event.id, event.title, event.image)}
                           title="Share event"
                           aria-label={shareCopiedId === event.id ? "Link copied" : "Share event"}
                         >
-                          {shareCopiedId === event.id ? (
-                            <Check size={18} strokeWidth={2} aria-hidden />
-                          ) : (
-                            <Share2 size={18} strokeWidth={2} aria-hidden />
-                          )}
+                          <span className="event-card-share-glyph" aria-hidden>
+                            {shareCopiedId === event.id ? (
+                              "✓"
+                            ) : (
+                              <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="18" cy="5" r="2.5" />
+                                <circle cx="6" cy="12" r="2.5" />
+                                <circle cx="18" cy="19" r="2.5" />
+                                <path d="M8.2 10.8L15.8 6.2" />
+                                <path d="M8.2 13.2L15.8 17.8" />
+                              </svg>
+                            )}
+                          </span>
                         </button>
                       </div>
                     </div>
