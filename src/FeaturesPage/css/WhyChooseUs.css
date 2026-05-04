@@ -1,85 +1,111 @@
-@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap');
-
-.container {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-/* Why Choose Us Section */
 .why-choose-us {
   width: 100%;
-  padding: 5rem 0;
-  background: #281851;
-  color: #ffffff;
-  font-family: 'Arimo', sans-serif;
+  padding: clamp(3.5rem, 9vw, 5.5rem) 0;
+  background: linear-gradient(180deg, var(--lp-bg-mid, #0a0520) 0%, rgba(12, 4, 40, 0.98) 100%);
+  color: var(--lp-ink, #f4f0ff);
+  font-family: var(--lp-font-body, "DM Sans", ui-sans-serif, system-ui, sans-serif);
   margin: 0;
+  position: relative;
 }
 
-.why-choose-us .section-title {
-  font-size: 2.5rem;
+.why-choose-us::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(168, 85, 247, 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+.wc-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.wc-label {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-align: center;
-  margin-bottom: 3rem;
-  color: #ffffff;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lp-faint, rgba(244, 240, 255, 0.48));
 }
 
-.benefits-grid {
+.wc-heading {
+  margin: 0 auto 0.6rem;
+  text-align: center;
+  font-family: var(--lp-font-display, "Syne", sans-serif);
+  font-size: clamp(1.85rem, 3.5vw, 2.45rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--lp-ink, #f4f0ff);
+}
+
+.wc-sub {
+  margin: 0 auto 2.5rem;
+  max-width: 480px;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
+}
+
+.wc-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  max-width: 800px;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  max-width: 720px;
   margin: 0 auto;
 }
 
-.benefits-column {
+.wc-col {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.85rem;
 }
 
-.benefit-item {
+.wc-item {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #ffffff;
-  font-size: 1rem;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--lp-radius-md, 14px);
+  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.95rem;
+  color: var(--lp-ink, #f4f0ff);
+  transition: border-color 0.2s, background 0.2s;
 }
 
-.benefit-item svg {
+.wc-item:hover {
+  border-color: rgba(34, 211, 238, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wc-item svg {
   flex-shrink: 0;
-  color: #ffffff;
+  margin-top: 2px;
+  color: var(--lp-cyan, #22d3ee);
 }
 
-.benefit-item span {
-  line-height: 1.5;
+.wc-item span {
+  line-height: 1.45;
 }
 
-/* Responsive Design */
-@media (max-width: 968px) {
-  .benefits-grid {
+@media (max-width: 768px) {
+  .wc-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .why-choose-us {
-    padding: 3rem 0;
-  }
-
-  .why-choose-us .section-title {
-    font-size: 2rem;
-  }
-
-  .container {
-    padding: 0 1.5rem;
-  }
-
-  .benefits-grid {
-    gap: 1.5rem;
-  }
-
-  .benefit-item {
-    font-size: 0.95rem;
+  .wc-item {
+    font-size: 0.9rem;
+    padding: 0.75rem 0.85rem;
   }
 }

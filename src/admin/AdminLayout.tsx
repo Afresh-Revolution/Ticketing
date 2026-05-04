@@ -13,7 +13,18 @@ const AdminLayout = () => {
   const [nextPasswordChangeAt, setNextPasswordChangeAt] = useState<string | null>(null);
 
   const userRole = localStorage.getItem('adminRole');
-  const isSuperAdmin = userRole === 'superadmin';
+  let storedAdminId: number | null = null;
+  try {
+    const raw = localStorage.getItem('adminUser');
+    if (raw) {
+      const parsed = JSON.parse(raw) as { id?: number | string };
+      const id = Number(parsed?.id);
+      storedAdminId = Number.isNaN(id) ? null : id;
+    }
+  } catch {
+    storedAdminId = null;
+  }
+  const isSuperAdmin = userRole === 'superadmin' || storedAdminId === 0;
 
   useEffect(() => {
     getPasswordChangeStatus()

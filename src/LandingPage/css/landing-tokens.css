@@ -1,0 +1,26 @@
+/* Design tokens — scoped to landing so other routes stay unchanged */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap");
+
+.landing-page {
+  --lp-font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --lp-font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --lp-ink: #f4f0ff;
+  --lp-muted: rgba(244, 240, 255, 0.72);
+  --lp-faint: rgba(244, 240, 255, 0.48);
+  --lp-bg-deep: #030014;
+  --lp-bg-mid: #0a0520;
+  --lp-bg-card: rgba(255, 255, 255, 0.035);
+  --lp-border: rgba(255, 255, 255, 0.09);
+  --lp-glow-violet: rgba(168, 85, 247, 0.45);
+  --lp-glow-cyan: rgba(34, 211, 238, 0.35);
+  --lp-accent: #c084fc;
+  --lp-accent-strong: #a855f7;
+  --lp-cyan: #22d3ee;
+  --lp-magenta: #e879f9;
+  --lp-radius-lg: 20px;
+  --lp-radius-md: 14px;
+  --lp-radius-pill: 999px;
+  --lp-shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --lp-shadow-card: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --lp-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

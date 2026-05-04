@@ -1,0 +1,23 @@
+:root {
+  --wc-font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --wc-font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --wc-ink: #f4f0ff;
+  --wc-muted: rgba(244, 240, 255, 0.72);
+  --wc-faint: rgba(244, 240, 255, 0.48);
+  --wc-bg-deep: #030014;
+  --wc-bg-mid: #0a0520;
+  --wc-bg-card: rgba(255, 255, 255, 0.035);
+  --wc-border: rgba(255, 255, 255, 0.1);
+  --wc-accent: #c084fc;
+  --wc-accent-strong: #a855f7;
+  --wc-cyan: #22d3ee;
+  --wc-magenta: #e879f9;
+  --wc-success: #22c55e;
+  --wc-danger: #ef4444;
+  --wc-shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --wc-shadow-card: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --wc-radius-lg: 20px;
+  --wc-radius-md: 14px;
+  --wc-radius-pill: 999px;
+  --wc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

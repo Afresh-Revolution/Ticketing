@@ -1,47 +1,75 @@
-@import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap");
-
 .top-users-carousel-wrap {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 1.25rem 0;
-  background: linear-gradient(180deg, rgba(24, 21, 67, 0.6) 0%, rgba(40, 24, 81, 0.4) 100%);
-  margin-bottom: 0;
+  padding: clamp(2.5rem, 6vw, 3.5rem) 0 clamp(1.5rem, 4vw, 2rem);
+  background: linear-gradient(180deg, var(--lp-bg-deep, #030014) 0%, var(--lp-bg-mid, #0a0520) 100%);
+  font-family: var(--lp-font-body, "DM Sans", ui-sans-serif, system-ui, sans-serif);
+}
+
+.top-users-carousel-intro {
+  max-width: 1120px;
+  margin: 0 auto clamp(1.25rem, 3vw, 1.75rem);
+  padding: 0 clamp(1.25rem, 4vw, 2.5rem);
+  text-align: center;
+}
+
+.top-users-carousel-label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lp-faint, rgba(244, 240, 255, 0.48));
+}
+
+.top-users-carousel-title {
+  margin: 0;
+  font-family: var(--lp-font-display, "Syne", sans-serif);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--lp-ink, #f4f0ff);
+}
+
+.top-users-carousel-marquee {
+  position: relative;
+  width: 100%;
 }
 
 .top-users-carousel-fade {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 80px;
+  width: min(100px, 12vw);
   z-index: 2;
   pointer-events: none;
 }
 
 .top-users-carousel-fade-left {
   left: 0;
-  background: linear-gradient(90deg, rgba(24, 21, 67, 0.95) 0%, rgba(24, 21, 67, 0) 100%);
+  background: linear-gradient(90deg, var(--lp-bg-mid, #0a0520) 0%, transparent 100%);
 }
 
 .top-users-carousel-fade-right {
   right: 0;
   left: auto;
-  background: linear-gradient(270deg, rgba(24, 21, 67, 0.95) 0%, rgba(24, 21, 67, 0) 100%);
+  background: linear-gradient(270deg, var(--lp-bg-mid, #0a0520) 0%, transparent 100%);
 }
 
 .top-users-carousel-track {
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
 }
 
 .top-users-carousel-inner {
   display: flex;
-  gap: 1.25rem;
+  gap: 1rem;
   width: max-content;
   animation: topUsersScroll 45s linear infinite;
-  padding: 0 2rem;
-  margin-top: 20px;
+  padding: 0.5rem 2rem 1.25rem;
 }
 
 .top-users-carousel-inner:hover {
@@ -49,8 +77,12 @@
 }
 
 @keyframes topUsersScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-33.333%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
 }
 
 .top-users-carousel-card {
@@ -58,29 +90,31 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 1rem;
-  background: rgba(121, 26, 148, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  min-width: 180px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 0.55rem 1.1rem 0.55rem 0.55rem;
+  background: var(--lp-bg-card, rgba(255, 255, 255, 0.035));
+  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
+  border-radius: var(--lp-radius-pill, 999px);
+  min-width: 200px;
+  box-shadow: var(--lp-shadow-card, 0 12px 40px rgba(0, 0, 0, 0.35));
+  transition: transform 0.25s var(--lp-ease-out, cubic-bezier(0.22, 1, 0.36, 1)), border-color 0.25s;
 }
 
 .top-users-carousel-card:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 20px rgba(121, 26, 148, 0.25);
+  transform: scale(1.02);
+  border-color: rgba(168, 85, 247, 0.35);
 }
 
 .top-users-carousel-card-avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
 }
 
 .top-users-carousel-card-avatar img {
@@ -90,24 +124,23 @@
 }
 
 .top-users-carousel-card-initial {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  font-family: "Arimo", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--lp-ink, #f4f0ff);
+  font-family: var(--lp-font-display, "Syne", sans-serif);
 }
 
 .top-users-carousel-card-info {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.12rem;
   min-width: 0;
 }
 
 .top-users-carousel-card-name {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #fff;
-  font-family: "Arimo", sans-serif;
+  color: var(--lp-ink, #f4f0ff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -115,8 +148,7 @@
 
 .top-users-carousel-card-title {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.75);
-  font-family: "Arimo", sans-serif;
+  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -128,36 +160,17 @@
   }
 
   .top-users-carousel-card {
-    min-width: 150px;
-    padding: 0.5rem 0.85rem;
-  }
-
-  .top-users-carousel-card-avatar {
-    width: 34px;
-    height: 34px;
-  }
-
-  .top-users-carousel-card-initial {
-    font-size: 1rem;
-  }
-
-  .top-users-carousel-card-name {
-    font-size: 0.85rem;
-  }
-
-  .top-users-carousel-card-title {
-    font-size: 0.7rem;
+    min-width: 170px;
   }
 
   .top-users-carousel-inner {
-    gap: 1rem;
-    animation-duration: 35s;
+    animation-duration: 38s;
   }
 }
 
 @media (max-width: 480px) {
   .top-users-carousel-wrap {
-    padding: 1rem 0;
+    padding: 2rem 0 1.25rem;
   }
 
   .top-users-carousel-fade {
@@ -165,16 +178,12 @@
   }
 
   .top-users-carousel-card {
-    min-width: 130px;
-    padding: 0.45rem 0.75rem;
+    min-width: 150px;
+    padding: 0.45rem 0.85rem 0.45rem 0.45rem;
   }
 
   .top-users-carousel-card-avatar {
-    width: 30px;
-    height: 30px;
-  }
-
-  .top-users-carousel-card-name {
-    font-size: 0.8rem;
+    width: 36px;
+    height: 36px;
   }
 }

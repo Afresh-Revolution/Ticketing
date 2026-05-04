@@ -11,12 +11,31 @@ interface TopUser {
   sortOrder: number;
 }
 
+interface LandingVideo {
+  id: string;
+  videoUrl: string;
+  thumbnailUrl: string | null;
+  sortOrder: number;
+  isActive: boolean;
+}
+
 type DeleteConfirm = TopUser | null;
 
 const AdminTopUsers = () => {
   const navigate = useNavigate();
   const userRole = localStorage.getItem('adminRole');
-  const isSuperAdmin = userRole === 'superadmin';
+  let storedAdminId: number | null = null;
+  try {
+    const raw = localStorage.getItem('adminUser');
+    if (raw) {
+      const parsed = JSON.parse(raw) as { id?: number | string };
+      const id = Number(parsed?.id);
+      storedAdminId = Number.isNaN(id) ? null : id;
+    }
+  } catch {
+    storedAdminId = null;
+  }
+  const isSuperAdmin = userRole === 'superadmin' || storedAdminId === 0;
 
   const [list, setList] = useState<TopUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +49,9 @@ const AdminTopUsers = () => {
   const [editImageUrl, setEditImageUrl] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
   const [deleting, setDeleting] = useState(false);
+  const [videos, setVideos] = useState<LandingVideo[]>([]);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoError, setVideoError] = useState('');
 
   const getToken = () => localStorage.getItem('adminToken');
 
@@ -51,13 +73,88 @@ const AdminTopUsers = () => {
     }
   }, []);
 
+  const fetchVideos = useCallback(async () => {
+    try {
+      setVideoError('');
+      const res = await fetch(apiUrl('/api/admin/landing-videos'), {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to load landing videos');
+      const data = await res.json();
+      setVideos(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setVideoError(e instanceof Error ? e.message : 'Failed to load landing videos');
+      setVideos([]);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isSuperAdmin) {
       navigate('/admin', { replace: true });
       return;
     }
     fetchList();
-  }, [fetchList, isSuperAdmin, navigate]);
+    fetchVideos();
+  }, [fetchList, fetchVideos, isSuperAdmin, navigate]);
+
+  const handleVideoUpload = async (file: File) => {
+    const maxBytes = 101 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      setVideoError('Video must be below 101MB.');
+      return;
+    }
+    setUploadingVideo(true);
+    setVideoError('');
+    try {
+      const fd = new FormData();
+      fd.append('video', file);
+      const res = await fetch(apiUrl('/api/admin/landing-videos/upload'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: fd,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Video upload failed');
+      }
+      await fetchVideos();
+    } catch (e) {
+      setVideoError(e instanceof Error ? e.message : 'Video upload failed');
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
+  const handleDeleteVideo = async (id: string) => {
+    try {
+      setVideoError('');
+      const res = await fetch(apiUrl(`/api/admin/landing-videos/${id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error('Failed to delete video');
+      await fetchVideos();
+    } catch (e) {
+      setVideoError(e instanceof Error ? e.message : 'Failed to delete video');
+    }
+  };
+
+  const handleVideoToggle = async (id: string, isActive: boolean) => {
+    try {
+      const res = await fetch(apiUrl(`/api/admin/landing-videos/${id}`), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ isActive: !isActive }),
+      });
+      if (!res.ok) throw new Error('Failed to update video');
+      await fetchVideos();
+    } catch (e) {
+      setVideoError(e instanceof Error ? e.message : 'Failed to update video');
+    }
+  };
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,6 +253,63 @@ const AdminTopUsers = () => {
     <div className="admin-page">
       <h1 className="admin-page-title">Top Users (Landing Carousel)</h1>
       <p className="admin-page-desc">These appear in the infinite carousel below the hero on the landing page.</p>
+
+      <div className="admin-section" style={{ marginBottom: '1.5rem' }}>
+        <h2 className="admin-section-title">Landing videos (Super Admin)</h2>
+        <p className="admin-muted" style={{ marginBottom: '0.75rem' }}>
+          Upload up to 101MB. These videos power the landing “Atmosphere” cards.
+        </p>
+        <label className="admin-btn admin-btn-primary" style={{ width: 'fit-content', cursor: uploadingVideo ? 'not-allowed' : 'pointer', opacity: uploadingVideo ? 0.6 : 1 }}>
+          {uploadingVideo ? 'Uploading video…' : 'Click to upload video'}
+          <input
+            type="file"
+            accept="video/*"
+            style={{ display: 'none' }}
+            disabled={uploadingVideo}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void handleVideoUpload(file);
+              e.currentTarget.value = '';
+            }}
+          />
+        </label>
+        {videoError && <div className="admin-form-error" style={{ marginTop: '0.75rem' }}>{videoError}</div>}
+        {videos.length > 0 && (
+          <div className="admin-table-container" style={{ marginTop: '1rem' }}>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Preview</th>
+                  <th>URL</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {videos.map((v) => (
+                  <tr key={v.id}>
+                    <td>
+                      <video src={v.videoUrl} style={{ width: '120px', borderRadius: '8px' }} muted playsInline />
+                    </td>
+                    <td style={{ maxWidth: '320px' }}>
+                      <a href={v.videoUrl} target="_blank" rel="noopener noreferrer">Open video</a>
+                    </td>
+                    <td>{v.isActive ? 'Active' : 'Hidden'}</td>
+                    <td>
+                      <button type="button" className="admin-btn admin-btn-sm" onClick={() => handleVideoToggle(v.id, v.isActive)}>
+                        {v.isActive ? 'Hide' : 'Show'}
+                      </button>
+                      <button type="button" className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => handleDeleteVideo(v.id)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {error && <div className="admin-form-error" style={{ marginBottom: '1rem' }}>{error}</div>}
 

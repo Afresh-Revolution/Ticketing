@@ -136,11 +136,25 @@ const EventDetailPage = () => {
         >
           ← Back to events
         </button>
-        <h1 className="event-detail-title">{event.title}</h1>
-
         <div className="event-detail-layout">
+          <div className="event-detail-poster-col">
+            <button
+              type="button"
+              className="event-detail-poster"
+              onClick={() => window.open(event.heroImage, "_blank", "noopener,noreferrer")}
+              aria-label="Open full event poster"
+            >
+              <img src={event.heroImage} alt={event.title} />
+            </button>
+          </div>
+
           <div className="event-detail-info-col">
-            <div className="event-detail-meta">
+            <div className="event-detail-title-wrap">
+              <span className="event-detail-mini-tag">{event.category.toUpperCase()}</span>
+              <h1 className="event-detail-title">{event.title}</h1>
+            </div>
+
+            <div className="event-detail-meta event-detail-meta-grid">
               <div className="event-detail-meta-item">
                 <span className="event-detail-meta-icon" aria-hidden>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -178,9 +192,7 @@ const EventDetailPage = () => {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="event-detail-cards-col">
             <div className="event-detail-card">
               <span className="event-detail-card-icon" aria-hidden>
                 Q

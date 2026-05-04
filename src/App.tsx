@@ -1,4 +1,5 @@
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { PWAProvider } from './contexts/PWAContext'
 import PWABadges from './components/PWABadges'
@@ -27,14 +28,30 @@ import AdminTopUsers from './admin/AdminTopUsers'
 import AdminCoupons from './admin/AdminCoupons'
 import './App.css'
 
-function App() {
+function AnimatedRoutes() {
+  const location = useLocation()
+  const [displayLocation, setDisplayLocation] = useState(location)
+  const [transitionStage, setTransitionStage] = useState<'fade-in' | 'fade-out'>('fade-in')
+
+  useEffect(() => {
+    if (location !== displayLocation) {
+      const id = window.setTimeout(() => setTransitionStage('fade-out'), 0)
+      return () => window.clearTimeout(id)
+    }
+    return undefined
+  }, [location, displayLocation])
+
   return (
-    <AuthProvider>
-    <PWAProvider>
-    <PullToRefresh />
-    <PWABadges />
-    <Router>
-      <Routes>
+    <div
+      className={`route-fade-wrap ${transitionStage}`}
+      onAnimationEnd={() => {
+        if (transitionStage === 'fade-out') {
+          setTransitionStage('fade-in')
+          setDisplayLocation(location)
+        }
+      }}
+    >
+      <Routes location={displayLocation}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -60,6 +77,18 @@ function App() {
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>
       </Routes>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+    <PWAProvider>
+    <PullToRefresh />
+    <PWABadges />
+    <Router>
+      <AnimatedRoutes />
     </Router>
     </PWAProvider>
     </AuthProvider>

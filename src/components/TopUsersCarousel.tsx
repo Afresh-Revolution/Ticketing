@@ -40,11 +40,18 @@ const TopUsersCarousel = () => {
   const duplicated = [...users, ...users, ...users];
 
   return (
-    <section className="top-users-carousel-wrap" aria-label="Top users">
-      <div className="top-users-carousel-fade top-users-carousel-fade-left" aria-hidden />
-      <div className="top-users-carousel-fade top-users-carousel-fade-right" aria-hidden />
-      <div className="top-users-carousel-track" ref={scrollRef}>
-        <div className="top-users-carousel-inner">
+    <section className="top-users-carousel-wrap" aria-labelledby="top-users-carousel-heading">
+      <div className="top-users-carousel-intro">
+        <span className="top-users-carousel-label">Community</span>
+        <h2 id="top-users-carousel-heading" className="top-users-carousel-title">
+          Top Users
+        </h2>
+      </div>
+      <div className="top-users-carousel-marquee">
+        <div className="top-users-carousel-fade top-users-carousel-fade-left" aria-hidden />
+        <div className="top-users-carousel-fade top-users-carousel-fade-right" aria-hidden />
+        <div className="top-users-carousel-track" ref={scrollRef}>
+          <div className="top-users-carousel-inner">
           {duplicated.map((user, index) => (
             <div key={`${user.id}-${index}`} className="top-users-carousel-card">
               <div className="top-users-carousel-card-avatar">
@@ -60,6 +67,7 @@ const TopUsersCarousel = () => {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </section>
