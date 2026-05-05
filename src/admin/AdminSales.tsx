@@ -104,10 +104,20 @@ const AdminSales = () => {
   const [walkInForm, setWalkInForm] = useState(emptyWalkInForm);
   const [walkInSubmitting, setWalkInSubmitting] = useState(false);
   const [walkInError, setWalkInError] = useState('');
+  const [showAddSoldModal, setShowAddSoldModal] = useState(false);
+  const [addSoldSubmitting, setAddSoldSubmitting] = useState(false);
+  const [addSoldError, setAddSoldError] = useState('');
+  const [addSoldForm, setAddSoldForm] = useState({
+    eventId: '',
+    ticketType: 'General',
+    quantity: '1',
+    notes: '',
+  });
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [showWalkInList, setShowWalkInList] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [walkInSearch, setWalkInSearch] = useState('');
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const eventGroups = useMemo(() => groupSalesByEvent(sales), [sales]);
   const filteredWalkInSales = useMemo(() => {
@@ -135,6 +145,13 @@ const AdminSales = () => {
       .filter(Boolean);
     return names.length > 0 ? names : ['General'];
   }, [events, walkInForm.eventId]);
+  const selectedAddSoldTicketTypes = useMemo(() => {
+    const selectedEvent = events.find((event) => event.id === addSoldForm.eventId);
+    const names = (selectedEvent?.ticketTypes || [])
+      .map((ticketType) => (ticketType.name || '').trim())
+      .filter(Boolean);
+    return names.length > 0 ? names : ['General'];
+  }, [events, addSoldForm.eventId]);
 
   const token = localStorage.getItem('adminToken');
   const authHeaders = useMemo(
@@ -339,6 +356,62 @@ const AdminSales = () => {
     }
   };
 
+  const showToast = (msg: string, type: 'success' | 'error') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const openAddSoldModal = () => {
+    const initialEventId = events[0]?.id || '';
+    const initialEvent = events.find((event) => event.id === initialEventId);
+    const initialTicketType =
+      initialEvent?.ticketTypes?.map((t) => (t.name || '').trim()).find(Boolean) || 'General';
+    setAddSoldForm({
+      eventId: initialEventId,
+      ticketType: initialTicketType,
+      quantity: '1',
+      notes: '',
+    });
+    setAddSoldError('');
+    setShowAddSoldModal(true);
+  };
+
+  const handleAddSoldSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addSoldForm.eventId) {
+      setAddSoldError('Please select an event.');
+      return;
+    }
+    setAddSoldSubmitting(true);
+    setAddSoldError('');
+    try {
+      const res = await fetch(apiUrl(`/api/admin/events/${addSoldForm.eventId}/ticket-adjustments`), {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          ticketType: addSoldForm.ticketType,
+          quantity: Math.max(1, parseInt(addSoldForm.quantity, 10) || 1),
+          notes: addSoldForm.notes.trim() || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({} as { error?: string; message?: string }));
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) throw new Error("You don't have access");
+        if (res.status === 500) throw new Error('Something went wrong. Please try again.');
+        if (res.status === 404) throw new Error(data.error || data.message || 'Event or ticket type not found');
+        throw new Error(data.error || data.message || 'Failed to update sold count');
+      }
+      setShowAddSoldModal(false);
+      showToast('Sold count updated', 'success');
+      await Promise.all([fetchSales(), fetchEvents(), fetchWalkInRevenue()]);
+    } catch (err) {
+      setAddSoldError(err instanceof Error ? err.message : 'Failed to update sold count');
+      showToast('Failed to update sold count', 'error');
+    } finally {
+      setAddSoldSubmitting(false);
+    }
+  };
+
   const toggleWalkInStatus = async (sale: WalkInSale) => {
     const newStatus = sale.status === 'paid' ? 'pending' : 'paid';
     setTogglingId(sale.id);
@@ -385,6 +458,11 @@ const AdminSales = () => {
 
   return (
     <div className="admin-page">
+      {toast && (
+        <div className={`withdraw-toast ${toast.type === 'success' ? 'withdraw-toast-success' : 'withdraw-toast-error'}`}>
+          {toast.msg}
+        </div>
+      )}
       <div className="admin-sales-container">
         <div className="admin-page-header">
           <h1 className="admin-page-title">
@@ -395,15 +473,26 @@ const AdminSales = () => {
               </span>
             )}
           </h1>
-          <button
-            type="button"
-            className="admin-btn-walkin"
-            onClick={openWalkInModal}
-            id="btn-add-walkin-sale"
-          >
-            <span className="admin-btn-walkin-icon">🎟️</span>
-            Add Walk-in Sale
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button
+              type="button"
+              className="admin-btn-walkin"
+              onClick={openAddSoldModal}
+              id="btn-add-sold-adjustment"
+            >
+              <span className="admin-btn-walkin-icon">➕</span>
+              Add Sold
+            </button>
+            <button
+              type="button"
+              className="admin-btn-walkin"
+              onClick={openWalkInModal}
+              id="btn-add-walkin-sale"
+            >
+              <span className="admin-btn-walkin-icon">🎟️</span>
+              Add Walk-in Sale
+            </button>
+          </div>
         </div>
 
         {/* ── Revenue KPI strip ── */}
@@ -920,6 +1009,114 @@ const AdminSales = () => {
                   disabled={walkInSubmitting || !walkInForm.eventId || !walkInForm.fullName}
                 >
                   {walkInSubmitting ? 'Saving…' : 'Record Sale'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAddSoldModal && (
+        <div className="admin-modal-overlay" onClick={() => !addSoldSubmitting && setShowAddSoldModal(false)}>
+          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Add Sold</h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => !addSoldSubmitting && setShowAddSoldModal(false)}
+                disabled={addSoldSubmitting}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <form className="admin-modal-form" onSubmit={handleAddSoldSubmit}>
+              {addSoldError && <div className="admin-modal-error">{addSoldError}</div>}
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="addsold-event">Event *</label>
+                <select
+                  id="addsold-event"
+                  className="admin-input"
+                  value={addSoldForm.eventId}
+                  onChange={(e) => {
+                    const selectedEventId = e.target.value;
+                    const selectedEvent = events.find((event) => event.id === selectedEventId);
+                    const eventTypes = (selectedEvent?.ticketTypes || [])
+                      .map((ticketType) => (ticketType.name || '').trim())
+                      .filter(Boolean);
+                    setAddSoldForm((prev) => ({
+                      ...prev,
+                      eventId: selectedEventId,
+                      ticketType: eventTypes[0] || 'General',
+                    }));
+                  }}
+                  required
+                  disabled={addSoldSubmitting}
+                >
+                  <option value="">Select an event</option>
+                  {events.map((ev) => (
+                    <option key={ev.id} value={ev.id}>{ev.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="addsold-ticket-type">Ticket Type *</label>
+                <select
+                  id="addsold-ticket-type"
+                  className="admin-input"
+                  value={addSoldForm.ticketType}
+                  onChange={(e) => setAddSoldForm((prev) => ({ ...prev, ticketType: e.target.value }))}
+                  required
+                  disabled={addSoldSubmitting}
+                >
+                  {selectedAddSoldTicketTypes.map((ticketTypeName) => (
+                    <option key={ticketTypeName} value={ticketTypeName}>
+                      {ticketTypeName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="addsold-qty">Quantity *</label>
+                <input
+                  id="addsold-qty"
+                  type="number"
+                  className="admin-input"
+                  min="1"
+                  value={addSoldForm.quantity}
+                  onChange={(e) => setAddSoldForm((prev) => ({ ...prev, quantity: e.target.value }))}
+                  required
+                  disabled={addSoldSubmitting}
+                />
+              </div>
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="addsold-notes">Note</label>
+                <textarea
+                  id="addsold-notes"
+                  className="admin-textarea"
+                  rows={2}
+                  value={addSoldForm.notes}
+                  onChange={(e) => setAddSoldForm((prev) => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Manual gate reconciliation"
+                  disabled={addSoldSubmitting}
+                />
+              </div>
+              <div className="admin-modal-actions">
+                <button
+                  type="button"
+                  className="admin-btn-cancel"
+                  onClick={() => setShowAddSoldModal(false)}
+                  disabled={addSoldSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-btn-primary"
+                  disabled={addSoldSubmitting || !addSoldForm.eventId}
+                >
+                  {addSoldSubmitting ? 'Updating…' : 'Add Sold'}
                 </button>
               </div>
             </form>

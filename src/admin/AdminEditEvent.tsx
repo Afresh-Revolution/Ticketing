@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect, useRef } from 'react';
+import { useState, type FormEvent, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
@@ -59,6 +59,13 @@ const AdminEditEvent = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageUploadError, setImageUploadError] = useState('');
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
+  const [adjustmentTicketType, setAdjustmentTicketType] = useState('');
+  const [adjustmentQuantity, setAdjustmentQuantity] = useState(1);
+  const [adjustmentNote, setAdjustmentNote] = useState('');
+  const [adjustmentError, setAdjustmentError] = useState('');
+  const [adjustmentLoading, setAdjustmentLoading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
 
@@ -68,6 +75,15 @@ const AdminEditEvent = () => {
   };
   const buildCandidateUrls = (path: string): string[] => {
     return [apiUrl(path)];
+  };
+  const showToast = (msg: string, type: 'success' | 'error') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+  const parseServerMessage = (body: unknown): string | undefined => {
+    if (!body || typeof body !== 'object') return undefined;
+    const maybeMessage = (body as { error?: unknown; message?: unknown }).error ?? (body as { message?: unknown }).message;
+    return typeof maybeMessage === 'string' && maybeMessage.trim() ? maybeMessage : undefined;
   };
 
   const [formData, setFormData] = useState({
@@ -90,100 +106,102 @@ const AdminEditEvent = () => {
     imageUrl: '',
   });
 
-  useEffect(() => {
+  const fetchEvent = useCallback(async () => {
     if (!id) return;
-    const fetchEvent = async () => {
+    try {
+      setLoadError('');
+      const headers = authHeaders();
+      // Load public event payload first to avoid edit page failure when admin lookup is restricted.
+      let fullEventData: EventApiResponse = {};
       try {
-        const headers = authHeaders();
-        // Load public event payload first to avoid edit page failure when admin lookup is restricted.
-        let fullEventData: EventApiResponse = {};
-        try {
-          for (const url of buildCandidateUrls(`/api/events/${id}`)) {
-            const publicRes = await fetch(url);
-            if (publicRes.ok) {
-              const publicData = (await publicRes.json()) as EventApiResponse;
-              fullEventData = publicData;
-              break;
-            }
-            if (publicRes.status !== 404) {
-              throw new Error('Failed to load event');
-            }
-          }
-        } catch {
-          // We still try admin endpoint below.
-        }
-
-        let adminData: EventApiResponse = {};
-        for (const url of buildCandidateUrls(`/api/admin/events/${id}`)) {
-          const adminRes = await fetch(url, { headers });
-          if (adminRes.ok) {
-            adminData = (await adminRes.json()) as EventApiResponse;
+        for (const url of buildCandidateUrls(`/api/events/${id}`)) {
+          const publicRes = await fetch(url);
+          if (publicRes.ok) {
+            const publicData = (await publicRes.json()) as EventApiResponse;
+            fullEventData = publicData;
             break;
           }
-          if (adminRes.status !== 404) {
+          if (publicRes.status !== 404) {
             throw new Error('Failed to load event');
           }
         }
-
-        const mergedEvent: EventApiResponse = {
-          ...fullEventData,
-          ...adminData,
-          tickets: adminData.tickets ?? fullEventData.tickets ?? fullEventData.ticketTypes,
-          ticketTypes: adminData.ticketTypes ?? fullEventData.ticketTypes ?? fullEventData.tickets,
-        };
-
-        if (!mergedEvent.id) {
-          throw new Error('Event not found');
-        }
-
-        const rawDate = mergedEvent.date ? new Date(mergedEvent.date) : null;
-        const isValidDate = rawDate instanceof Date && !Number.isNaN(rawDate.getTime());
-        const startDate = isValidDate ? rawDate.toLocaleDateString('en-CA') : '';
-        const startTime = (mergedEvent.startTime || (isValidDate ? rawDate.toTimeString().slice(0, 5) : '') || '12:00').slice(0, 5);
-
-        const locationText = String(mergedEvent.location ?? '').trim();
-        const locationParts = locationText ? locationText.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
-        const inferredCity = locationParts.length > 1 ? locationParts[1] : '';
-        setFormData({
-          title: mergedEvent.title ?? '',
-          description: mergedEvent.description ?? '',
-          category: mergedEvent.category ?? '',
-          eventType: '',
-          startDate,
-          startTime,
-          endDate: startDate,
-          endTime: startTime,
-          timezone: 'Africa/Lagos',
-          venue: mergedEvent.venue ?? '',
-          address: mergedEvent.address ?? '',
-          city: mergedEvent.city ?? inferredCity,
-          state: mergedEvent.state ?? '',
-          country: mergedEvent.country ?? 'Nigeria',
-          capacity: String(mergedEvent.capacity ?? '500'),
-          minTickets: '1',
-          imageUrl: mergedEvent.imageUrl ?? '',
-        });
-        const tickets: EventTicket[] = mergedEvent.tickets ?? mergedEvent.ticketTypes ?? [];
-        if (tickets.length > 0) {
-          setPools(
-            tickets.map((t) => ({
-              id: t.id ?? crypto.randomUUID(),
-              ticketName: t.name ?? t.ticketName ?? 'Ticket',
-              ticketType: (t.type === 'free' ? 'free' : 'paid') as 'paid' | 'free',
-              price: String(t.price ?? 0),
-              quantity: String(t.quantity ?? 0),
-              description: t.description ?? '',
-            }))
-          );
-        } else {
-          setPools([defaultPool()]);
-        }
-      } catch (err) {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load event');
+      } catch {
+        // We still try admin endpoint below.
       }
-    };
-    fetchEvent();
+
+      let adminData: EventApiResponse = {};
+      for (const url of buildCandidateUrls(`/api/admin/events/${id}`)) {
+        const adminRes = await fetch(url, { headers });
+        if (adminRes.ok) {
+          adminData = (await adminRes.json()) as EventApiResponse;
+          break;
+        }
+        if (adminRes.status !== 404) {
+          throw new Error('Failed to load event');
+        }
+      }
+
+      const mergedEvent: EventApiResponse = {
+        ...fullEventData,
+        ...adminData,
+        tickets: adminData.tickets ?? fullEventData.tickets ?? fullEventData.ticketTypes,
+        ticketTypes: adminData.ticketTypes ?? fullEventData.ticketTypes ?? fullEventData.tickets,
+      };
+
+      if (!mergedEvent.id) {
+        throw new Error('Event not found');
+      }
+
+      const rawDate = mergedEvent.date ? new Date(mergedEvent.date) : null;
+      const isValidDate = rawDate instanceof Date && !Number.isNaN(rawDate.getTime());
+      const startDate = isValidDate ? rawDate.toLocaleDateString('en-CA') : '';
+      const startTime = (mergedEvent.startTime || (isValidDate ? rawDate.toTimeString().slice(0, 5) : '') || '12:00').slice(0, 5);
+
+      const locationText = String(mergedEvent.location ?? '').trim();
+      const locationParts = locationText ? locationText.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+      const inferredCity = locationParts.length > 1 ? locationParts[1] : '';
+      setFormData({
+        title: mergedEvent.title ?? '',
+        description: mergedEvent.description ?? '',
+        category: mergedEvent.category ?? '',
+        eventType: '',
+        startDate,
+        startTime,
+        endDate: startDate,
+        endTime: startTime,
+        timezone: 'Africa/Lagos',
+        venue: mergedEvent.venue ?? '',
+        address: mergedEvent.address ?? '',
+        city: mergedEvent.city ?? inferredCity,
+        state: mergedEvent.state ?? '',
+        country: mergedEvent.country ?? 'Nigeria',
+        capacity: String(mergedEvent.capacity ?? '500'),
+        minTickets: '1',
+        imageUrl: mergedEvent.imageUrl ?? '',
+      });
+      const tickets: EventTicket[] = mergedEvent.tickets ?? mergedEvent.ticketTypes ?? [];
+      if (tickets.length > 0) {
+        setPools(
+          tickets.map((t) => ({
+            id: t.id ?? crypto.randomUUID(),
+            ticketName: t.name ?? t.ticketName ?? 'Ticket',
+            ticketType: (t.type === 'free' ? 'free' : 'paid') as 'paid' | 'free',
+            price: String(t.price ?? 0),
+            quantity: String(t.quantity ?? 0),
+            description: t.description ?? '',
+          }))
+        );
+      } else {
+        setPools([defaultPool()]);
+      }
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load event');
+    }
   }, [id]);
+
+  useEffect(() => {
+    void fetchEvent();
+  }, [fetchEvent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -327,6 +345,62 @@ const AdminEditEvent = () => {
     }
   };
 
+  const openAdjustmentModal = (ticketType: string) => {
+    setAdjustmentTicketType(ticketType);
+    setAdjustmentQuantity(1);
+    setAdjustmentNote('');
+    setAdjustmentError('');
+    setShowAdjustmentModal(true);
+  };
+
+  const closeAdjustmentModal = () => {
+    if (adjustmentLoading) return;
+    setShowAdjustmentModal(false);
+    setAdjustmentError('');
+  };
+
+  const handleCreateAdjustment = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+    const normalizedQuantity = Number.isNaN(adjustmentQuantity) ? 1 : Math.max(1, adjustmentQuantity);
+    setAdjustmentLoading(true);
+    setAdjustmentError('');
+    try {
+      const res = await fetch(apiUrl(`/api/admin/events/${id}/ticket-adjustments`), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
+        body: JSON.stringify({
+          ticketType: adjustmentTicketType,
+          quantity: normalizedQuantity,
+          notes: adjustmentNote.trim() || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error("You don't have access");
+        }
+        if (res.status === 500) {
+          throw new Error('Something went wrong. Please try again.');
+        }
+        if (res.status === 404) {
+          throw new Error(parseServerMessage(data) || 'Event or ticket type not found');
+        }
+        throw new Error(parseServerMessage(data) || 'Failed to update sold count');
+      }
+      setShowAdjustmentModal(false);
+      showToast('Sold count updated', 'success');
+      await fetchEvent();
+    } catch (err) {
+      setAdjustmentError(err instanceof Error ? err.message : 'Failed to update sold count');
+    } finally {
+      setAdjustmentLoading(false);
+    }
+  };
+
   if (loadError) {
     return (
       <div className="admin-page">
@@ -340,6 +414,11 @@ const AdminEditEvent = () => {
 
   return (
     <div className="admin-page">
+      {toast && (
+        <div className={`withdraw-toast ${toast.type === 'success' ? 'withdraw-toast-success' : 'withdraw-toast-error'}`}>
+          {toast.msg}
+        </div>
+      )}
       <h1 className="admin-page-title">Edit Event</h1>
 
       {submitError && (
@@ -472,15 +551,24 @@ const AdminEditEvent = () => {
                 <div key={pool.id} className="admin-pool-card">
                   <div className="admin-pool-card-header">
                     <span className="admin-pool-card-title">Ticket Pool</span>
-                    {pools.length > 1 && (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
                         type="button"
-                        className="admin-pool-remove"
-                        onClick={() => setPools((prev) => prev.filter((p) => p.id !== pool.id))}
+                        className="admin-btn-ghost"
+                        onClick={() => openAdjustmentModal(pool.ticketName)}
                       >
-                        Remove
+                        + Add Sold
                       </button>
-                    )}
+                      {pools.length > 1 && (
+                        <button
+                          type="button"
+                          className="admin-pool-remove"
+                          onClick={() => setPools((prev) => prev.filter((p) => p.id !== pool.id))}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <label className="admin-label">Ticket Name *</label>
                   <input
@@ -611,6 +699,58 @@ const AdminEditEvent = () => {
           </button>
         </div>
       </form>
+
+      {showAdjustmentModal && (
+        <div className="admin-modal-overlay" onClick={closeAdjustmentModal}>
+          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title">Add Sold Ticket</h2>
+              <button type="button" className="admin-modal-close" onClick={closeAdjustmentModal} disabled={adjustmentLoading}>
+                ×
+              </button>
+            </div>
+            <form className="admin-modal-form" onSubmit={handleCreateAdjustment}>
+              {adjustmentError && <div className="admin-modal-error">{adjustmentError}</div>}
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="adjustment-ticket-type">Ticket Type</label>
+                <input id="adjustment-ticket-type" className="admin-input" value={adjustmentTicketType} readOnly disabled />
+              </div>
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="adjustment-quantity">Quantity</label>
+                <input
+                  id="adjustment-quantity"
+                  className="admin-input"
+                  type="number"
+                  min={1}
+                  value={adjustmentQuantity}
+                  onChange={(e) => setAdjustmentQuantity(Math.max(1, Number(e.target.value) || 1))}
+                  required
+                  disabled={adjustmentLoading}
+                />
+              </div>
+              <div className="admin-modal-field">
+                <label className="admin-modal-label" htmlFor="adjustment-note">Note (optional)</label>
+                <textarea
+                  id="adjustment-note"
+                  className="admin-textarea"
+                  value={adjustmentNote}
+                  onChange={(e) => setAdjustmentNote(e.target.value)}
+                  placeholder="Manual gate reconciliation"
+                  disabled={adjustmentLoading}
+                />
+              </div>
+              <div className="admin-modal-actions">
+                <button type="button" className="admin-btn-cancel" onClick={closeAdjustmentModal} disabled={adjustmentLoading}>
+                  Cancel
+                </button>
+                <button type="submit" className="admin-btn-primary" disabled={adjustmentLoading}>
+                  {adjustmentLoading ? 'Updating...' : 'Add Sold'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
