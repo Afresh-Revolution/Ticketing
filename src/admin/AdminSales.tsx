@@ -33,6 +33,7 @@ interface WalkInSale {
 interface AdminEvent {
   id: string;
   title: string;
+  ticketTypes?: { id: string; name: string; price?: number }[];
 }
 
 const formatCurrency = (amount: number) =>
@@ -106,8 +107,34 @@ const AdminSales = () => {
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [showWalkInList, setShowWalkInList] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [walkInSearch, setWalkInSearch] = useState('');
 
   const eventGroups = useMemo(() => groupSalesByEvent(sales), [sales]);
+  const filteredWalkInSales = useMemo(() => {
+    const term = walkInSearch.trim().toLowerCase();
+    if (!term) return walkInSales;
+    return walkInSales.filter((sale) => {
+      const haystack = [
+        sale.fullName,
+        sale.email,
+        sale.phone,
+        sale.ticketType,
+        sale.event_title,
+        sale.status,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(term);
+    });
+  }, [walkInSales, walkInSearch]);
+  const selectedEventTicketTypes = useMemo(() => {
+    const selectedEvent = events.find((event) => event.id === walkInForm.eventId);
+    const names = (selectedEvent?.ticketTypes || [])
+      .map((ticketType) => (ticketType.name || '').trim())
+      .filter(Boolean);
+    return names.length > 0 ? names : ['General'];
+  }, [events, walkInForm.eventId]);
 
   const token = localStorage.getItem('adminToken');
   const authHeaders = useMemo(
@@ -154,7 +181,21 @@ const AdminSales = () => {
       const res = await fetch(apiUrl('/api/admin/events'), { headers: authHeaders });
       if (!res.ok) return;
       const data = await res.json();
-      setEvents(Array.isArray(data) ? data.map((e: Record<string, unknown>) => ({ id: String(e.id), title: String(e.title || '') })) : []);
+      setEvents(
+        Array.isArray(data)
+          ? data.map((e: Record<string, unknown>) => ({
+            id: String(e.id),
+            title: String(e.title || ''),
+            ticketTypes: Array.isArray(e.ticketTypes)
+              ? (e.ticketTypes as Array<Record<string, unknown>>).map((ticketType) => ({
+                id: String(ticketType.id || ''),
+                name: String(ticketType.name || ''),
+                price: Number(ticketType.price) || 0,
+              }))
+              : [],
+          }))
+          : []
+      );
     } catch { /* ignore */ }
   }, [authHeaders]);
 
@@ -164,6 +205,13 @@ const AdminSales = () => {
     fetchWalkInRevenue();
     fetchEvents();
   }, [fetchSales, fetchWalkInSales, fetchWalkInRevenue, fetchEvents]);
+
+  useEffect(() => {
+    if (!showWalkInModal) return;
+    if (!walkInForm.eventId) return;
+    if (selectedEventTicketTypes.includes(walkInForm.ticketType)) return;
+    setWalkInForm((prev) => ({ ...prev, ticketType: selectedEventTicketTypes[0] || 'General' }));
+  }, [selectedEventTicketTypes, showWalkInModal, walkInForm.eventId, walkInForm.ticketType]);
 
   /* ─── Online sales actions ─── */
   const handleDeleteAllSales = async () => {
@@ -390,7 +438,7 @@ const AdminSales = () => {
             <div className="admin-walkin-section-header">
               <h2 className="admin-walkin-section-title">
                 🎟️ Walk-in Sales
-                <span className="admin-walkin-count">{walkInSales.length}</span>
+                <span className="admin-walkin-count">{filteredWalkInSales.length}</span>
               </h2>
               <button
                 type="button"
@@ -403,10 +451,21 @@ const AdminSales = () => {
 
             {showWalkInList && (
               <div className="admin-walkin-table-wrap">
+                <div className="admin-walkin-tools">
+                  <input
+                    type="search"
+                    className="admin-input admin-walkin-search-input"
+                    value={walkInSearch}
+                    onChange={(e) => setWalkInSearch(e.target.value)}
+                    placeholder="Search by name, phone, email, event, or type"
+                    aria-label="Search walk-in sales"
+                  />
+                </div>
                 <table className="admin-table">
                   <thead>
                     <tr>
                       <th>Name</th>
+                      <th>Phone</th>
                       <th>Event</th>
                       <th>Type</th>
                       <th>Qty</th>
@@ -417,13 +476,13 @@ const AdminSales = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {walkInSales.map((ws) => (
+                    {filteredWalkInSales.map((ws) => (
                       <tr key={ws.id} className={ws.status === 'paid' ? 'admin-walkin-row-paid' : ''}>
                         <td>
                           <div className="admin-walkin-name">{ws.fullName}</div>
                           {ws.email && <div className="admin-sales-buyer-email">{ws.email}</div>}
-                          {ws.phone && <div className="admin-sales-buyer-email">{ws.phone}</div>}
                         </td>
+                        <td>{ws.phone || '—'}</td>
                         <td>{ws.event_title || '—'}</td>
                         <td>{ws.ticketType}</td>
                         <td>{ws.quantity}</td>
@@ -457,6 +516,13 @@ const AdminSales = () => {
                         </td>
                       </tr>
                     ))}
+                    {filteredWalkInSales.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="admin-table-empty">
+                          No walk-in sales match your search.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -695,7 +761,18 @@ const AdminSales = () => {
                   id="walkin-event"
                   className="admin-input"
                   value={walkInForm.eventId}
-                  onChange={(e) => setWalkInForm({ ...walkInForm, eventId: e.target.value })}
+                  onChange={(e) => {
+                    const selectedEventId = e.target.value;
+                    const selectedEvent = events.find((event) => event.id === selectedEventId);
+                    const eventTypes = (selectedEvent?.ticketTypes || [])
+                      .map((ticketType) => (ticketType.name || '').trim())
+                      .filter(Boolean);
+                    setWalkInForm({
+                      ...walkInForm,
+                      eventId: selectedEventId,
+                      ticketType: eventTypes[0] || 'General',
+                    });
+                  }}
                   required
                 >
                   <option value="">Select an event</option>
@@ -748,15 +825,19 @@ const AdminSales = () => {
               {/* Ticket Type + Quantity row */}
               <div className="admin-form-row">
                 <div className="admin-modal-field">
-                  <label className="admin-modal-label" htmlFor="walkin-type">Ticket Type</label>
-                  <input
+                  <label className="admin-modal-label" htmlFor="walkin-type">Event Type</label>
+                  <select
                     id="walkin-type"
-                    type="text"
                     className="admin-input"
                     value={walkInForm.ticketType}
                     onChange={(e) => setWalkInForm({ ...walkInForm, ticketType: e.target.value })}
-                    placeholder="e.g. General, VIP"
-                  />
+                  >
+                    {selectedEventTicketTypes.map((ticketTypeName) => (
+                      <option key={ticketTypeName} value={ticketTypeName}>
+                        {ticketTypeName}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="admin-modal-field">
                   <label className="admin-modal-label" htmlFor="walkin-qty">Quantity</label>

@@ -363,6 +363,24 @@
   box-sizing: border-box;
 }
 
+select.admin-input,
+select.admin-select {
+  color: #f8fafc;
+  background-color: rgba(27, 22, 51, 0.96);
+}
+
+select.admin-input option,
+select.admin-select option {
+  color: #f8fafc;
+  background-color: #1a1633;
+}
+
+select.admin-input option:checked,
+select.admin-select option:checked {
+  color: #ffffff;
+  background-color: #4c1d95;
+}
+
 .admin-input::placeholder,
 .admin-textarea::placeholder {
   color: var(--admin-text-muted);
@@ -2856,6 +2874,17 @@
 
 .admin-walkin-table-wrap .admin-table {
   margin-top: 0.5rem;
+}
+
+.admin-walkin-tools {
+  display: flex;
+  justify-content: stretch;
+  margin-top: 0.75rem;
+}
+
+.admin-walkin-search-input {
+  width: 100%;
+  max-width: none;
 }
 
 .admin-walkin-name {
