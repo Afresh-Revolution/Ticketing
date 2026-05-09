@@ -13,6 +13,8 @@ interface Sale {
   status: string;
   created_at: string;
   event_title: string;
+  ticket_count?: number;
+  source?: 'online' | 'walk-in';
 }
 
 interface WalkInSale {
@@ -72,6 +74,38 @@ function groupSalesByEvent(sales: Sale[]): { eventId: string; eventTitle: string
   }));
 }
 
+const isWalkInAsMainSale = (sale: Sale) => sale.source === 'walk-in' || sale.id.startsWith('walkin-');
+
+const mapWalkInToSale = (walkIn: WalkInSale): Sale => ({
+  id: `walkin-${walkIn.id}`,
+  event_id: String(walkIn.eventId || ''),
+  buyer_name: walkIn.fullName || 'Walk-in Customer',
+  buyer_email: walkIn.email || 'N/A',
+  buyer_phone: walkIn.phone || '',
+  ticket_breakdown: `${walkIn.ticketType} x${walkIn.quantity}`,
+  amount: Number(walkIn.amount) || 0,
+  status: walkIn.status || 'pending',
+  created_at: walkIn.createdAt,
+  event_title: walkIn.event_title || 'Unknown event',
+  ticket_count: Number(walkIn.quantity) || 0,
+  source: 'walk-in',
+});
+
+const matchesSaleSearchTerm = (sale: Sale, term: string) => {
+  const haystack = [
+    sale.buyer_name,
+    sale.buyer_email,
+    sale.buyer_phone,
+    sale.ticket_breakdown,
+    sale.status,
+    sale.id,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(term);
+};
+
 /* ─────────── Walk-In Sale Form Initial State ─────────── */
 const emptyWalkInForm = {
   eventId: '',
@@ -117,9 +151,38 @@ const AdminSales = () => {
   const [showWalkInList, setShowWalkInList] = useState(false);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [walkInSearch, setWalkInSearch] = useState('');
+  const [eventSearch, setEventSearch] = useState('');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
-  const eventGroups = useMemo(() => groupSalesByEvent(sales), [sales]);
+  const mergedSales = useMemo(
+    () => [...sales.map((sale) => ({ ...sale, source: 'online' as const })), ...walkInSales.map(mapWalkInToSale)],
+    [sales, walkInSales]
+  );
+  const eventGroups = useMemo(() => groupSalesByEvent(mergedSales), [mergedSales]);
+  const filteredEventGroups = useMemo(() => {
+    const term = eventSearch.trim().toLowerCase();
+    if (!term) {
+      return eventGroups.map((group) => ({
+        ...group,
+        displaySales: group.sales,
+        forceExpanded: false,
+      }));
+    }
+    return eventGroups
+      .map((group) => {
+      const eventMatch = (group.eventTitle || '').toLowerCase().includes(term);
+      const matchingSales = eventMatch
+        ? group.sales
+        : group.sales.filter((sale) => matchesSaleSearchTerm(sale, term));
+      if (matchingSales.length === 0) return null;
+      return {
+        ...group,
+        displaySales: matchingSales,
+        forceExpanded: true,
+      };
+      })
+      .filter((group): group is { eventId: string; eventTitle: string; sales: Sale[]; displaySales: Sale[]; forceExpanded: boolean } => Boolean(group));
+  }, [eventGroups, eventSearch]);
   const filteredWalkInSales = useMemo(() => {
     const term = walkInSearch.trim().toLowerCase();
     if (!term) return walkInSales;
@@ -346,9 +409,22 @@ const AdminSales = () => {
         const j = await res.json().catch(() => ({}));
         throw new Error(j.error || 'Failed to record walk-in sale');
       }
+      const adjustmentRes = await fetch(apiUrl(`/api/admin/events/${walkInForm.eventId}/ticket-adjustments`), {
+        method: 'POST',
+        headers: authHeaders,
+        body: JSON.stringify({
+          ticketType: walkInForm.ticketType || 'General',
+          quantity: Math.max(1, parseInt(walkInForm.quantity, 10) || 1),
+          notes: `Auto increment from walk-in sale (${walkInForm.fullName || 'walk-in customer'})`,
+        }),
+      });
+      if (!adjustmentRes.ok) {
+        const j = await adjustmentRes.json().catch(() => ({} as { error?: string; message?: string }));
+        throw new Error(j.error || j.message || 'Walk-in sale saved but ticket count did not update');
+      }
       setShowWalkInModal(false);
       setWalkInForm(emptyWalkInForm);
-      await Promise.all([fetchWalkInSales(), fetchWalkInRevenue()]);
+      await Promise.all([fetchWalkInSales(), fetchWalkInRevenue(), fetchSales()]);
     } catch (err) {
       setWalkInError(err instanceof Error ? err.message : 'Failed');
     } finally {
@@ -626,16 +702,45 @@ const AdminSales = () => {
           <div className="admin-table-empty">No sales records found.</div>
         ) : (
           <div className="admin-sales-by-event">
-            {eventGroups.map((group) => {
-              const total = group.sales.reduce((s, r) => s + r.amount, 0);
-              const isExpanded = expandedEventId === group.eventId;
+            <div className={`admin-sales-search-wrap ${eventSearch.trim() ? 'admin-sales-search-wrap-active' : ''}`}>
+              <input
+                type="search"
+                className="admin-input"
+                value={eventSearch}
+                onChange={(e) => setEventSearch(e.target.value)}
+                placeholder="Search sales cards by event, buyer, phone, email, or ticket"
+                aria-label="Search sales cards"
+              />
+              {eventSearch.trim() && (
+                <button
+                  type="button"
+                  className="admin-sales-search-clear"
+                  onClick={() => setEventSearch('')}
+                  aria-label="Clear sales card search"
+                >
+                  ✕
+                </button>
+              )}
+              <div className="admin-sales-search-meta">
+                {eventSearch.trim()
+                  ? `Showing ${filteredEventGroups.length} of ${eventGroups.length} event cards`
+                  : `${eventGroups.length} event card${eventGroups.length !== 1 ? 's' : ''}`}
+              </div>
+            </div>
+            {filteredEventGroups.length === 0 ? (
+              <div className="admin-table-empty">No sales records match your search.</div>
+            ) : filteredEventGroups.map((group) => {
+              const hasActiveSearch = eventSearch.trim().length > 0;
+              const listForDisplay = group.displaySales;
+              const total = listForDisplay.reduce((s, r) => s + r.amount, 0);
+              const isExpanded = hasActiveSearch || group.forceExpanded || expandedEventId === group.eventId;
               return (
                 <div key={group.eventId} className="admin-sales-event-card">
                   <div className="admin-sales-event-header">
                     <div className="admin-sales-event-info">
                       <h3 className="admin-sales-event-title">{group.eventTitle}</h3>
                       <span className="admin-sales-event-summary">
-                        {group.sales.length} sale{group.sales.length !== 1 ? 's' : ''} · {formatCurrency(total)}
+                        {listForDisplay.length} sale{listForDisplay.length !== 1 ? 's' : ''} · {formatCurrency(total)}
                       </span>
                     </div>
                     <div className="admin-sales-event-actions">
@@ -652,8 +757,9 @@ const AdminSales = () => {
                         className="admin-sales-btn admin-sales-btn-view"
                         onClick={() => setExpandedEventId(isExpanded ? null : group.eventId)}
                         title="View all sales history"
+                        disabled={hasActiveSearch}
                       >
-                        {isExpanded ? 'Hide' : 'View'} sales
+                        {hasActiveSearch ? 'Showing matches' : `${isExpanded ? 'Hide' : 'View'} sales`}
                       </button>
                       <button
                         type="button"
@@ -679,7 +785,7 @@ const AdminSales = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {group.sales.map((sale) => (
+                          {listForDisplay.map((sale) => (
                             <tr key={sale.id}>
                               <td className="admin-sales-id">{sale.id}</td>
                               <td>
@@ -691,30 +797,40 @@ const AdminSales = () => {
                               <td>{formatDate(sale.created_at)}</td>
                               <td>{formatCurrency(sale.amount)}</td>
                               <td>
-                                <select
-                                  className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}
-                                  value={sale.status}
-                                  onChange={(e) => handleOnlineSaleStatusChange(sale.id, e.target.value)}
-                                  disabled={updatingSaleStatusId === sale.id}
-                                  aria-label="Update sale status"
-                                >
-                                  {ONLINE_SALE_STATUS_OPTIONS.map((status) => (
-                                    <option key={status} value={status}>
-                                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                                    </option>
-                                  ))}
-                                </select>
+                                {isWalkInAsMainSale(sale) ? (
+                                  <span className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}>
+                                    {sale.status?.charAt(0).toUpperCase() + sale.status?.slice(1)}
+                                  </span>
+                                ) : (
+                                  <select
+                                    className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}
+                                    value={sale.status}
+                                    onChange={(e) => handleOnlineSaleStatusChange(sale.id, e.target.value)}
+                                    disabled={updatingSaleStatusId === sale.id}
+                                    aria-label="Update sale status"
+                                  >
+                                    {ONLINE_SALE_STATUS_OPTIONS.map((status) => (
+                                      <option key={status} value={status}>
+                                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
                               </td>
                               <td>
-                                <button
-                                  type="button"
-                                  className="admin-sales-resend-btn"
-                                  onClick={() => handleResendTicket(sale)}
-                                  disabled={resendingSaleId === sale.id || sale.status.toLowerCase() !== 'paid'}
-                                  title={sale.status.toLowerCase() === 'paid' ? 'Resend ticket email' : 'Set status to Paid first'}
-                                >
-                                  {resendingSaleId === sale.id ? 'Sending…' : 'Resend'}
-                                </button>
+                                {isWalkInAsMainSale(sale) ? (
+                                  <span style={{ opacity: 0.6 }}>—</span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="admin-sales-resend-btn"
+                                    onClick={() => handleResendTicket(sale)}
+                                    disabled={resendingSaleId === sale.id || sale.status.toLowerCase() !== 'paid'}
+                                    title={sale.status.toLowerCase() === 'paid' ? 'Resend ticket email' : 'Set status to Paid first'}
+                                  >
+                                    {resendingSaleId === sale.id ? 'Sending…' : 'Resend'}
+                                  </button>
+                                )}
                               </td>
                             </tr>
                           ))}
