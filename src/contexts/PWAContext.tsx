@@ -29,14 +29,58 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    let intervalId: number | null = null;
+    let activeRegistration: ServiceWorkerRegistration | undefined;
+    const revalidateForUpdate = async (registration?: ServiceWorkerRegistration) => {
+      if (!registration) return;
+      try {
+        await registration.update();
+      } catch {
+        // Ignore transient update errors (offline, throttling, etc).
+      }
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void revalidateForUpdate(activeRegistration);
+      }
+    };
+    const onFocus = () => {
+      void revalidateForUpdate(activeRegistration);
+    };
+
+    const bindRegistration = (registration?: ServiceWorkerRegistration) => {
+      if (!registration) return;
+      activeRegistration = registration;
+      void revalidateForUpdate(activeRegistration);
+      if (!intervalId) {
+        intervalId = window.setInterval(() => {
+          void revalidateForUpdate(activeRegistration);
+        }, 60 * 1000);
+      }
+      document.addEventListener('visibilitychange', onVisibility);
+      window.addEventListener('focus', onFocus);
+    };
+
     const updateSW = registerSW({
       immediate: true,
       onNeedRefresh() {
         setUpdateReady(true);
       },
       onOfflineReady() {},
+      onRegisteredSW(_swUrl, registration) {
+        bindRegistration(registration);
+      },
+      onRegistered(registration) {
+        bindRegistration(registration);
+      },
     });
     updateSWRef.current = updateSW;
+    return () => {
+      if (intervalId) window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   const onInstallClick = async () => {
@@ -49,6 +93,8 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   };
 
   const onRefreshClick = () => {
+    // Avoid lingering UI if reload is suppressed for any reason (edge cases/offline transitions).
+    setUpdateReady(false);
     updateSWRef.current?.(true);
   };
 
