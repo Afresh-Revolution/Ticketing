@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -12,6 +12,7 @@ interface DashboardStats {
 
 interface RecentSale {
   id: string;
+  event_id?: string;
   buyer_name: string;
   buyer_email: string;
   buyer_phone?: string;
@@ -25,6 +26,20 @@ interface RecentSale {
 
 const ONLINE_SALE_STATUS_OPTIONS = ['pending', 'paid'] as const;
 
+function groupSalesByEvent(sales: RecentSale[]): { eventId: string; eventTitle: string; sales: RecentSale[] }[] {
+  const byEvent = new Map<string, RecentSale[]>();
+  for (const sale of sales) {
+    const eventId = sale.event_title || 'Unknown event';
+    if (!byEvent.has(eventId)) byEvent.set(eventId, []);
+    byEvent.get(eventId)!.push(sale);
+  }
+  return Array.from(byEvent.entries()).map(([eventId, eventSales]) => ({
+    eventId,
+    eventTitle: eventSales[0]?.event_title || 'Unknown event',
+    sales: eventSales,
+  }));
+}
+
 function normalizeRecentSales(raw: unknown): RecentSale[] {
   const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && 'recentSales' in raw)
     ? (raw as { recentSales?: unknown }).recentSales
@@ -32,6 +47,7 @@ function normalizeRecentSales(raw: unknown): RecentSale[] {
   const list = Array.isArray(arr) ? arr : [];
   return list.map((s: Record<string, unknown>) => ({
     id: String(s.id ?? s.order_id ?? ''),
+    event_id: String(s.event_id ?? s.eventId ?? ''),
     buyer_name: String(s.buyer_name ?? s.buyerName ?? ''),
     buyer_email: String(s.buyer_email ?? s.buyerEmail ?? ''),
     buyer_phone: String(s.buyer_phone ?? s.buyerPhone ?? ''),
@@ -47,11 +63,16 @@ function normalizeRecentSales(raw: unknown): RecentSale[] {
 const AdminDashboard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
+  const [allSales, setAllSales] = useState<RecentSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [infoMessage, setInfoMessage] = useState('');
   const [updatingSaleStatusId, setUpdatingSaleStatusId] = useState<string | null>(null);
   const [resendingSaleId, setResendingSaleId] = useState<string | null>(null);
+  const [pendingSearch, setPendingSearch] = useState('');
+  const [recentSearch, setRecentSearch] = useState('');
+  const [recordSearch, setRecordSearch] = useState('');
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
 
   const userRole = localStorage.getItem('adminRole');
   const isSuperAdmin = userRole === 'superadmin';
@@ -85,6 +106,14 @@ const AdminDashboard = () => {
             const salesData = await salesRes.json();
             const all = Array.isArray(salesData) ? salesData : (salesData?.sales ?? salesData?.data ?? []);
             sales = normalizeRecentSales(all).slice(0, 20);
+            setAllSales(normalizeRecentSales(all));
+          }
+        } else if (token) {
+          const allSalesRes = await fetch(apiUrl('/api/admin/sales'), { headers });
+          if (allSalesRes.ok) {
+            const allSalesData = await allSalesRes.json();
+            const all = Array.isArray(allSalesData) ? allSalesData : (allSalesData?.sales ?? allSalesData?.data ?? []);
+            setAllSales(normalizeRecentSales(all));
           }
         }
         setRecentSales(sales);
@@ -97,23 +126,42 @@ const AdminDashboard = () => {
     fetchDashboard();
   }, []);
 
-  const handleRecentSaleStatusChange = async (saleId: string, status: string) => {
+  const handleRecentSaleStatusChange = async (sale: RecentSale, status: string) => {
     if (!ONLINE_SALE_STATUS_OPTIONS.includes(status as (typeof ONLINE_SALE_STATUS_OPTIONS)[number])) return;
-    setUpdatingSaleStatusId(saleId);
+    setUpdatingSaleStatusId(sale.id);
     try {
       const token = localStorage.getItem('adminToken');
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
-      const res = await fetch(apiUrl(`/api/admin/sales/${saleId}/status`), {
+      const res = await fetch(apiUrl(`/api/admin/sales/${sale.id}/status`), {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ status }),
       });
       const data = await res.json().catch(() => ({} as { error?: string; emailError?: string; message?: string }));
       if (!res.ok) throw new Error(data.error || 'Failed to update sale status');
-      setRecentSales((prev) => prev.map((sale) => (sale.id === saleId ? { ...sale, status } : sale)));
+      const prevStatus = (sale.status || '').toLowerCase();
+      const nextStatus = (status || '').toLowerCase();
+      const isPendingToPaid = prevStatus === 'pending' && nextStatus === 'paid';
+      const isPaidToPending = prevStatus === 'paid' && nextStatus === 'pending';
+      const ticketCountDelta = Number(sale.ticket_count) || 0;
+      const amountDelta = Number(sale.amount) || 0;
+
+      setRecentSales((prev) => prev.map((row) => (row.id === sale.id ? { ...row, status } : row)));
+      setAllSales((prev) => prev.map((row) => (row.id === sale.id ? { ...row, status } : row)));
+      setStats((prev) => {
+        if (!prev) return prev;
+        if (!isPendingToPaid && !isPaidToPending) return prev;
+        const direction = isPendingToPaid ? 1 : -1;
+        return {
+          ...prev,
+          ticketsSold: Math.max(0, prev.ticketsSold + direction * ticketCountDelta),
+          ticketRevenue: Math.max(0, prev.ticketRevenue + direction * amountDelta),
+          totalRevenue: Math.max(0, prev.totalRevenue + direction * amountDelta),
+        };
+      });
       setInfoMessage(data.emailError || data.message || 'Sale status updated');
       setError('');
     } catch (err) {
@@ -150,6 +198,39 @@ const AdminDashboard = () => {
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+
+  const matchesSearch = (sale: RecentSale, term: string) => {
+    const haystack = [
+      sale.event_title,
+      sale.buyer_name,
+      sale.buyer_email,
+      sale.buyer_phone,
+      sale.ticket_breakdown,
+      sale.status,
+      sale.id,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(term.toLowerCase());
+  };
+
+  const pendingSales = useMemo(
+    () =>
+      allSales
+        .filter((sale) => sale.status?.toLowerCase() === 'pending')
+        .filter((sale) => matchesSearch(sale, pendingSearch.trim())),
+    [allSales, pendingSearch]
+  );
+  const filteredRecentSales = useMemo(
+    () => recentSales.filter((sale) => matchesSearch(sale, recentSearch.trim())),
+    [recentSales, recentSearch]
+  );
+  const filteredSalesRecord = useMemo(
+    () => allSales.filter((sale) => matchesSearch(sale, recordSearch.trim())),
+    [allSales, recordSearch]
+  );
+  const salesRecordGroups = useMemo(() => groupSalesByEvent(filteredSalesRecord), [filteredSalesRecord]);
 
   const kpis = stats
     ? [
@@ -229,10 +310,91 @@ const AdminDashboard = () => {
       </div>
 
       <div className="admin-section">
-        <h2 className="admin-section-title">Recent Sales</h2>
+        <div className="admin-section-title-row">
+          <h2 className="admin-section-title">Pending Sales</h2>
+          <span className="admin-scroll-hint-badge" title="Scroll to view more">
+            ↔ Scroll
+          </span>
+        </div>
+        <input
+          type="search"
+          className="admin-input"
+          placeholder="Search pending sales by event, buyer, phone, email, or ticket"
+          value={pendingSearch}
+          onChange={(e) => setPendingSearch(e.target.value)}
+          style={{ marginBottom: '0.75rem' }}
+          aria-label="Search pending sales"
+        />
         {loading ? (
           <div className="admin-empty-state">Loading…</div>
-        ) : recentSales.length === 0 ? (
+        ) : pendingSales.length === 0 ? (
+          <div className="admin-empty-state">No pending sales found.</div>
+        ) : (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Buyer</th>
+                  <th>Amount</th>
+                  <th>Ticket</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingSales.map((sale) => (
+                  <tr key={`pending-${sale.id}`}>
+                    <td>{sale.event_title}</td>
+                    <td>
+                      <div>{sale.buyer_name}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_email}</div>
+                    </td>
+                    <td>{formatCurrency(sale.amount)}</td>
+                    <td>{sale.ticket_count ?? 0}</td>
+                    <td>
+                      <select
+                        className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}
+                        value={sale.status}
+                        onChange={(e) => handleRecentSaleStatusChange(sale, e.target.value)}
+                        disabled={updatingSaleStatusId === sale.id}
+                        aria-label="Update pending sale status"
+                      >
+                        {ONLINE_SALE_STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>{formatDate(sale.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="admin-section">
+        <div className="admin-section-title-row">
+          <h2 className="admin-section-title">Recent Sales</h2>
+          <span className="admin-scroll-hint-badge" title="Scroll to view more">
+            ↔ Scroll
+          </span>
+        </div>
+        <input
+          type="search"
+          className="admin-input"
+          placeholder="Search recent sales"
+          value={recentSearch}
+          onChange={(e) => setRecentSearch(e.target.value)}
+          style={{ marginBottom: '0.75rem' }}
+          aria-label="Search recent sales"
+        />
+        {loading ? (
+          <div className="admin-empty-state">Loading…</div>
+        ) : filteredRecentSales.length === 0 ? (
           <div className="admin-empty-state">No sales yet.</div>
         ) : (
           <div className="admin-table-wrap">
@@ -249,7 +411,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentSales.map((sale) => (
+                {filteredRecentSales.map((sale) => (
                   <tr key={sale.id}>
                     <td>{sale.event_title}</td>
                     <td>
@@ -268,7 +430,7 @@ const AdminDashboard = () => {
                       <select
                         className={`admin-sales-status-select admin-sales-status-${sale.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'}`}
                         value={sale.status}
-                        onChange={(e) => handleRecentSaleStatusChange(sale.id, e.target.value)}
+                        onChange={(e) => handleRecentSaleStatusChange(sale, e.target.value)}
                         disabled={updatingSaleStatusId === sale.id}
                         aria-label="Update recent sale status"
                       >
@@ -295,6 +457,89 @@ const AdminDashboard = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+      </div>
+
+      <div className="admin-section">
+        <div className="admin-section-title-row">
+          <h2 className="admin-section-title">Sales Records</h2>
+          <span className="admin-scroll-hint-badge" title="Scroll to view more">
+            ↔ Scroll
+          </span>
+        </div>
+        <input
+          type="search"
+          className="admin-input"
+          placeholder="Search all sales records"
+          value={recordSearch}
+          onChange={(e) => setRecordSearch(e.target.value)}
+          style={{ marginBottom: '0.75rem' }}
+          aria-label="Search sales records"
+        />
+        {loading ? (
+          <div className="admin-empty-state">Loading…</div>
+        ) : salesRecordGroups.length === 0 ? (
+          <div className="admin-empty-state">No sales records found.</div>
+        ) : (
+          <div className="admin-sales-by-event">
+            {salesRecordGroups.map((group) => {
+              const total = group.sales.reduce((sum, sale) => sum + (Number(sale.amount) || 0), 0);
+              const isExpanded = expandedEventId === group.eventId;
+              return (
+                <div key={group.eventId} className="admin-sales-event-card">
+                  <div className="admin-sales-event-header">
+                    <div className="admin-sales-event-info">
+                      <h3 className="admin-sales-event-title">{group.eventTitle}</h3>
+                      <span className="admin-sales-event-summary">
+                        {group.sales.length} sale{group.sales.length !== 1 ? 's' : ''} · {formatCurrency(total)}
+                      </span>
+                    </div>
+                    <div className="admin-sales-event-actions">
+                      <button
+                        type="button"
+                        className="admin-sales-btn admin-sales-btn-view"
+                        onClick={() => setExpandedEventId(isExpanded ? null : group.eventId)}
+                      >
+                        {isExpanded ? 'Hide' : 'View'} sales
+                      </button>
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <div className="admin-sales-event-table-wrap">
+                      <table className="admin-table">
+                        <thead>
+                          <tr>
+                            <th>Buyer</th>
+                            <th>Amount</th>
+                            <th>Ticket</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {group.sales.map((sale) => (
+                            <tr key={`record-${group.eventId}-${sale.id}-${sale.created_at}`}>
+                              <td>
+                                <div>{sale.buyer_name}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_email}</div>
+                                {sale.ticket_breakdown && (
+                                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.ticket_breakdown}</div>
+                                )}
+                              </td>
+                              <td>{formatCurrency(sale.amount)}</td>
+                              <td>{sale.ticket_count ?? 0}</td>
+                              <td>{sale.status}</td>
+                              <td>{formatDate(sale.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
