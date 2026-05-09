@@ -1,55 +1,126 @@
-/* Small square badges for Install and Update – fixed position, non-intrusive */
-.pwa-badge {
-  position: fixed;
-  z-index: 9999;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-  overflow: hidden;
+/* PWA badges – fixed “toast-chip” anchored to bottom safe-area */
+@import '../styles/variables.css';
+
+@keyframes pwa-badge-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.pwa-badge-install {
-  bottom: 1rem;
-  right: 1rem;
-  background: linear-gradient(135deg, #5a2c8f 0%, #3a1f5b 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.pwa-badge {
+  position: fixed;
+  z-index: 9500;
+  left: calc(1rem + env(safe-area-inset-left, 0px));
+  right: auto;
+  max-width: calc(100vw - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+
+  isolation: isolate;
+  border-radius: 16px;
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  box-shadow:
+    var(--shadow-button-soft),
+    0 0 0 1px var(--color-border-faint),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease;
+
+  animation: pwa-badge-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  outline: transparent;
+}
+
+.pwa-badge:hover {
+  box-shadow:
+    var(--shadow-card-hover),
+    0 0 0 1px var(--color-border-subtle),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+  transform: translateY(-1px);
 }
 
 .pwa-badge-update {
-  bottom: 1rem;
-  left: 1rem;
-  right: auto;
-  background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: radial-gradient(circle at 10% -20%, rgba(121, 26, 148, 0.55), rgba(24, 21, 67, 0.78) 45%, rgba(10, 8, 30, 0.85) 105%);
+}
+
+.pwa-badge-install {
+  bottom: calc(7.65rem + env(safe-area-inset-bottom, 0px));
+
+  border: 1px solid rgba(102, 126, 234, 0.32);
+  background: radial-gradient(circle at 10% -20%, rgba(102, 126, 234, 0.35), rgba(27, 20, 60, 0.78) 45%, rgba(10, 8, 30, 0.85) 105%);
+}
+
+.pwa-badge-update:only-child,
+.pwa-badge-install:only-child {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 .pwa-badge-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.9rem;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: inherit;
+  appearance: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0.95rem calc(0.75rem + 1px);
+
+  width: 100%;
+
   border: none;
   background: transparent;
   cursor: pointer;
-  border-radius: 10px;
-  transition: background 0.2s, transform 0.15s;
+  font-family: inherit;
+  border-radius: 16px;
+
+  color: var(--color-text-primary);
 }
 
-.pwa-badge-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+.pwa-badge-btn:focus-visible {
+  outline: none;
 }
 
-.pwa-badge-btn:active {
-  transform: scale(0.98);
+.pwa-badge:focus-within {
+  box-shadow:
+    var(--shadow-button-soft),
+    0 0 0 1px var(--color-white-15),
+    0 0 0 3px rgba(121, 26, 148, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.pwa-badge:active {
+  transform: translateY(0);
+}
+
+.pwa-badge-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+
+  border-radius: 12px;
+
+  flex: none;
+  background: radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0));
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .pwa-badge-icon {
-  display: flex;
-  width: 18px;
-  height: 18px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+
+  opacity: 0.95;
+  color: var(--color-text-primary);
 }
 
 .pwa-badge-icon svg {
@@ -57,26 +128,104 @@
   height: 100%;
 }
 
+.pwa-badge-content {
+  flex: 1;
+  display: grid;
+  gap: 3px;
+
+  align-content: center;
+}
+
+.pwa-badge-title {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+
 .pwa-badge-label {
-  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.pwa-badge-btn:hover .pwa-badge-label {
+  color: rgba(241, 245, 249, 0.98);
+}
+
+.pwa-badge-btn:active .pwa-badge-icon-wrap {
+  transform: translateY(0.25px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-badge {
+    animation: none;
+    transition: none;
+  }
+
+  .pwa-badge:hover {
+    transform: none;
+  }
 }
 
 @media (max-width: 480px) {
   .pwa-badge {
-    bottom: 0.75rem;
-    right: 0.75rem;
-    left: 0.75rem;
-    right: auto;
-    max-width: 200px;
+    left: calc(0.75rem + env(safe-area-inset-left, 0px));
+
+    border-radius: 14px;
+
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.28),
+      0 0 0 1px var(--color-border-faint),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+    animation-duration: 0.28s;
   }
 
   .pwa-badge-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.75rem;
+    gap: 0.65rem;
+    padding: 0.72rem 0.85rem calc(0.72rem + 1px);
+
+    align-items: center;
+  }
+
+  .pwa-badge-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+  }
+
+  .pwa-badge-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pwa-badge-title {
+    font-size: 0.95rem;
   }
 
   .pwa-badge-label {
-    white-space: normal;
-    line-height: 1.2;
+    font-size: 0.8rem;
+
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* When both badges are visible, keep them neatly stacked near the thumb */
+  .pwa-badge-install {
+    bottom: calc(calc(var(--keyboard-inset-height, 0px) + env(safe-area-inset-bottom, 0px)) + 9.95rem);
+  }
+
+  .pwa-badge-update {
+    bottom: calc(calc(var(--keyboard-inset-height, 0px) + env(safe-area-inset-bottom, 0px)) + 0.95rem);
+  }
+
+  .pwa-badge-update:only-child,
+  .pwa-badge-install:only-child {
+    bottom: calc(calc(var(--keyboard-inset-height, 0px) + env(safe-area-inset-bottom, 0px)) + 0.95rem);
   }
 }

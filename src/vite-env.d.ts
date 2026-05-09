@@ -1,9 +1,9 @@
 /// <reference types="vite/client" />
 
 declare module 'virtual:pwa-register' {
-  export function registerSW(options?: {
-    immediate?: boolean;
-    onNeedRefresh?: () => void;
-    onOfflineReady?: () => void;
-  }): (reload?: boolean) => void;
+  import type { RegisterSWOptions } from 'vite-plugin-pwa/types';
+
+  export type { RegisterSWOptions };
+
+  export function registerSW(options?: RegisterSWOptions): (reload?: boolean) => Promise<void>;
 }
