@@ -1014,6 +1014,26 @@ select.admin-select option:checked {
   cursor: not-allowed;
 }
 
+.admin-sales-delete-btn {
+  border: 1px solid rgba(244, 63, 94, 0.52);
+  background: rgba(244, 63, 94, 0.18);
+  color: #fecdd3;
+  border-radius: 8px;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-sales-delete-btn:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.3);
+}
+
+.admin-sales-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Scanner page */
 .admin-scanner-container {
   background: #36195c;
@@ -1958,7 +1978,7 @@ select.admin-select option:checked {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 20000;
   padding: 1rem;
   animation: fadeIn 0.2s ease-out;
 }
