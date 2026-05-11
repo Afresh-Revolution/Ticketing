@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -23,6 +24,8 @@ interface RecentSale {
   created_at: string;
   event_title: string;
 }
+
+type DeleteConfirm = { sale: RecentSale } | null;
 
 const ONLINE_SALE_STATUS_OPTIONS = ['pending', 'paid'] as const;
 
@@ -69,6 +72,8 @@ const AdminDashboard = () => {
   const [infoMessage, setInfoMessage] = useState('');
   const [updatingSaleStatusId, setUpdatingSaleStatusId] = useState<string | null>(null);
   const [resendingSaleId, setResendingSaleId] = useState<string | null>(null);
+  const [deletingSaleId, setDeletingSaleId] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
   const [pendingSearch, setPendingSearch] = useState('');
   const [recentSearch, setRecentSearch] = useState('');
   const [recordSearch, setRecordSearch] = useState('');
@@ -190,6 +195,54 @@ const AdminDashboard = () => {
       setInfoMessage('');
     } finally {
       setResendingSaleId(null);
+    }
+  };
+
+  const handleDeleteSale = async () => {
+    if (!deleteConfirm) return;
+    const { sale } = deleteConfirm;
+    setDeletingSaleId(sale.id);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+      const endpoints = [`/api/admin/sales/${sale.id}`, `/api/admin/orders/${sale.id}`];
+      let deleted = false;
+      let lastError = 'Failed to delete sale';
+
+      for (const endpoint of endpoints) {
+        const res = await fetch(apiUrl(endpoint), { method: 'DELETE', headers });
+        const data = await res.json().catch(() => ({} as { error?: string; message?: string }));
+        if (res.ok) {
+          deleted = true;
+          break;
+        }
+        lastError = data.error || data.message || lastError;
+      }
+
+      if (!deleted) throw new Error(lastError);
+
+      setRecentSales((prev) => prev.filter((row) => row.id !== sale.id));
+      setAllSales((prev) => prev.filter((row) => row.id !== sale.id));
+      setStats((prev) => {
+        if (!prev) return prev;
+        if ((sale.status || '').toLowerCase() !== 'paid') return prev;
+        const ticketCount = Number(sale.ticket_count) || 0;
+        const amount = Number(sale.amount) || 0;
+        return {
+          ...prev,
+          ticketsSold: Math.max(0, prev.ticketsSold - ticketCount),
+          ticketRevenue: Math.max(0, prev.ticketRevenue - amount),
+          totalRevenue: Math.max(0, prev.totalRevenue - amount),
+        };
+      });
+      setInfoMessage('Sale deleted successfully');
+      setError('');
+      setDeleteConfirm(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete sale');
+      setInfoMessage('');
+    } finally {
+      setDeletingSaleId(null);
     }
   };
 
@@ -339,6 +392,7 @@ const AdminDashboard = () => {
                   <th>Amount</th>
                   <th>Ticket</th>
                   <th>Status</th>
+                  <th>Action</th>
                   <th>Date</th>
                 </tr>
               </thead>
@@ -349,6 +403,9 @@ const AdminDashboard = () => {
                     <td>
                       <div>{sale.buyer_name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_email}</div>
+                      {sale.buyer_phone && (
+                        <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_phone}</div>
+                      )}
                     </td>
                     <td>{formatCurrency(sale.amount)}</td>
                     <td>{sale.ticket_count ?? 0}</td>
@@ -366,6 +423,17 @@ const AdminDashboard = () => {
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="admin-sales-delete-btn"
+                        onClick={() => setDeleteConfirm({ sale })}
+                        disabled={deletingSaleId === sale.id}
+                        aria-label="Delete pending sale"
+                      >
+                        {deletingSaleId === sale.id ? 'Deleting…' : 'Delete'}
+                      </button>
                     </td>
                     <td>{formatDate(sale.created_at)}</td>
                   </tr>
@@ -407,6 +475,7 @@ const AdminDashboard = () => {
                   <th>Ticket</th>
                   <th>Status</th>
                   <th>Resend</th>
+                  <th>Delete</th>
                   <th>Date</th>
                 </tr>
               </thead>
@@ -450,6 +519,17 @@ const AdminDashboard = () => {
                         title={sale.status.toLowerCase() === 'paid' ? 'Resend ticket email' : 'Set status to Paid first'}
                       >
                         {resendingSaleId === sale.id ? 'Sending…' : 'Resend'}
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="admin-sales-delete-btn"
+                        onClick={() => setDeleteConfirm({ sale })}
+                        disabled={deletingSaleId === sale.id}
+                        aria-label="Delete sale"
+                      >
+                        {deletingSaleId === sale.id ? 'Deleting…' : 'Delete'}
                       </button>
                     </td>
                     <td>{formatDate(sale.created_at)}</td>
@@ -543,6 +623,52 @@ const AdminDashboard = () => {
           </div>
         )}
       </div>
+
+      {deleteConfirm &&
+        createPortal(
+          <div className="admin-modal-overlay" onClick={() => !deletingSaleId && setDeleteConfirm(null)}>
+            <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h2 className="admin-modal-title">Delete sale</h2>
+                <button
+                  type="button"
+                  className="admin-modal-close"
+                  onClick={() => !deletingSaleId && setDeleteConfirm(null)}
+                  disabled={Boolean(deletingSaleId)}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="admin-modal-form">
+                <p className="admin-delete-confirm-message">
+                  Permanently delete sale for{' '}
+                  <strong>{deleteConfirm.sale.buyer_name || deleteConfirm.sale.buyer_email || 'this buyer'}</strong>{' '}
+                  ({deleteConfirm.sale.buyer_email || 'no email'})? This action cannot be undone.
+                </p>
+                <div className="admin-modal-actions">
+                  <button
+                    type="button"
+                    className="admin-btn-cancel"
+                    onClick={() => !deletingSaleId && setDeleteConfirm(null)}
+                    disabled={Boolean(deletingSaleId)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn-danger"
+                    onClick={handleDeleteSale}
+                    disabled={Boolean(deletingSaleId)}
+                  >
+                    {deletingSaleId ? 'Deleting…' : 'Delete sale'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
