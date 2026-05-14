@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import Navbar from "./Navbar";
 import "./EventDetailPage.css";
@@ -30,10 +30,27 @@ interface EventDetail {
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [manualCheckoutBanner, setManualCheckoutBanner] = useState<string | null>(null);
+
+  useEffect(() => {
+    const msg = (location.state as { manualCheckoutSuccess?: string } | null)?.manualCheckoutSuccess;
+    if (!msg || !id) return;
+    setManualCheckoutBanner(msg);
+    navigate(`/event/${id}`, { replace: true, state: {} });
+  }, [location.state, id, navigate]);
+
+  useEffect(() => {
+    if (!manualCheckoutBanner) return;
+    const t = window.setTimeout(() => {
+      document.getElementById("event-detail-tickets-heading")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => window.clearTimeout(t);
+  }, [manualCheckoutBanner]);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -211,6 +228,20 @@ const EventDetailPage = () => {
             </div>
           </div>
         </div>
+
+        {manualCheckoutBanner && (
+          <div className="event-detail-manual-success" role="status">
+            <p className="event-detail-manual-success-text">{manualCheckoutBanner}</p>
+            <button
+              type="button"
+              className="event-detail-manual-success-dismiss"
+              onClick={() => setManualCheckoutBanner(null)}
+              aria-label="Dismiss message"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         <section className="event-detail-tickets" aria-labelledby="event-detail-tickets-heading">
           <h2 id="event-detail-tickets-heading" className="event-detail-tickets-heading">Select Tickets</h2>
