@@ -626,3 +626,51 @@
     text-align: center;
   }
 }
+
+/* Manual checkout success (return from bank transfer flow) */
+.event-detail-manual-success {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 1.5rem 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  background: rgba(34, 197, 94, 0.12);
+  color: rgba(240, 253, 244, 0.95);
+}
+
+.event-detail-manual-success-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.event-detail-manual-success-dismiss {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--wc-ink, #fff);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.event-detail-manual-success-dismiss:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+@media (max-width: 520px) {
+  .event-detail-manual-success {
+    margin: 0 1rem 0.85rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .event-detail-manual-success-dismiss {
+    align-self: flex-end;
+  }
+}

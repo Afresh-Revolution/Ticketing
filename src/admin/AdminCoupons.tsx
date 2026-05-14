@@ -82,9 +82,28 @@ const AdminCoupons = () => {
     }
   }, []);
 
+  const refreshCoupons = useCallback(async () => {
+    try {
+      const couponsRes = await fetch(apiUrl('/api/admin/coupons'), { headers: getAuthHeaders() });
+      if (!couponsRes.ok) return;
+      const couponsData = await couponsRes.json();
+      setCoupons(Array.isArray(couponsData) ? couponsData : []);
+    } catch {
+      // ignore background refresh errors
+    }
+  }, []);
+
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refreshCoupons();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [refreshCoupons]);
 
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();

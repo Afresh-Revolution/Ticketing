@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import "./CheckoutPage.css";
@@ -50,8 +50,6 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { token, user } = useAuth();
-  const createdOrderIdRef = useRef<string | null>(null);
-  const orderEmailRef = useRef<string | null>(null);
 
   const pendingCheckout =
     (() => {
@@ -82,9 +80,7 @@ const CheckoutPage = () => {
   const [couponPreview, setCouponPreview] = useState<CouponPreview | null>(null);
   const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
   const [copiedDetailKey, setCopiedDetailKey] = useState<string | null>(null);
-  const [manualOrderId, setManualOrderId] = useState<string>("");
   const [manualPaidLoading, setManualPaidLoading] = useState(false);
-  const [manualHoldSeconds, setManualHoldSeconds] = useState(0);
   const discountedTotal = toSafeNumber(couponPreview?.finalAmount, totalPrice);
 
   // Pre-fill email and name from logged-in user when available.
@@ -236,6 +232,36 @@ const CheckoutPage = () => {
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
+      // Paid (manual bank transfer): open bank details only — order is created when buyer taps "Paid"
+      // so the admin dashboard lists the sale only after they confirm transfer.
+      if (!isFreeOrder) {
+        if (discountedTotal < 1) {
+          throw new Error("Amount must be at least ₦1. Please select at least one ticket.");
+        }
+        localStorage.setItem(
+          PENDING_CHECKOUT_KEY,
+          JSON.stringify({
+            checkoutState: {
+              totalPrice,
+              eventId: state.eventId,
+              eventTitle: state.eventTitle,
+              items: state.items,
+            },
+            attendee: {
+              fullName: trimmedName,
+              email: trimmedEmail,
+              phone: (phone || "").trim(),
+              address: (address || "").trim(),
+            },
+            couponCode: couponPreview?.coupon?.code || couponCode.trim() || "",
+          })
+        );
+        setShowManualPaymentModal(true);
+        setCopiedDetailKey(null);
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(apiUrl("/api/orders"), {
         method: "POST",
         headers,
@@ -248,11 +274,11 @@ const CheckoutPage = () => {
       }
 
       const createdOrder = await res.json();
-      orderEmailRef.current = trimmedEmail;
       const payableAmount = Number(createdOrder?.totalAmount ?? discountedTotal);
 
       // Free tickets: backend already set status to paid and sent ticket email; go to success
       if (payableAmount <= 0) {
+        localStorage.removeItem(PENDING_CHECKOUT_KEY);
         navigate("/payment-success", {
           state: {
             amount: payableAmount,
@@ -266,37 +292,7 @@ const CheckoutPage = () => {
         return;
       }
 
-      // Paid: manual transfer flow (order is created, user pays to bank details and confirms on WhatsApp).
-      if (payableAmount < 1) {
-        throw new Error(
-          "Amount must be at least ₦1. Please select at least one ticket.",
-        );
-      }
-      createdOrderIdRef.current = createdOrder?.id || null;
-      orderEmailRef.current = trimmedEmail;
-      setManualOrderId(String(createdOrder?.id || ""));
-      localStorage.setItem(
-        PENDING_CHECKOUT_KEY,
-        JSON.stringify({
-          checkoutState: {
-            totalPrice,
-            eventId: state.eventId,
-            eventTitle: state.eventTitle,
-            items: state.items,
-          },
-          attendee: {
-            fullName: trimmedName,
-            email: trimmedEmail,
-            phone: (phone || "").trim(),
-            address: (address || "").trim(),
-          },
-          couponCode: couponPreview?.coupon?.code || couponCode.trim() || "",
-        })
-      );
-      setShowManualPaymentModal(true);
-      setCopiedDetailKey(null);
-      setLoading(false);
-      return;
+      throw new Error("Unexpected order amount. Please try again.");
     } catch (err: unknown) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Payment processing failed");
@@ -316,32 +312,83 @@ const CheckoutPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (manualHoldSeconds <= 0) return;
-    const timer = window.setInterval(() => {
-      setManualHoldSeconds((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [manualHoldSeconds]);
-
   const handlePaidClick = async () => {
-    if (!manualOrderId || manualPaidLoading) return;
+    if (manualPaidLoading) return;
+    if (!state.eventId || !state.items || !Array.isArray(state.items) || state.items.length === 0) {
+      setError("Checkout session expired. Close this window and try again from the event page.");
+      return;
+    }
+    const trimmedName = (fullName || "").trim();
+    const trimmedEmail = (email || "").trim();
+    if (!trimmedName || !trimmedEmail || !trimmedEmail.includes("@")) {
+      setError("Please enter your full name and a valid email before tapping Paid.");
+      return;
+    }
+
+    const totalAmount = Number(totalPrice);
+    if (Number.isNaN(totalAmount) || totalAmount < 0) {
+      setError("Invalid total amount. Return to the event and start checkout again.");
+      return;
+    }
+
     setManualPaidLoading(true);
     setError("");
     try {
-      const res = await fetch(apiUrl("/api/orders/manual-payment-notify"), {
+      const orderPayload = {
+        eventId: state.eventId,
+        items: state.items,
+        originalAmount: totalAmount,
+        totalAmount,
+        fullName: trimmedName,
+        email: trimmedEmail,
+        phone: (phone || "").trim(),
+        address: (address || "").trim(),
+        couponCode: couponPreview?.coupon?.code || undefined,
+      };
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const createRes = await fetch(apiUrl("/api/orders"), {
+        method: "POST",
+        headers,
+        body: JSON.stringify(orderPayload),
+      });
+      const createData = await createRes.json().catch(() => ({} as { error?: string }));
+      if (!createRes.ok) {
+        throw new Error(createData.error || "Failed to submit your ticket request");
+      }
+      const orderId = String((createData as { id?: string }).id || "");
+      if (!orderId) {
+        throw new Error("Order was created but no id was returned. Please contact support.");
+      }
+
+      const notifyRes = await fetch(apiUrl("/api/orders/manual-payment-notify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderId: manualOrderId,
-          email: email.trim(),
+          orderId,
+          email: trimmedEmail,
         }),
       });
-      const data = await res.json().catch(() => ({} as { error?: string }));
-      if (!res.ok) throw new Error(data.error || "Failed to send payment confirmation");
-      setManualHoldSeconds(120);
+      const notifyData = await notifyRes.json().catch(() => ({} as { error?: string }));
+      if (!notifyRes.ok) {
+        throw new Error(notifyData.error || "Request was saved but we could not send the payment notice. Please contact support with your email.");
+      }
+
+      localStorage.removeItem(PENDING_CHECKOUT_KEY);
+      setShowManualPaymentModal(false);
+
+      navigate(`/event/${state.eventId}`, {
+        state: {
+          manualCheckoutSuccess:
+            "Your ticket request was submitted. We will review your transfer and mark it paid in the dashboard — you will receive your ticket by email once confirmed.",
+        },
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send payment confirmation");
+      setError(err instanceof Error ? err.message : "Failed to submit payment confirmation");
     } finally {
       setManualPaidLoading(false);
     }
@@ -589,52 +636,30 @@ const CheckoutPage = () => {
                 </button>
               </div>
               {copiedDetailKey === "bank" && <span className="checkout-manual-copied-badge">Detail copied</span>}
-              {manualOrderId && (
-                <>
-                  <div className="checkout-manual-detail-item">
-                    <div>
-                      <span className="checkout-manual-detail-label">Order ID</span>
-                      <span className="checkout-manual-detail-value">{manualOrderId}</span>
-                    </div>
-                    <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("order", manualOrderId)} aria-label="Copy order id">
-                      <span className="checkout-manual-copy-icon" aria-hidden>
-                        {copiedDetailKey === "order" ? "✓" : "⧉"}
-                      </span>
-                    </button>
-                  </div>
-                  {copiedDetailKey === "order" && <span className="checkout-manual-copied-badge">Detail copied</span>}
-                </>
-              )}
             </div>
+            <p className="checkout-cancel-text checkout-manual-paid-hint">
+              After you send the transfer, tap <strong>Paid</strong> below so we can register your purchase for the team to review. Include your email in the transfer narration if your bank allows it.
+            </p>
             <p className="checkout-cancel-text">
               After successful payment, contact William by clicking this:{" "}
               <a href={MANUAL_PAYMENT_CONTACT_URL} target="_blank" rel="noreferrer" className="checkout-manual-link">
                 {MANUAL_PAYMENT_CONTACT_URL}
               </a>
             </p>
-            {manualHoldSeconds > 0 && (
-              <p className="checkout-cancel-text checkout-manual-hold-text">
-                Payment notice sent. Keep this page open for{" "}
-                <strong>
-                  {Math.floor(manualHoldSeconds / 60)}:{String(manualHoldSeconds % 60).padStart(2, "0")}
-                </strong>{" "}
-                to confirm your ticket, or check your email in 10 minutes.
-              </p>
-            )}
             <div className="checkout-cancel-actions">
               <button
                 type="button"
                 className="checkout-cancel-btn checkout-cancel-btn-add"
                 onClick={handlePaidClick}
-                disabled={manualPaidLoading || manualHoldSeconds > 0}
+                disabled={manualPaidLoading}
               >
-                {manualPaidLoading ? "Sending..." : manualHoldSeconds > 0 ? "Paid (Sent)" : "Paid"}
+                {manualPaidLoading ? "Submitting…" : "Paid"}
               </button>
               <button
                 type="button"
                 className="checkout-cancel-btn checkout-cancel-btn-cancel"
-                onClick={() => setShowManualPaymentModal(false)}
-                disabled={manualHoldSeconds > 0}
+                onClick={() => !manualPaidLoading && setShowManualPaymentModal(false)}
+                disabled={manualPaidLoading}
               >
                 Close
               </button>
