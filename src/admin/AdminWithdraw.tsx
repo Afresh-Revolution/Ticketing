@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -11,6 +11,7 @@ interface EventRow {
   imageUrl: string | null;
   createdBy: string | null;
   gross_revenue: number;
+  tickets_sold: number;
   withdrawal_status: string | null;
   withdrawn_net: number | null;
   withdrawn_at: string | null;
@@ -29,6 +30,10 @@ interface WithdrawalRow {
   event_title: string;
   admin_name: string | null;
   admin_email: string | null;
+  bankName?: string | null;
+  bankCode?: string | null;
+  accountNumber?: string | null;
+  accountName?: string | null;
 }
 
 interface BankAccount {
@@ -49,6 +54,7 @@ interface PageData {
   kpi: KPI;
   events: EventRow[];
   withdrawals: WithdrawalRow[];
+  pendingRequests: WithdrawalRow[];
   bankAccount: BankAccount | null;
   isSuperAdmin: boolean;
 }
@@ -66,13 +72,120 @@ const fmt = (n: number) =>
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
-function isEligible(event: EventRow): boolean {
-  const eventDay = new Date(event.date);
-  eventDay.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return eventDay <= today;
+function hasSoldTickets(event: EventRow): boolean {
+  return Number(event.tickets_sold) > 0 || Number(event.gross_revenue) > 0;
 }
+
+// ─── Searchable bank picker (inline — pushes form fields down when open) ─────
+
+interface SearchableBankSelectProps {
+  banks: Bank[];
+  loading: boolean;
+  value: string;
+  onChange: (bank: Bank) => void;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const SearchableBankSelect = ({
+  banks,
+  loading,
+  value,
+  onChange,
+  onOpenChange,
+}: SearchableBankSelectProps) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const selected = banks.find((b) => b.code === value);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return banks;
+    return banks.filter(
+      (b) => b.name.toLowerCase().includes(q) || b.code.toLowerCase().includes(q)
+    );
+  }, [banks, query]);
+
+  const setOpenState = (next: boolean) => {
+    setOpen(next);
+    onOpenChange?.(next);
+    if (!next) setQuery('');
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => searchRef.current?.focus(), 0);
+    const onDoc = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpenState(false);
+      }
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => {
+      window.clearTimeout(t);
+      document.removeEventListener('mousedown', onDoc);
+    };
+  }, [open]);
+
+  const handleSelect = (bank: Bank) => {
+    onChange(bank);
+    setOpenState(false);
+  };
+
+  return (
+    <div className="bank-select" ref={rootRef}>
+      <button
+        type="button"
+        className={`bank-select-trigger admin-select ${open ? 'bank-select-trigger-open' : ''}`}
+        onClick={() => !loading && setOpenState(!open)}
+        disabled={loading}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        <span className="bank-select-trigger-label">
+          {loading ? 'Loading banks…' : selected?.name || 'Select a bank…'}
+        </span>
+        <span className="bank-select-chevron" aria-hidden>{open ? '▴' : '▾'}</span>
+      </button>
+
+      {open && (
+        <div className="bank-select-panel">
+          <input
+            ref={searchRef}
+            type="search"
+            className="admin-input bank-select-search"
+            placeholder="Search banks (e.g. OPay, GTBank)…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
+            aria-label="Search banks"
+          />
+          <ul className="bank-select-list" role="listbox" aria-label="Banks">
+            {filtered.length === 0 ? (
+              <li className="bank-select-empty">No banks match &ldquo;{query}&rdquo;</li>
+            ) : (
+              filtered.map((b) => (
+                <li key={b.code} role="none">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={b.code === value}
+                    className={`bank-select-option ${b.code === value ? 'is-selected' : ''}`}
+                    onClick={() => handleSelect(b)}
+                  >
+                    {b.name}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ─── Bank Setup Modal ─────────────────────────────────────────────────────────
 
@@ -83,6 +196,8 @@ interface BankModalProps {
 
 const BankSetupModal = ({ onClose, onSaved }: BankModalProps) => {
   const [banks, setBanks] = useState<Bank[]>([]);
+  const [banksLoading, setBanksLoading] = useState(true);
+  const [bankPickerOpen, setBankPickerOpen] = useState(false);
   const [bankCode, setBankCode] = useState('');
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
@@ -94,15 +209,26 @@ const BankSetupModal = ({ onClose, onSaved }: BankModalProps) => {
     const token = localStorage.getItem('adminToken');
     fetch(apiUrl('/api/admin/banks'), { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
-      .then((data) => setBanks(Array.isArray(data) ? data : []))
-      .catch(() => {});
+      .then((data) => {
+        if (!Array.isArray(data)) {
+          setBanks([]);
+          return;
+        }
+        const normalized = data
+          .map((b: { code?: string; bank_code?: string; name?: string; bank_name?: string }) => ({
+            code: String(b.code ?? b.bank_code ?? '').trim(),
+            name: String(b.name ?? b.bank_name ?? '').trim(),
+          }))
+          .filter((b) => b.code && b.name);
+        const byCode = new Map<string, Bank>();
+        for (const b of normalized) {
+          if (!byCode.has(b.code)) byCode.set(b.code, b);
+        }
+        setBanks([...byCode.values()].sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => setBanks([]))
+      .finally(() => setBanksLoading(false));
   }, []);
-
-  const handleBankChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = banks.find((b) => b.code === e.target.value);
-    setBankCode(e.target.value);
-    setBankName(selected?.name || '');
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +245,16 @@ const BankSetupModal = ({ onClose, onSaved }: BankModalProps) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ accountNumber, bankCode, accountName, bankName }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save bank account');
-      onSaved(data);
+      const saved = await res.json();
+      if (!res.ok) throw new Error(saved.error || 'Failed to save bank account');
+      if (!saved.id) throw new Error('Bank account did not save. Please try again.');
+      onSaved({
+        id: String(saved.id),
+        accountName: saved.accountName || accountName,
+        accountNumber: saved.accountNumber || accountNumber,
+        bankCode: saved.bankCode || bankCode,
+        bankName: saved.bankName || bankName,
+      });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save bank account');
     } finally {
@@ -130,22 +263,32 @@ const BankSetupModal = ({ onClose, onSaved }: BankModalProps) => {
   };
 
   return (
-    <div className="admin-modal-overlay" onClick={onClose}>
-      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="admin-modal-overlay admin-modal-overlay--bank-setup" onClick={onClose}>
+      <div
+        className={`admin-modal-container admin-modal-container--bank-setup${bankPickerOpen ? ' is-bank-picker-open' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="admin-modal-header">
           <h2 className="admin-modal-title">Set Up Bank Account</h2>
           <button type="button" className="admin-modal-close" onClick={onClose}>×</button>
         </div>
-        <form className="admin-modal-form" onSubmit={handleSubmit}>
+        <form className="admin-modal-form admin-modal-form--bank-setup" onSubmit={handleSubmit}>
           {error && <div className="admin-form-error">{error}</div>}
 
           <label className="admin-label">Bank</label>
-          <select className="admin-select" value={bankCode} onChange={handleBankChange} required>
-            <option value="">Select a bank…</option>
-            {banks.map((b) => (
-              <option key={b.code} value={b.code}>{b.name}</option>
-            ))}
-          </select>
+          <SearchableBankSelect
+            banks={banks}
+            loading={banksLoading}
+            value={bankCode}
+            onChange={(b) => {
+              setBankCode(b.code);
+              setBankName(b.name);
+            }}
+            onOpenChange={setBankPickerOpen}
+          />
+          {!banksLoading && banks.length === 0 && (
+            <p className="admin-form-hint">Could not load banks. Refresh the page or contact support.</p>
+          )}
 
           <label className="admin-label">Account Number</label>
           <input
@@ -191,16 +334,23 @@ interface EventCardProps {
 }
 
 const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawing }: EventCardProps) => {
-  const eligible = isEligible(event);
+  const isPending = event.withdrawal_status === 'pending';
+  const isRejected = event.withdrawal_status === 'rejected';
   const alreadyWithdrawn = event.withdrawal_status === 'completed';
-  const hasRevenue = Number(event.gross_revenue) > 0;
-  const canWithdraw = eligible && !alreadyWithdrawn && hasRevenue && (isSuperAdmin || hasBankAccount);
+  const sold = hasSoldTickets(event);
+  const canWithdraw =
+    !isSuperAdmin &&
+    sold &&
+    !alreadyWithdrawn &&
+    !isPending &&
+    hasBankAccount;
   const isLoading = withdrawing === event.id;
 
   let statusChip: { label: string; cls: string };
   if (alreadyWithdrawn) statusChip = { label: '✓ Withdrawn', cls: 'chip-withdrawn' };
-  else if (!eligible) statusChip = { label: '⏳ Not Yet', cls: 'chip-pending' };
-  else if (!hasRevenue) statusChip = { label: 'No Revenue', cls: 'chip-pending' };
+  else if (isPending) statusChip = { label: '⏳ Pending approval', cls: 'chip-pending' };
+  else if (isRejected) statusChip = { label: 'Not approved', cls: 'chip-rejected' };
+  else if (!sold) statusChip = { label: 'No tickets sold', cls: 'chip-pending' };
   else statusChip = { label: 'Eligible', cls: 'chip-eligible' };
 
   return (
@@ -232,14 +382,87 @@ const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawin
           disabled={!canWithdraw || isLoading}
           onClick={() => canWithdraw && onWithdraw(event.id)}
           title={
-            !eligible ? 'Available on or after the event date'
-            : !hasRevenue ? 'No paid ticket revenue'
+            !sold ? 'No sold tickets for this event yet'
             : alreadyWithdrawn ? 'Already withdrawn'
             : !hasBankAccount && !isSuperAdmin ? 'Set up your bank account first'
-            : 'Withdraw funds'
+            : 'Request withdrawal'
           }
         >
-          {isLoading ? 'Processing…' : alreadyWithdrawn ? 'Withdrawn' : 'Withdraw'}
+          {isLoading
+            ? 'Sending…'
+            : alreadyWithdrawn
+              ? 'Withdrawn'
+              : isPending
+                ? 'Request pending'
+                : 'Withdraw'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── Pending request card (super admin) ──────────────────────────────────────
+
+interface PendingRequestCardProps {
+  request: WithdrawalRow;
+  reviewing: string | null;
+  onReview: (withdrawalId: string, action: 'approve' | 'disapprove') => void;
+}
+
+const PendingRequestCard = ({ request, reviewing, onReview }: PendingRequestCardProps) => {
+  const busy = reviewing === request.id;
+  return (
+    <div className="withdraw-pending-card">
+      <div className="withdraw-pending-header">
+        <div>
+          <h3 className="withdraw-pending-title">{request.event_title || 'Event'}</h3>
+          <p className="withdraw-pending-admin">
+            {request.admin_name || 'Admin'}
+            {request.admin_email ? ` · ${request.admin_email}` : ''}
+          </p>
+        </div>
+        <span className="withdraw-chip chip-pending">Pending</span>
+      </div>
+
+      <div className="withdraw-pending-details">
+        <div className="withdraw-pending-detail-row">
+          <span className="withdraw-pending-label">Gross revenue</span>
+          <span>{fmt(request.grossAmount)}</span>
+        </div>
+        <div className="withdraw-pending-detail-row">
+          <span className="withdraw-pending-label">Platform fee (15%)</span>
+          <span style={{ color: '#f87171' }}>{fmt(request.platformFee)}</span>
+        </div>
+        <div className="withdraw-pending-detail-row">
+          <span className="withdraw-pending-label">Net payout</span>
+          <span style={{ color: '#86efac', fontWeight: 700 }}>{fmt(request.netAmount)}</span>
+        </div>
+        <div className="withdraw-pending-bank">
+          <span className="withdraw-pending-label">Bank details</span>
+          <p className="withdraw-pending-bank-line">
+            <strong>{request.bankName || '—'}</strong>
+          </p>
+          <p className="withdraw-pending-bank-line">{request.accountName || '—'}</p>
+          <p className="withdraw-pending-bank-line">{request.accountNumber || '—'}</p>
+        </div>
+      </div>
+
+      <div className="withdraw-pending-actions">
+        <button
+          type="button"
+          className="admin-btn-secondary withdraw-disapprove-btn"
+          disabled={busy}
+          onClick={() => onReview(request.id, 'disapprove')}
+        >
+          {busy ? '…' : 'Disapprove'}
+        </button>
+        <button
+          type="button"
+          className="admin-btn-primary"
+          disabled={busy}
+          onClick={() => onReview(request.id, 'approve')}
+        >
+          {busy ? '…' : 'Approve'}
         </button>
       </div>
     </div>
@@ -252,9 +475,10 @@ const AdminWithdraw = () => {
   const [data, setData] = useState<PageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'events' | 'history'>('events');
+  const [activeTab, setActiveTab] = useState<'events' | 'history' | 'requests'>('events');
   const [showBankModal, setShowBankModal] = useState(false);
   const [withdrawing, setWithdrawing] = useState<string | null>(null);
+  const [reviewing, setReviewing] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
@@ -280,17 +504,51 @@ const AdminWithdraw = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  useEffect(() => {
+    if (!data?.isSuperAdmin) return;
+    if ((data.pendingRequests?.length ?? 0) > 0) {
+      setActiveTab('requests');
+    } else if (activeTab === 'events') {
+      setActiveTab('history');
+    }
+  }, [data?.isSuperAdmin, data?.pendingRequests?.length, activeTab]);
+
+  useEffect(() => {
+    const layout = document.querySelector('.admin-layout');
+    const adminBody = document.querySelector('.admin-body');
+    const main = document.querySelector('.admin-main');
+    layout?.classList.add('admin-layout--withdraw');
+    adminBody?.classList.add('admin-body--withdraw');
+    main?.classList.add('admin-main--withdraw');
+    return () => {
+      layout?.classList.remove('admin-layout--withdraw');
+      adminBody?.classList.remove('admin-body--withdraw');
+      main?.classList.remove('admin-main--withdraw');
+    };
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('admin-bank-modal-open', showBankModal);
+    return () => document.documentElement.classList.remove('admin-bank-modal-open');
+  }, [showBankModal]);
+
   const handleWithdraw = async (eventId: string) => {
+    if (!data?.bankAccount?.accountNumber || !data?.bankAccount?.bankCode) {
+      showToast('Set up your bank account before requesting a withdrawal', 'error');
+      setShowBankModal(true);
+      return;
+    }
     setWithdrawing(eventId);
     try {
       const token = localStorage.getItem('adminToken');
       const res = await fetch(apiUrl(`/api/admin/withdraw/${eventId}`), {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ bankAccount: data.bankAccount }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Withdrawal failed');
-      showToast(`Withdrawal successful! Net: ${fmt(json.withdrawal.net)}`, 'success');
+      showToast(json.message || 'Withdrawal request submitted for approval', 'success');
       fetchData();
     } catch (err: unknown) {
       showToast(err instanceof Error ? err.message : 'Withdrawal failed', 'error');
@@ -299,32 +557,60 @@ const AdminWithdraw = () => {
     }
   };
 
+  const handleReview = async (withdrawalId: string, action: 'approve' | 'disapprove') => {
+    setReviewing(withdrawalId);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(apiUrl(`/api/admin/withdraw/${withdrawalId}/review`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Review failed');
+      showToast(
+        json.message || (action === 'approve' ? 'Withdrawal approved' : 'Withdrawal disapproved'),
+        'success'
+      );
+      fetchData();
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Review failed', 'error');
+    } finally {
+      setReviewing(null);
+    }
+  };
+
   const handleBankSaved = (ba: BankAccount) => {
     setShowBankModal(false);
     setData((prev) => prev ? { ...prev, bankAccount: ba } : prev);
     showToast('Bank account saved!', 'success');
+    fetchData();
   };
 
   if (loading) {
     return (
-      <div className="admin-page">
-        <div className="admin-empty-state">Loading withdraw data…</div>
+      <div className="admin-page admin-withdraw-page">
+        <div className="admin-withdraw-scroll">
+          <div className="admin-empty-state">Loading withdraw data…</div>
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="admin-page">
-        <div className="admin-empty-state" style={{ color: '#f87171' }}>{error || 'No data'}</div>
+      <div className="admin-page admin-withdraw-page">
+        <div className="admin-withdraw-scroll">
+          <div className="admin-empty-state" style={{ color: '#f87171' }}>{error || 'No data'}</div>
+        </div>
       </div>
     );
   }
 
-  const { kpi, events, withdrawals, bankAccount, isSuperAdmin } = data;
+  const { kpi, events, withdrawals, pendingRequests = [], bankAccount, isSuperAdmin } = data;
 
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-withdraw-page">
       {/* Toast */}
       {toast && (
         <div className={`withdraw-toast ${toast.type === 'success' ? 'withdraw-toast-success' : 'withdraw-toast-error'}`}>
@@ -332,6 +618,7 @@ const AdminWithdraw = () => {
         </div>
       )}
 
+      <div className="admin-withdraw-scroll">
       {/* Page header */}
       <div className="admin-page-header">
         <h1 className="admin-page-title">Withdraw</h1>
@@ -395,13 +682,27 @@ const AdminWithdraw = () => {
 
       {/* Tabs */}
       <div className="withdraw-tabs">
-        <button
-          type="button"
-          className={`withdraw-tab ${activeTab === 'events' ? 'withdraw-tab-active' : ''}`}
-          onClick={() => setActiveTab('events')}
-        >
-          Events
-        </button>
+        {isSuperAdmin && (
+          <button
+            type="button"
+            className={`withdraw-tab ${activeTab === 'requests' ? 'withdraw-tab-active' : ''}`}
+            onClick={() => setActiveTab('requests')}
+          >
+            Pending Requests
+            {pendingRequests.length > 0 && (
+              <span className="withdraw-tab-badge">{pendingRequests.length}</span>
+            )}
+          </button>
+        )}
+        {!isSuperAdmin && (
+          <button
+            type="button"
+            className={`withdraw-tab ${activeTab === 'events' ? 'withdraw-tab-active' : ''}`}
+            onClick={() => setActiveTab('events')}
+          >
+            Events
+          </button>
+        )}
         <button
           type="button"
           className={`withdraw-tab ${activeTab === 'history' ? 'withdraw-tab-active' : ''}`}
@@ -414,8 +715,25 @@ const AdminWithdraw = () => {
         </button>
       </div>
 
+      {isSuperAdmin && activeTab === 'requests' && (
+        <div className="withdraw-pending-grid">
+          {pendingRequests.length === 0 ? (
+            <div className="admin-empty-state">No pending withdrawal requests.</div>
+          ) : (
+            pendingRequests.map((req) => (
+              <PendingRequestCard
+                key={req.id}
+                request={req}
+                reviewing={reviewing}
+                onReview={handleReview}
+              />
+            ))
+          )}
+        </div>
+      )}
+
       {/* Events tab */}
-      {activeTab === 'events' && (
+      {activeTab === 'events' && !isSuperAdmin && (
         <div className="withdraw-events-grid">
           {events.length === 0 ? (
             <div className="admin-empty-state">No events found.</div>
@@ -480,6 +798,7 @@ const AdminWithdraw = () => {
           )}
         </div>
       )}
+      </div>
 
       {/* Bank setup modal */}
       {showBankModal && (
