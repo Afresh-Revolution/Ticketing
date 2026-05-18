@@ -72,8 +72,9 @@ const fmt = (n: number) =>
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
-function hasSoldTickets(event: EventRow): boolean {
-  return Number(event.tickets_sold) > 0 || Number(event.gross_revenue) > 0;
+/** Any event with paid revenue can be withdrawn — event date is not considered. */
+function hasWithdrawableRevenue(event: EventRow): boolean {
+  return Number(event.gross_revenue) > 0 || Number(event.tickets_sold) > 0;
 }
 
 // ─── Searchable bank picker (inline — pushes form fields down when open) ─────
@@ -337,10 +338,10 @@ const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawin
   const isPending = event.withdrawal_status === 'pending';
   const isRejected = event.withdrawal_status === 'rejected';
   const alreadyWithdrawn = event.withdrawal_status === 'completed';
-  const sold = hasSoldTickets(event);
+  const hasRevenue = hasWithdrawableRevenue(event);
   const canWithdraw =
     !isSuperAdmin &&
-    sold &&
+    hasRevenue &&
     !alreadyWithdrawn &&
     !isPending &&
     hasBankAccount;
@@ -350,7 +351,7 @@ const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawin
   if (alreadyWithdrawn) statusChip = { label: '✓ Withdrawn', cls: 'chip-withdrawn' };
   else if (isPending) statusChip = { label: '⏳ Pending approval', cls: 'chip-pending' };
   else if (isRejected) statusChip = { label: 'Not approved', cls: 'chip-rejected' };
-  else if (!sold) statusChip = { label: 'No tickets sold', cls: 'chip-pending' };
+  else if (!hasRevenue) statusChip = { label: 'No revenue yet', cls: 'chip-pending' };
   else statusChip = { label: 'Eligible', cls: 'chip-eligible' };
 
   return (
@@ -382,7 +383,7 @@ const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawin
           disabled={!canWithdraw || isLoading}
           onClick={() => canWithdraw && onWithdraw(event.id)}
           title={
-            !sold ? 'No sold tickets for this event yet'
+            !hasRevenue ? 'No ticket revenue for this event yet'
             : alreadyWithdrawn ? 'Already withdrawn'
             : !hasBankAccount && !isSuperAdmin ? 'Set up your bank account first'
             : 'Request withdrawal'
