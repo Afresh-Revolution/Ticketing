@@ -13,6 +13,7 @@ interface DashboardStats {
 
 interface RecentSale {
   id: string;
+  source?: 'online' | 'walk_in' | string;
   event_id?: string;
   buyer_name: string;
   buyer_email: string;
@@ -43,6 +44,7 @@ function groupSalesByEvent(sales: RecentSale[]): { eventId: string; eventTitle: 
   }));
 }
 
+
 function normalizeRecentSales(raw: unknown): RecentSale[] {
   const arr = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && 'recentSales' in raw)
     ? (raw as { recentSales?: unknown }).recentSales
@@ -50,6 +52,7 @@ function normalizeRecentSales(raw: unknown): RecentSale[] {
   const list = Array.isArray(arr) ? arr : [];
   return list.map((s: Record<string, unknown>) => ({
     id: String(s.id ?? s.order_id ?? ''),
+    source: String(s.source ?? 'online'),
     event_id: String(s.event_id ?? s.eventId ?? ''),
     buyer_name: String(s.buyer_name ?? s.buyerName ?? ''),
     buyer_email: String(s.buyer_email ?? s.buyerEmail ?? ''),
@@ -205,7 +208,10 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
       const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-      const endpoints = [`/api/admin/sales/${sale.id}`, `/api/admin/orders/${sale.id}`];
+      const endpoints =
+        sale.source === 'walk_in'
+          ? [`/api/admin/walk-in-sales/${sale.id}`, `/api/admin/sales/${sale.id}`]
+          : [`/api/admin/sales/${sale.id}`, `/api/admin/orders/${sale.id}`];
       let deleted = false;
       let lastError = 'Failed to delete sale';
 
