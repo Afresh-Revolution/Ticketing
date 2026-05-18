@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -195,7 +196,6 @@ const AdminCoupons = () => {
       setError(err instanceof Error ? err.message : 'Failed to delete coupon');
     } finally {
       setDeletingId(null);
-      
     }
   };
 
@@ -371,47 +371,58 @@ const AdminCoupons = () => {
         )}
       </section>
 
-      {deleteConfirm && (
-        <div className="admin-modal-overlay" onClick={() => !deletingId && setDeleteConfirm(null)}>
-          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h2 className="admin-modal-title">Delete coupon</h2>
-              <button
-                type="button"
-                className="admin-modal-close"
-                onClick={() => !deletingId && setDeleteConfirm(null)}
-                disabled={deletingId === deleteConfirm.id}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="admin-modal-form">
-              <p className="admin-delete-confirm-message">
-                Are you sure you want to delete <strong>"{deleteConfirm.code}"</strong>? This action cannot be undone.
-              </p>
-              <div className="admin-modal-actions">
+      {deleteConfirm &&
+        createPortal(
+          <div
+            className="admin-modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-coupon-modal-title"
+            onClick={() => !deletingId && setDeleteConfirm(null)}
+          >
+            <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h2 id="delete-coupon-modal-title" className="admin-modal-title">
+                  Delete coupon
+                </h2>
                 <button
                   type="button"
-                  className="admin-btn-cancel"
+                  className="admin-modal-close"
                   onClick={() => !deletingId && setDeleteConfirm(null)}
                   disabled={deletingId === deleteConfirm.id}
+                  aria-label="Close"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="admin-btn-danger"
-                  onClick={() => handleDeleteCoupon(deleteConfirm)}
-                  disabled={deletingId === deleteConfirm.id}
-                >
-                  {deletingId === deleteConfirm.id ? 'Deleting...' : 'Delete coupon'}
+                  ✕
                 </button>
               </div>
+              <div className="admin-modal-form">
+                <p className="admin-delete-confirm-message">
+                  Are you sure you want to delete <strong>"{deleteConfirm.code}"</strong>? This action
+                  cannot be undone.
+                </p>
+                <div className="admin-modal-actions">
+                  <button
+                    type="button"
+                    className="admin-btn-cancel"
+                    onClick={() => !deletingId && setDeleteConfirm(null)}
+                    disabled={deletingId === deleteConfirm.id}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn-danger"
+                    onClick={() => handleDeleteCoupon(deleteConfirm)}
+                    disabled={deletingId === deleteConfirm.id}
+                  >
+                    {deletingId === deleteConfirm.id ? 'Deleting...' : 'Delete coupon'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
