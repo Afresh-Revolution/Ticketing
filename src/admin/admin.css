@@ -1989,7 +1989,7 @@ select.admin-select option:checked {
 }
 
 .admin-modal-container {
-  background: var(--admin-card);
+  background: #12082e;
   border: 1px solid var(--admin-border);
   border-radius: 16px;
   width: 100%;
