@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
 import './admin.css';
 
@@ -153,6 +154,7 @@ const AdminSales = () => {
   const [walkInSearch, setWalkInSearch] = useState('');
   const [eventSearch, setEventSearch] = useState('');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const modalHost = typeof document !== 'undefined' ? document.body : null;
 
   const mergedSales = useMemo(
     () => [...sales.map((sale) => ({ ...sale, source: 'online' as const })), ...walkInSales.map(mapWalkInToSale)],
@@ -888,7 +890,7 @@ const AdminSales = () => {
         </div>
       )}
 
-      {walkInDeleteConfirm && (
+      {walkInDeleteConfirm && modalHost && createPortal(
         <div className="admin-modal-overlay" onClick={() => !deletingWalkIn && setWalkInDeleteConfirm(null)}>
           <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
@@ -927,7 +929,8 @@ const AdminSales = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        modalHost
       )}
 
       {/* ── Walk-In Sale Modal ── */}
