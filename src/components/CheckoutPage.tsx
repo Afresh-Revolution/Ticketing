@@ -365,17 +365,25 @@ const CheckoutPage = () => {
         throw new Error("Order was created but no id was returned. Please contact support.");
       }
 
-      const notifyRes = await fetch(apiUrl("/api/orders/manual-payment-notify"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          email: trimmedEmail,
-        }),
-      });
-      const notifyData = await notifyRes.json().catch(() => ({} as { error?: string }));
-      if (!notifyRes.ok) {
-        throw new Error(notifyData.error || "Request was saved but we could not send the payment notice. Please contact support with your email.");
+      let notifyWarning = "";
+      try {
+        const notifyRes = await fetch(apiUrl("/api/orders/manual-payment-notify"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            email: trimmedEmail,
+          }),
+        });
+        const notifyData = await notifyRes.json().catch(() => ({} as { error?: string }));
+        if (!notifyRes.ok) {
+          notifyWarning =
+            notifyData.error ||
+            " We could not send the automatic payment notice, but your request is saved — the team can still see it in the admin dashboard.";
+        }
+      } catch {
+        notifyWarning =
+          " We could not send the automatic payment notice, but your request is saved — the team can still see it in the admin dashboard.";
       }
 
       localStorage.removeItem(PENDING_CHECKOUT_KEY);
@@ -384,7 +392,7 @@ const CheckoutPage = () => {
       navigate(`/event/${state.eventId}`, {
         state: {
           manualCheckoutSuccess:
-            "Your ticket request was submitted. We will review your transfer and mark it paid in the dashboard — you will receive your ticket by email once confirmed.",
+            `Your ticket request was submitted. We will review your transfer and mark it paid in the dashboard — you will receive your ticket by email once confirmed.${notifyWarning}`,
         },
       });
     } catch (err) {

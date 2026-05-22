@@ -2829,6 +2829,24 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 .withdraw-btn-active:hover:not(:disabled) { background: var(--admin-accent-bright); }
 .withdraw-btn-disabled { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.3); cursor: not-allowed; }
 
+.withdraw-kpi-withdraw-btn {
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid rgba(134, 239, 172, 0.45);
+  border-radius: 8px;
+  background: rgba(22, 101, 52, 0.35);
+  color: #86efac;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.withdraw-kpi-withdraw-btn:hover {
+  background: rgba(22, 101, 52, 0.55);
+  border-color: rgba(134, 239, 172, 0.7);
+}
+
 /* Bank button saved state */
 .withdraw-bank-btn-saved {
   background: rgba(139, 92, 246, 0.15) !important;

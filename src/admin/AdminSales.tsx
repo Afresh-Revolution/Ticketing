@@ -289,6 +289,24 @@ const AdminSales = () => {
   }, [fetchSales, fetchWalkInSales, fetchWalkInRevenue, fetchEvents]);
 
   useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState !== 'visible') return;
+      fetchSales();
+      fetchWalkInSales();
+      fetchWalkInRevenue();
+    };
+    const intervalId = window.setInterval(refresh, 15000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [fetchSales, fetchWalkInSales, fetchWalkInRevenue]);
+
+  useEffect(() => {
     if (!showWalkInModal) return;
     if (!walkInForm.eventId) return;
     if (selectedEventTicketTypes.includes(walkInForm.ticketType)) return;

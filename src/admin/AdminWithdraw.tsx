@@ -15,6 +15,8 @@ interface EventRow {
   withdrawal_status: string | null;
   withdrawn_net: number | null;
   withdrawn_at: string | null;
+  available_to_withdraw?: number;
+  withdrawn_gross?: number;
 }
 
 interface WithdrawalRow {
@@ -72,9 +74,85 @@ const fmt = (n: number) =>
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
 
+const WITHDRAW_NET_RATE = 0.85;
+
 /** Any event with paid revenue can be withdrawn — event date is not considered. */
 function hasWithdrawableRevenue(event: EventRow): boolean {
   return Number(event.gross_revenue) > 0 || Number(event.tickets_sold) > 0;
+}
+
+/** Compute per-event balance from revenue + withdrawal history (works with older APIs too). */
+function enrichWithdrawPageData(raw: PageData): PageData {
+  const withdrawals = raw.withdrawals ?? [];
+  const withdrawnGrossByEvent = new Map<string, number>();
+  const withdrawnNetByEvent = new Map<string, number>();
+  const pendingEventIds = new Set<string>();
+
+  for (const w of withdrawals) {
+    const eventId = String(w.eventId);
+    const status = String(w.status || '').toLowerCase();
+    if (status === 'pending') pendingEventIds.add(eventId);
+    if (status !== 'completed') continue;
+
+    const gross = Number(w.grossAmount) || 0;
+    const net = Number(w.netAmount) || 0;
+    const effectiveGross =
+      gross > 0 ? gross : net > 0 ? Math.round((net / WITHDRAW_NET_RATE) * 100) / 100 : 0;
+
+    withdrawnGrossByEvent.set(
+      eventId,
+      (withdrawnGrossByEvent.get(eventId) || 0) + effectiveGross
+    );
+    withdrawnNetByEvent.set(eventId, (withdrawnNetByEvent.get(eventId) || 0) + net);
+  }
+
+  const events = (raw.events ?? []).map((ev) => {
+    const eventId = String(ev.id);
+    const grossSum = withdrawnGrossByEvent.get(eventId) || 0;
+    const netSum = withdrawnNetByEvent.get(eventId) || 0;
+    const grossFromNet =
+      netSum > 0 ? Math.round((netSum / WITHDRAW_NET_RATE) * 100) / 100 : 0;
+    let withdrawnGross =
+      Number(ev.withdrawn_gross) > 0 ? Number(ev.withdrawn_gross) : grossSum;
+    if (grossFromNet > 0 && (withdrawnGross <= 0 || withdrawnGross > grossFromNet * 1.05)) {
+      withdrawnGross = grossFromNet;
+    }
+    const remainingGross = Math.max(0, Number(ev.gross_revenue) - withdrawnGross);
+    const computedAvailable = Math.round(remainingGross * WITHDRAW_NET_RATE * 100) / 100;
+    const apiAvailable = Number(ev.available_to_withdraw);
+    const available =
+      Number.isFinite(apiAvailable) && apiAvailable > 0 ? apiAvailable : computedAvailable;
+
+    let withdrawal_status = ev.withdrawal_status;
+    if (pendingEventIds.has(eventId)) withdrawal_status = 'pending';
+    else if (available > 0) withdrawal_status = 'eligible';
+    else if (withdrawnGross > 0) withdrawal_status = 'completed';
+
+    return {
+      ...ev,
+      withdrawn_gross: withdrawnGross,
+      withdrawn_net: withdrawnNetByEvent.get(eventId) ?? ev.withdrawn_net ?? null,
+      available_to_withdraw: available,
+      withdrawal_status,
+    };
+  });
+
+  const sumEventAvailable = events.reduce(
+    (sum, ev) => sum + (Number(ev.available_to_withdraw) || 0),
+    0
+  );
+  const kpiAvailable = Number(raw.kpi?.availableToWithdraw) || 0;
+  const alignedKpiAvailable =
+    kpiAvailable > 0 ? kpiAvailable : Math.round(sumEventAvailable * 100) / 100;
+
+  return {
+    ...raw,
+    events,
+    kpi: {
+      ...raw.kpi,
+      availableToWithdraw: Math.max(kpiAvailable, alignedKpiAvailable),
+    },
+  };
 }
 
 // ─── Searchable bank picker (inline — pushes form fields down when open) ─────
@@ -337,22 +415,24 @@ interface EventCardProps {
 const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawing }: EventCardProps) => {
   const isPending = event.withdrawal_status === 'pending';
   const isRejected = event.withdrawal_status === 'rejected';
-  const alreadyWithdrawn = event.withdrawal_status === 'completed';
+  const available = Number(event.available_to_withdraw ?? 0);
+  const hasAvailableBalance = available > 0.009;
+  const fullyWithdrawn = !hasAvailableBalance && Number(event.withdrawn_gross ?? 0) > 0;
   const hasRevenue = hasWithdrawableRevenue(event);
   const canWithdraw =
     !isSuperAdmin &&
-    hasRevenue &&
-    !alreadyWithdrawn &&
+    hasAvailableBalance &&
     !isPending &&
     hasBankAccount;
   const isLoading = withdrawing === event.id;
 
   let statusChip: { label: string; cls: string };
-  if (alreadyWithdrawn) statusChip = { label: '✓ Withdrawn', cls: 'chip-withdrawn' };
-  else if (isPending) statusChip = { label: '⏳ Pending approval', cls: 'chip-pending' };
+  if (isPending) statusChip = { label: '⏳ Pending approval', cls: 'chip-pending' };
+  else if (hasAvailableBalance) statusChip = { label: 'Eligible', cls: 'chip-eligible' };
+  else if (fullyWithdrawn) statusChip = { label: '✓ Fully withdrawn', cls: 'chip-withdrawn' };
   else if (isRejected) statusChip = { label: 'Not approved', cls: 'chip-rejected' };
   else if (!hasRevenue) statusChip = { label: 'No revenue yet', cls: 'chip-pending' };
-  else statusChip = { label: 'Eligible', cls: 'chip-eligible' };
+  else statusChip = { label: 'No balance', cls: 'chip-pending' };
 
   return (
     <div className="withdraw-event-card">
@@ -371,10 +451,16 @@ const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawin
           <span className="withdraw-revenue-label">Total Revenue</span>
           <span className="withdraw-revenue-value">{fmt(event.gross_revenue)}</span>
         </div>
-        {alreadyWithdrawn && event.withdrawn_net && (
+        {Number(event.withdrawn_net) > 0 && (
           <div className="withdraw-event-revenue" style={{ marginTop: '0.25rem' }}>
-            <span className="withdraw-revenue-label">Net Paid Out</span>
-            <span className="withdraw-revenue-value" style={{ color: '#22c55e' }}>{fmt(event.withdrawn_net)}</span>
+            <span className="withdraw-revenue-label">Net Paid Out (total)</span>
+            <span className="withdraw-revenue-value" style={{ color: '#22c55e' }}>{fmt(event.withdrawn_net!)}</span>
+          </div>
+        )}
+        {hasAvailableBalance && (
+          <div className="withdraw-event-revenue" style={{ marginTop: '0.25rem' }}>
+            <span className="withdraw-revenue-label">Available to Withdraw</span>
+            <span className="withdraw-revenue-value" style={{ color: '#86efac' }}>{fmt(available)}</span>
           </div>
         )}
         <button
@@ -383,19 +469,24 @@ const EventCard = ({ event, hasBankAccount, isSuperAdmin, onWithdraw, withdrawin
           disabled={!canWithdraw || isLoading}
           onClick={() => canWithdraw && onWithdraw(event.id)}
           title={
-            !hasRevenue ? 'No ticket revenue for this event yet'
-            : alreadyWithdrawn ? 'Already withdrawn'
-            : !hasBankAccount && !isSuperAdmin ? 'Set up your bank account first'
-            : 'Request withdrawal'
+            !hasAvailableBalance
+              ? fullyWithdrawn
+                ? 'All revenue for this event has been withdrawn'
+                : 'No withdrawable balance for this event yet'
+              : !hasBankAccount && !isSuperAdmin
+                ? 'Set up your bank account first'
+                : `Request withdrawal of ${fmt(available)}`
           }
         >
           {isLoading
             ? 'Sending…'
-            : alreadyWithdrawn
-              ? 'Withdrawn'
-              : isPending
-                ? 'Request pending'
-                : 'Withdraw'}
+            : isPending
+              ? 'Request pending'
+              : hasAvailableBalance
+                ? 'Withdraw'
+                : fullyWithdrawn
+                  ? 'Fully withdrawn'
+                  : 'No balance'}
         </button>
       </div>
     </div>
@@ -495,7 +586,8 @@ const AdminWithdraw = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to load withdraw data');
-      setData(await res.json());
+      const json = (await res.json()) as PageData;
+      setData(enrichWithdrawPageData(json));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to load');
     } finally {
@@ -660,8 +752,17 @@ const AdminWithdraw = () => {
             <span className="admin-kpi-value">{fmt(kpi.availableToWithdraw)}</span>
             {!isSuperAdmin && (
               <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.15rem' }}>
-                85% of unwithdraw revenue
+                85% of unwithdrawn revenue
               </span>
+            )}
+            {!isSuperAdmin && kpi.availableToWithdraw > 0 && (
+              <button
+                type="button"
+                className="withdraw-kpi-withdraw-btn"
+                onClick={() => setActiveTab('events')}
+              >
+                Withdraw from an event below
+              </button>
             )}
           </div>
         </div>

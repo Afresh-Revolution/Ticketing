@@ -27,6 +27,25 @@ interface EventDetail {
   tickets: TicketType[];
 }
 
+function resolveOrganizerName(data: {
+  createdByName?: string | null;
+  organizer?: string | null;
+  organizerName?: string | null;
+  createdBy?: string | number | { name?: string | null; username?: string | null } | null;
+}): string {
+  const fromApi =
+    (typeof data.createdByName === 'string' && data.createdByName.trim()) ||
+    (typeof data.organizer === 'string' && data.organizer.trim()) ||
+    (typeof data.organizerName === 'string' && data.organizerName.trim());
+  if (fromApi) return fromApi;
+  const cb = data.createdBy;
+  if (cb && typeof cb === 'object') {
+    const nested = (cb.name || cb.username || '').trim();
+    if (nested) return nested;
+  }
+  return 'Organizer';
+}
+
 const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -80,7 +99,7 @@ const EventDetailPage = () => {
           location: data.location || data.venue || "TBD",
           heroImage: data.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
           about: data.description || "No description available.",
-          organizer: "Gatewav Organizer", // TODO: Fetch from createdBy user if available
+          organizer: resolveOrganizerName(data),
           tickets
         };
         
@@ -219,7 +238,7 @@ const EventDetailPage = () => {
             </div>
             <div className="event-detail-card event-detail-card-organizer">
               <span className="event-detail-card-icon event-detail-card-icon-lg" aria-hidden>
-                L
+                {(event.organizer.trim()[0] || 'O').toUpperCase()}
               </span>
               <div>
                 <span className="event-detail-organizer-label">Organized by</span>
