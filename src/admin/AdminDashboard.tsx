@@ -134,6 +134,36 @@ const AdminDashboard = () => {
     fetchDashboard();
   }, []);
 
+  useEffect(() => {
+    const refresh = async () => {
+      if (document.visibilityState !== 'visible') return;
+      const token = localStorage.getItem('adminToken');
+      if (!token) return;
+      const headers: HeadersInit = { Authorization: `Bearer ${token}` };
+      try {
+        const salesRes = await fetch(apiUrl('/api/admin/sales'), { headers });
+        if (salesRes.ok) {
+          const salesData = await salesRes.json();
+          const all = Array.isArray(salesData) ? salesData : (salesData?.sales ?? salesData?.data ?? []);
+          const normalized = normalizeRecentSales(all);
+          setAllSales(normalized);
+          setRecentSales(normalized.filter((s) => s.status?.toLowerCase() === 'paid').slice(0, 20));
+        }
+      } catch {
+        /* ignore background refresh errors */
+      }
+    };
+    const intervalId = window.setInterval(refresh, 15000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refresh();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, []);
+
   const handleRecentSaleStatusChange = async (sale: RecentSale, status: string) => {
     if (!ONLINE_SALE_STATUS_OPTIONS.includes(status as (typeof ONLINE_SALE_STATUS_OPTIONS)[number])) return;
     setUpdatingSaleStatusId(sale.id);
