@@ -1,4 +1,5 @@
 import { usePWA } from '../contexts/PWAContext';
+import { brandAssetUrl } from '../branding/version';
 import './PWABadges.css';
 
 export default function PWABadges() {
@@ -41,7 +42,7 @@ export default function PWABadges() {
             aria-label="Install GateWav app"
           >
             <span className="pwa-badge-icon-wrap" aria-hidden>
-              <img src="/icon-192.png" alt="" className="pwa-badge-icon" />
+              <img src={brandAssetUrl('/icon-192.png')} alt="" className="pwa-badge-icon" />
             </span>
             <span className="pwa-badge-content">
               <span className="pwa-badge-title">Install GateWav</span>

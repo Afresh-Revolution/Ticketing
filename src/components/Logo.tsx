@@ -1,3 +1,6 @@
+import logoMainSrc from '../assets/branding/logo-main.png';
+import logoIconSrc from '../assets/branding/logo.png';
+
 type LogoVariant = 'main' | 'icon';
 
 interface LogoProps {
@@ -10,8 +13,8 @@ interface LogoProps {
 }
 
 const LOGO_SRC: Record<LogoVariant, string> = {
-  main: '/logo-main.png',
-  icon: '/logo.png',
+  main: logoMainSrc,
+  icon: logoIconSrc,
 };
 
 const DEFAULT_HEIGHT: Record<LogoVariant, number> = {

@@ -5,6 +5,7 @@ import Navbar from './Navbar';
 import TopUsersCarousel from './TopUsersCarousel';
 import { usePWA } from '../contexts/PWAContext';
 import { apiUrl } from '../api/config';
+import { brandAssetUrl } from '../branding/version';
 import '../LandingPage/css/LandingPage.css';
 
 interface HeroTrendingEvent {
@@ -302,7 +303,7 @@ const LandingPage = () => {
         <section className="lp-pwa-wrap">
           <div className="lp-pwa-card lp-reveal lp-reveal--bu lp-d2">
             <div className="lp-pwa-icon lp-reveal lp-reveal--lr lp-d0" aria-hidden>
-              <img src="/icon-192.png" alt="" width={48} height={48} />
+              <img src={brandAssetUrl('/icon-192.png')} alt="" width={48} height={48} />
             </div>
             <div className="lp-pwa-text">
               <h3 className="lp-pwa-title lp-reveal lp-reveal--tb lp-d1">Install GateWav</h3>

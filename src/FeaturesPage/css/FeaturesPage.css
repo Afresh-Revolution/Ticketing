@@ -103,6 +103,7 @@
   inset: 0;
   background: linear-gradient(180deg, rgba(3, 0, 20, 0.2) 0%, rgba(3, 0, 20, 0.55) 100%);
   z-index: 1;
+  pointer-events: none;
 }
 
 .lp-video-live {
@@ -112,6 +113,7 @@
 .lp-video-media {
   position: absolute;
   inset: 0;
+  z-index: 2;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -162,16 +164,6 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.lp-video-play {
-  position: relative;
-  z-index: 2;
-  transition: transform 0.3s var(--lp-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.lp-video-card:hover .lp-video-play {
-  transform: scale(1.08);
-}
-
 @media (max-width: 900px) {
   .lp-video-grid,
   .lp-video-reveal-stack {
@@ -196,8 +188,4 @@
     aspect-ratio: 16 / 10;
   }
 
-  .lp-video-play svg {
-    width: 52px;
-    height: 52px;
-  }
 }

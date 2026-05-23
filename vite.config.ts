@@ -16,8 +16,6 @@ export default defineConfig({
         'icon-192.png',
         'icon-512.png',
         'icon-512-maskable.png',
-        'logo.png',
-        'logo-main.png',
       ],
       manifest: {
         name: 'GateWav',
@@ -30,19 +28,19 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: '/icon-192.png',
+            src: '/icon-192.png?v=gw-gateway-2026-05',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/icon-512.png',
+            src: '/icon-512.png?v=gw-gateway-2026-05',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/icon-512-maskable.png',
+            src: '/icon-512-maskable.png?v=gw-gateway-2026-05',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
