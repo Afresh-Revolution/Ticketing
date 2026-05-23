@@ -52,6 +52,7 @@ const AdminTopUsers = () => {
   const [deleting, setDeleting] = useState(false);
   const [videos, setVideos] = useState<LandingVideo[]>([]);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
   const [videoError, setVideoError] = useState('');
   const [videoExternalUrl, setVideoExternalUrl] = useState('');
   const [editingExternalId, setEditingExternalId] = useState<string | null>(null);
@@ -108,28 +109,58 @@ const AdminTopUsers = () => {
       setVideoError('Video must be below 101MB.');
       return;
     }
+    const token = getToken();
+    if (!token) {
+      setVideoError('You must be logged in to upload a video.');
+      return;
+    }
+
     setUploadingVideo(true);
+    setVideoUploadProgress(0);
     setVideoError('');
     try {
       const fd = new FormData();
       fd.append('video', file);
       const trimmedLink = videoExternalUrl.trim();
       if (trimmedLink) fd.append('externalUrl', trimmedLink);
-      const res = await fetch(apiUrl('/api/admin/landing-videos/upload'), {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${getToken()}` },
-        body: fd,
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', apiUrl('/api/admin/landing-videos/upload'));
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setVideoUploadProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Video upload failed'));
+        xhr.onload = () => {
+          let body: { error?: string } = {};
+          try {
+            body = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+          } catch {
+            body = {};
+          }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setVideoUploadProgress(100);
+            resolve();
+            return;
+          }
+          reject(new Error(body.error || 'Video upload failed'));
+        };
+
+        xhr.send(fd);
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Video upload failed');
-      }
+
       setVideoExternalUrl('');
       await fetchVideos();
     } catch (e) {
       setVideoError(e instanceof Error ? e.message : 'Video upload failed');
     } finally {
       setUploadingVideo(false);
+      setVideoUploadProgress(0);
     }
   };
 
@@ -321,6 +352,17 @@ const AdminTopUsers = () => {
             }}
           />
         </label>
+        {uploadingVideo && (
+          <div className="admin-upload-progress-wrap" style={{ maxWidth: '480px' }}>
+            <div className="admin-upload-progress-label">
+              <span>Uploading video…</span>
+              <span>{videoUploadProgress}%</span>
+            </div>
+            <div className="admin-upload-progress-track" role="progressbar" aria-valuenow={videoUploadProgress} aria-valuemin={0} aria-valuemax={100} aria-label="Video upload progress">
+              <div className="admin-upload-progress-fill" style={{ width: `${videoUploadProgress}%` }} />
+            </div>
+          </div>
+        )}
         {videoError && <div className="admin-form-error" style={{ marginTop: '0.75rem' }}>{videoError}</div>}
         {videos.length > 0 && (
           <div className="admin-table-container" style={{ marginTop: '1rem' }}>

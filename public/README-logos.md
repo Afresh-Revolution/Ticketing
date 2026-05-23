@@ -1,13 +1,11 @@
 # Logo assets
 
-Place source logos in this folder:
-
 | File | Use |
 |------|-----|
-| **logo-main.png** | Full wordmark (navbar, admin, footer, login) |
-| **logo.png** | G mark — source for favicon & PWA icons |
+| **logo.png** | G mark — source for `npm run generate-icons` (favicons & PWA) |
+| **src/assets/branding/** | Wordmark + icon used in the app (Vite hashed URLs, not cached stale paths) |
 
-After updating `logo.png`, regenerate sized icons:
+After updating `logo.png`, regenerate sized icons and bump `BRAND_ASSET_VERSION` in `src/branding/version.ts`:
 
 ```bash
 npm run generate-icons
