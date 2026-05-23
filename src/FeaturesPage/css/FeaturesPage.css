@@ -135,6 +135,33 @@
     url("https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80");
 }
 
+.lp-video-external-link {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(3, 0, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.25s var(--lp-ease-out, cubic-bezier(0.22, 1, 0.36, 1)),
+    background 0.25s,
+    border-color 0.25s;
+}
+
+.lp-video-external-link:hover {
+  transform: scale(1.08);
+  background: rgba(124, 58, 237, 0.92);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 .lp-video-play {
   position: relative;
   z-index: 2;

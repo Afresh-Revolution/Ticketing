@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import BuiltForEveryone from './BuiltForEveryone';
 import WhyChooseUs from './WhyChooseUs';
 import ReadyToJoin from './ReadyToJoin';
@@ -11,6 +12,7 @@ interface LandingVideo {
   id: string;
   videoUrl: string;
   thumbnailUrl: string | null;
+  externalUrl: string | null;
   sortOrder: number;
 }
 
@@ -71,6 +73,18 @@ const FeaturesPage = () => {
                       playsInline
                       preload="metadata"
                     />
+                    {video.externalUrl ? (
+                      <a
+                        href={video.externalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="lp-video-external-link"
+                        aria-label="Watch full video"
+                        title="Watch full video"
+                      >
+                        <ExternalLink size={18} strokeWidth={2.25} aria-hidden />
+                      </a>
+                    ) : null}
                     <div className="lp-video-play" aria-hidden>
                       <svg width="64" height="64" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="30" cy="30" r="28" fill="rgba(255, 255, 255, 0.92)" />

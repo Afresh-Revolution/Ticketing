@@ -15,6 +15,7 @@ interface LandingVideo {
   id: string;
   videoUrl: string;
   thumbnailUrl: string | null;
+  externalUrl: string | null;
   sortOrder: number;
   isActive: boolean;
 }
@@ -52,6 +53,10 @@ const AdminTopUsers = () => {
   const [videos, setVideos] = useState<LandingVideo[]>([]);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [videoError, setVideoError] = useState('');
+  const [videoExternalUrl, setVideoExternalUrl] = useState('');
+  const [editingExternalId, setEditingExternalId] = useState<string | null>(null);
+  const [editExternalUrl, setEditExternalUrl] = useState('');
+  const [savingExternalId, setSavingExternalId] = useState<string | null>(null);
 
   const getToken = () => localStorage.getItem('adminToken');
 
@@ -108,6 +113,8 @@ const AdminTopUsers = () => {
     try {
       const fd = new FormData();
       fd.append('video', file);
+      const trimmedLink = videoExternalUrl.trim();
+      if (trimmedLink) fd.append('externalUrl', trimmedLink);
       const res = await fetch(apiUrl('/api/admin/landing-videos/upload'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${getToken()}` },
@@ -117,11 +124,38 @@ const AdminTopUsers = () => {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Video upload failed');
       }
+      setVideoExternalUrl('');
       await fetchVideos();
     } catch (e) {
       setVideoError(e instanceof Error ? e.message : 'Video upload failed');
     } finally {
       setUploadingVideo(false);
+    }
+  };
+
+  const handleSaveExternalUrl = async (id: string) => {
+    setSavingExternalId(id);
+    setVideoError('');
+    try {
+      const res = await fetch(apiUrl(`/api/admin/landing-videos/${id}`), {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ externalUrl: editExternalUrl.trim() || null }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to update link');
+      }
+      setEditingExternalId(null);
+      setEditExternalUrl('');
+      await fetchVideos();
+    } catch (e) {
+      setVideoError(e instanceof Error ? e.message : 'Failed to update link');
+    } finally {
+      setSavingExternalId(null);
     }
   };
 
@@ -257,8 +291,22 @@ const AdminTopUsers = () => {
       <div className="admin-section" style={{ marginBottom: '1.5rem' }}>
         <h2 className="admin-section-title">Landing videos (Super Admin)</h2>
         <p className="admin-muted" style={{ marginBottom: '0.75rem' }}>
-          Upload up to 101MB. These videos power the landing “Atmosphere” cards.
+          Upload up to 101MB. These videos power the landing “Atmosphere” cards. Optionally add a link
+          where users can watch the full video (YouTube, Vimeo, etc.).
         </p>
+        <label className="admin-label" htmlFor="landing-video-external-url">
+          Full video link (optional)
+        </label>
+        <input
+          id="landing-video-external-url"
+          type="url"
+          className="admin-input"
+          style={{ maxWidth: '480px', marginBottom: '0.75rem' }}
+          value={videoExternalUrl}
+          onChange={(e) => setVideoExternalUrl(e.target.value)}
+          placeholder="https://youtube.com/watch?v=…"
+          disabled={uploadingVideo}
+        />
         <label className="admin-btn admin-btn-primary" style={{ width: 'fit-content', cursor: uploadingVideo ? 'not-allowed' : 'pointer', opacity: uploadingVideo ? 0.6 : 1 }}>
           {uploadingVideo ? 'Uploading video…' : 'Click to upload video'}
           <input
@@ -280,7 +328,8 @@ const AdminTopUsers = () => {
               <thead>
                 <tr>
                   <th>Preview</th>
-                  <th>URL</th>
+                  <th>Clip</th>
+                  <th>Full video link</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -291,8 +340,62 @@ const AdminTopUsers = () => {
                     <td>
                       <video src={v.videoUrl} style={{ width: '120px', borderRadius: '8px' }} muted playsInline />
                     </td>
-                    <td style={{ maxWidth: '320px' }}>
-                      <a href={v.videoUrl} target="_blank" rel="noopener noreferrer">Open video</a>
+                    <td style={{ maxWidth: '200px' }}>
+                      <a href={v.videoUrl} target="_blank" rel="noopener noreferrer">
+                        Open clip
+                      </a>
+                    </td>
+                    <td style={{ maxWidth: '280px' }}>
+                      {editingExternalId === v.id ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                          <input
+                            type="url"
+                            className="admin-input"
+                            value={editExternalUrl}
+                            onChange={(e) => setEditExternalUrl(e.target.value)}
+                            placeholder="https://…"
+                          />
+                          <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-sm admin-btn-primary"
+                              disabled={savingExternalId === v.id}
+                              onClick={() => void handleSaveExternalUrl(v.id)}
+                            >
+                              {savingExternalId === v.id ? 'Saving…' : 'Save'}
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-sm"
+                              onClick={() => {
+                                setEditingExternalId(null);
+                                setEditExternalUrl('');
+                              }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : v.externalUrl ? (
+                        <a href={v.externalUrl} target="_blank" rel="noopener noreferrer">
+                          {v.externalUrl.length > 40 ? `${v.externalUrl.slice(0, 40)}…` : v.externalUrl}
+                        </a>
+                      ) : (
+                        <span className="admin-muted">—</span>
+                      )}
+                      {editingExternalId !== v.id && (
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-sm"
+                          style={{ display: 'block', marginTop: '0.35rem' }}
+                          onClick={() => {
+                            setEditingExternalId(v.id);
+                            setEditExternalUrl(v.externalUrl || '');
+                          }}
+                        >
+                          {v.externalUrl ? 'Edit link' : 'Add link'}
+                        </button>
+                      )}
                     </td>
                     <td>{v.isActive ? 'Active' : 'Hidden'}</td>
                     <td>
