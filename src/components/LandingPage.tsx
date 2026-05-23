@@ -302,11 +302,7 @@ const LandingPage = () => {
         <section className="lp-pwa-wrap">
           <div className="lp-pwa-card lp-reveal lp-reveal--bu lp-d2">
             <div className="lp-pwa-icon lp-reveal lp-reveal--lr lp-d0" aria-hidden>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
+              <img src="/icon-192.png" alt="" width={48} height={48} />
             </div>
             <div className="lp-pwa-text">
               <h3 className="lp-pwa-title lp-reveal lp-reveal--tb lp-d1">Install GateWav</h3>

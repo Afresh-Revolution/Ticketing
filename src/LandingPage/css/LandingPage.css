@@ -544,9 +544,11 @@
   color: var(--lp-accent);
 }
 
-.lp-pwa-icon svg {
-  width: 26px;
-  height: 26px;
+.lp-pwa-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
 }
 
 .lp-pwa-text {

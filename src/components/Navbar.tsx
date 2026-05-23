@@ -39,7 +39,7 @@ const Navbar = () => {
       <div className={`nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
       <div className="navbar-container">
         <div className="logo" onClick={() => navigate('/')}>
-          <Logo variant="main" className="logo-img" height={44} />
+          <Logo variant="main" className="logo-img" />
         </div>
 
         <div className={`nav-links ${mobileMenuOpen ? 'active' : ''}`}>

@@ -274,7 +274,7 @@ const EventsPage = () => {
         <div className="events-footer-top">
           <div className="events-footer-brand">
             <div className="events-logo events-logo-footer">
-              <Logo variant="sec" className="events-logo-img" />
+              <Logo variant="main" className="events-logo-img" height={24} />
             </div>
             <p className="events-footer-desc">
               The premier platform for discovering and hosting events. We

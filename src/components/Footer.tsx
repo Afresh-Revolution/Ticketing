@@ -31,7 +31,7 @@ const Footer = () => {
           {/* Company Info Column */}
           <div className="footer-column company-info">
             <div className="footer-logo">
-              <Logo variant="sec" className="footer-logo-img" />
+              <Logo variant="main" className="footer-logo-img" height={28} />
             </div>
             <p className="footer-description">
               The premier platform for discovering and hosting events. We connect passionate organizers with enthusiastic attendees to create unforgettable experiences.

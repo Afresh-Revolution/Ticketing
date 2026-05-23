@@ -8,7 +8,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt', // Show "Update available" so user can refresh and get latest
-      includeAssets: ['logo.png', 'logo-main.png', 'logo-sec.png'],
+      includeAssets: [
+        'favicon.ico',
+        'favicon-16x16.png',
+        'favicon-32x32.png',
+        'apple-touch-icon.png',
+        'icon-192.png',
+        'icon-512.png',
+        'icon-512-maskable.png',
+        'logo.png',
+        'logo-main.png',
+      ],
       manifest: {
         name: 'GateWav',
         short_name: 'GateWav',
@@ -20,19 +30,19 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: '/logo.png',
+            src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/logo.png',
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/logo.png',
+            src: '/icon-512-maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
