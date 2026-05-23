@@ -1,10 +1,16 @@
 # Logo assets
 
-Place your logo image files in this **public** folder so they are served at the site root:
+Place source logos in this folder:
 
-- **logo-main.png** – main logo (navbar, admin header, admin login, favicon)
-- **logo-sec.png** – secondary logo (footer on main site and events page)
+| File | Use |
+|------|-----|
+| **logo-main.png** | Full wordmark (navbar, admin, footer, login) |
+| **logo.png** | G mark — source for favicon & PWA icons |
 
-They will be available as `/logo-main.png` and `/logo-sec.png`.
+After updating `logo.png`, regenerate sized icons:
 
-If the files are missing, the app shows a "G" + "GATEWAV" text fallback automatically.
+```bash
+npm run generate-icons
+```
+
+Generated files (do not edit by hand): `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-512-maskable.png`.

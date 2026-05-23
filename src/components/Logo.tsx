@@ -1,10 +1,7 @@
-import { useState } from 'react';
-
-import logoMain from '../assets/logo-main.png';
-
-type LogoVariant = 'main' | 'sec';
+type LogoVariant = 'main' | 'icon';
 
 interface LogoProps {
+  /** `main` = full wordmark; `icon` = G mark only */
   variant?: LogoVariant;
   className?: string;
   alt?: string;
@@ -12,8 +9,15 @@ interface LogoProps {
   height?: number;
 }
 
-const DEFAULT_HEIGHT_MAIN = 60;
-const DEFAULT_HEIGHT_SEC = 54;
+const LOGO_SRC: Record<LogoVariant, string> = {
+  main: '/logo-main.png',
+  icon: '/logo.png',
+};
+
+const DEFAULT_HEIGHT: Record<LogoVariant, number> = {
+  main: 60,
+  icon: 40,
+};
 
 export default function Logo({
   variant = 'main',
@@ -21,34 +25,23 @@ export default function Logo({
   alt = 'Gatewav',
   height,
 }: LogoProps) {
-  const h = height ?? (variant === 'sec' ? DEFAULT_HEIGHT_SEC : DEFAULT_HEIGHT_MAIN);
-  const [failed, setFailed] = useState(false);
+  const h = height ?? DEFAULT_HEIGHT[variant];
+  const src = LOGO_SRC[variant];
 
-  if (failed) {
-    return (
-      <span
-        className={className}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          height: `${h}px`,
-          fontSize: `${Math.max(12, h * 0.4)}px`,
-          fontWeight: 600,
-          color: 'inherit',
-        }}
-      >
-        {alt}
-      </span>
-    );
-  }
+  const style =
+    height != null
+      ? { height: `${h}px`, width: 'auto', display: 'block', objectFit: 'contain' as const }
+      : { width: 'auto', display: 'block', objectFit: 'contain' as const };
 
   return (
     <img
-      src={logoMain}
+      src={src}
       alt={alt}
       className={className}
-      style={{ height: `${h}px`, width: 'auto', display: 'block', objectFit: 'contain' }}
-      onError={() => setFailed(true)}
+      width={variant === 'main' ? undefined : h}
+      height={height != null ? h : undefined}
+      style={style}
+      decoding="async"
     />
   );
 }
