@@ -870,6 +870,7 @@ const AdminWithdraw = () => {
                     <th>Fee (15%)</th>
                     <th>Net Paid</th>
                     <th>Status</th>
+                    <th>Paystack Ref</th>
                     <th>Date</th>
                   </tr>
                 </thead>
@@ -890,6 +891,9 @@ const AdminWithdraw = () => {
                         <span className={`admin-status-badge ${w.status === 'completed' ? 'admin-status-active' : 'admin-status-inactive'}`}>
                           {w.status}
                         </span>
+                      </td>
+                      <td style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
+                        {w.paystackReference || '—'}
                       </td>
                       <td>{fmtDate(w.createdAt)}</td>
                     </tr>

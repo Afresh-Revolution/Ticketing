@@ -127,6 +127,119 @@ const CheckoutPage = () => {
 
   const isFreeOrder = discountedTotal === 0;
 
+  const buildOrderPayload = (
+    trimmedName: string,
+    trimmedEmail: string,
+    paymentMethod: "paystack" | "manual" = "manual"
+  ) => {
+    const totalAmount = Number(totalPrice);
+    return {
+      eventId: state.eventId,
+      items: state.items,
+      originalAmount: totalAmount,
+      totalAmount,
+      fullName: trimmedName,
+      email: trimmedEmail,
+      phone: (phone || "").trim(),
+      address: (address || "").trim(),
+      couponCode: couponPreview?.coupon?.code || undefined,
+      paymentMethod,
+    };
+  };
+
+  const savePendingCheckout = (trimmedName: string, trimmedEmail: string) => {
+    localStorage.setItem(
+      PENDING_CHECKOUT_KEY,
+      JSON.stringify({
+        checkoutState: {
+          totalPrice,
+          eventId: state.eventId,
+          eventTitle: state.eventTitle,
+          items: state.items,
+        },
+        attendee: {
+          fullName: trimmedName,
+          email: trimmedEmail,
+          phone: (phone || "").trim(),
+          address: (address || "").trim(),
+        },
+        couponCode: couponPreview?.coupon?.code || couponCode.trim() || "",
+      })
+    );
+  };
+
+  const buildPaymentCallbackUrl = (
+    orderId: string,
+    amount: number,
+    trimmedEmail: string
+  ) => {
+    const params = new URLSearchParams({
+      orderId,
+      amount: String(amount),
+      email: trimmedEmail,
+      eventTitle: state.eventTitle || "",
+      eventId: state.eventId || "",
+    });
+    return `${window.location.origin}/#/payment-success?${params.toString()}`;
+  };
+
+  const openManualPayment = (fallbackMessage?: string) => {
+    if (fallbackMessage) {
+      setError(fallbackMessage);
+    }
+    setShowManualPaymentModal(true);
+    setCopiedDetailKey(null);
+    setLoading(false);
+  };
+
+  const startPaystackCheckout = async (
+    orderPayload: ReturnType<typeof buildOrderPayload>,
+    headers: Record<string, string>,
+    trimmedEmail: string
+  ) => {
+    const createRes = await fetch(apiUrl("/api/orders"), {
+      method: "POST",
+      headers,
+      body: JSON.stringify(orderPayload),
+    });
+    const createData = await createRes.json().catch(() => ({} as { error?: string; id?: string; totalAmount?: number }));
+    if (!createRes.ok) {
+      throw new Error(createData.error || "Failed to create order");
+    }
+
+    const orderId = String(createData.id || "");
+    const payableAmount = Number(createData.totalAmount ?? discountedTotal);
+    if (!orderId) {
+      throw new Error("Order was created but no id was returned");
+    }
+    if (!Number.isFinite(payableAmount) || payableAmount < 1) {
+      throw new Error("Amount must be at least ₦1");
+    }
+
+    const callbackUrl = buildPaymentCallbackUrl(orderId, payableAmount, trimmedEmail);
+    const initRes = await fetch(apiUrl("/api/orders/initialize-payment"), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ orderId, callbackUrl }),
+    });
+    const initData = await initRes.json().catch(() => ({} as {
+      error?: string;
+      authorizationUrl?: string;
+      authorization_url?: string;
+    }));
+    if (!initRes.ok) {
+      throw new Error(initData.error || "Could not start Paystack checkout");
+    }
+
+    const authorizationUrl =
+      initData.authorizationUrl || initData.authorization_url || "";
+    if (!authorizationUrl) {
+      throw new Error("Paystack did not return a checkout URL");
+    }
+
+    window.location.assign(authorizationUrl);
+  };
+
   const applyCoupon = async () => {
     setCouponError("");
     const normalizedCode = couponCode.trim().toUpperCase();
@@ -215,52 +328,33 @@ const CheckoutPage = () => {
         throw new Error("Invalid total amount");
       }
 
-      const orderPayload = {
-        eventId: state.eventId,
-        items: state.items,
-        originalAmount: totalAmount,
-        totalAmount,
-        fullName: trimmedName,
-        email: trimmedEmail,
-        phone: (phone || "").trim(),
-        address: (address || "").trim(),
-        couponCode: couponPreview?.coupon?.code || undefined,
-      };
-
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      // Paid (manual bank transfer): open bank details only — order is created when buyer taps "Paid"
-      // so the admin dashboard lists the sale only after they confirm transfer.
+      // Paid: try Paystack first; fall back to manual bank transfer if initialization fails.
       if (!isFreeOrder) {
         if (discountedTotal < 1) {
           throw new Error("Amount must be at least ₦1. Please select at least one ticket.");
         }
-        localStorage.setItem(
-          PENDING_CHECKOUT_KEY,
-          JSON.stringify({
-            checkoutState: {
-              totalPrice,
-              eventId: state.eventId,
-              eventTitle: state.eventTitle,
-              items: state.items,
-            },
-            attendee: {
-              fullName: trimmedName,
-              email: trimmedEmail,
-              phone: (phone || "").trim(),
-              address: (address || "").trim(),
-            },
-            couponCode: couponPreview?.coupon?.code || couponCode.trim() || "",
-          })
-        );
-        setShowManualPaymentModal(true);
-        setCopiedDetailKey(null);
-        setLoading(false);
-        return;
+        savePendingCheckout(trimmedName, trimmedEmail);
+        const paystackOrderPayload = buildOrderPayload(trimmedName, trimmedEmail, "paystack");
+        try {
+          await startPaystackCheckout(paystackOrderPayload, headers, trimmedEmail);
+          return;
+        } catch (paystackErr) {
+          console.error(paystackErr);
+          openManualPayment(
+            paystackErr instanceof Error
+              ? `${paystackErr.message} You can complete payment via bank transfer below.`
+              : "Online payment is unavailable. Please use bank transfer below."
+          );
+          return;
+        }
       }
+
+      const orderPayload = buildOrderPayload(trimmedName, trimmedEmail, "manual");
 
       const res = await fetch(apiUrl("/api/orders"), {
         method: "POST",
@@ -334,17 +428,7 @@ const CheckoutPage = () => {
     setManualPaidLoading(true);
     setError("");
     try {
-      const orderPayload = {
-        eventId: state.eventId,
-        items: state.items,
-        originalAmount: totalAmount,
-        totalAmount,
-        fullName: trimmedName,
-        email: trimmedEmail,
-        phone: (phone || "").trim(),
-        address: (address || "").trim(),
-        couponCode: couponPreview?.coupon?.code || undefined,
-      };
+      const orderPayload = buildOrderPayload(trimmedName, trimmedEmail, "manual");
 
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
@@ -400,6 +484,26 @@ const CheckoutPage = () => {
     } finally {
       setManualPaidLoading(false);
     }
+  };
+
+  const handleManualPaymentClick = () => {
+    setError("");
+    const trimmedName = (fullName || "").trim();
+    const trimmedEmail = (email || "").trim();
+    if (!trimmedName) {
+      setError("Please enter your full name before continuing.");
+      return;
+    }
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
+      setError("Please enter a valid email before continuing.");
+      return;
+    }
+    if (!state.eventId || !state.items?.length) {
+      setError("Checkout session expired. Return to the event and try again.");
+      return;
+    }
+    savePendingCheckout(trimmedName, trimmedEmail);
+    openManualPayment();
   };
 
   if (!state.eventId) {
@@ -532,9 +636,19 @@ const CheckoutPage = () => {
               )}
             </button>
             {!isFreeOrder && (
-              <p className="checkout-transfer-hint">
-                If bank transfer fails or expires, retry and choose Card, Bank, or USSD for faster confirmation.
-              </p>
+              <>
+                <button
+                  type="button"
+                  className="checkout-manual-link-btn"
+                  onClick={handleManualPaymentClick}
+                  disabled={loading}
+                >
+                  Pay via bank transfer instead
+                </button>
+                <p className="checkout-transfer-hint">
+                  Paystack supports card, bank, and USSD. If online payment fails, use bank transfer — we will review and confirm your ticket.
+                </p>
+              </>
             )}
           </div>
 
