@@ -2,48 +2,39 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
-import { apiUrl } from '../api/config';
+import { fetchMyOrders, filterOrdersByEmail, type Order } from '../api/orders';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import './MyTicketsPage.css';
 
-interface OrderItem {
-  ticketName: string;
-  quantity: number;
-  price: number;
-}
-
-interface Order {
-  id: string;
-  eventId: string;
-  fullName: string;
-  email: string;
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  ticketCode?: string | null;
-  event?: {
-    title: string;
-    description: string;
-    date: string;
-    venue: string;
-    imageUrl: string;
-    category: string;
-    startTime: string;
-  } | null;
-  items: OrderItem[];
-}
-
 type Tab = 'upcoming' | 'past';
 
-function normalizeOrdersList(data: unknown): Order[] {
-  if (Array.isArray(data)) return data as Order[];
-  if (data && typeof data === 'object') {
-    const o = data as { orders?: unknown[]; data?: unknown[] };
-    if (Array.isArray(o.orders)) return o.orders as Order[];
-    if (Array.isArray(o.data)) return o.data as Order[];
+function getEventDate(order: Order): Date | null {
+  const dateStr = order.event?.date ?? order.createdAt;
+  if (!dateStr) return null;
+  const eventDate = new Date(dateStr);
+  return isNaN(eventDate.getTime()) ? null : eventDate;
+}
+
+function splitOrdersByEventDate(orders: Order[]) {
+  const now = new Date();
+  const upcoming: Order[] = [];
+  const past: Order[] = [];
+  for (const order of orders) {
+    const eventDate = getEventDate(order);
+    if (!eventDate) {
+      past.push(order);
+      continue;
+    }
+    if (eventDate > now) {
+      upcoming.push(order);
+    } else {
+      past.push(order);
+    }
   }
-  return [];
+  upcoming.sort((a, b) => (getEventDate(a)?.getTime() ?? 0) - (getEventDate(b)?.getTime() ?? 0));
+  past.sort((a, b) => (getEventDate(b)?.getTime() ?? 0) - (getEventDate(a)?.getTime() ?? 0));
+  return { upcomingOrders: upcoming, pastOrders: past };
 }
 
 const MyTicketsPage = () => {
@@ -63,21 +54,12 @@ const MyTicketsPage = () => {
       return;
     }
 
-    async function fetchOrders() {
+    async function loadOrders() {
       try {
         setLoading(true);
         setError('');
-        const headers = { Authorization: `Bearer ${token}` };
-        let res = await fetch(apiUrl('/api/user/orders'), { headers });
-        if (res.status === 404) {
-          res = await fetch(apiUrl('/api/orders'), { headers });
-        }
-        if (!res.ok) {
-          throw new Error(res.status === 401 ? 'Please sign in to view your tickets.' : 'Failed to load tickets.');
-        }
-        const data = await res.json();
-        const list = normalizeOrdersList(data);
-        setOrders(list);
+        const list = await fetchMyOrders(token!);
+        setOrders(filterOrdersByEmail(list, user?.email));
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load your tickets.');
         setOrders([]);
@@ -86,26 +68,13 @@ const MyTicketsPage = () => {
       }
     }
 
-    fetchOrders();
-  }, [isAuthenticated, token, navigate]);
+    loadOrders();
+  }, [isAuthenticated, token, user?.email, navigate]);
 
-  const { upcomingOrders, pastOrders } = useMemo(() => {
-    const now = new Date();
-    const upcoming: Order[] = [];
-    const past: Order[] = [];
-    for (const order of orders) {
-      const dateStr = order.event?.date ?? order.createdAt;
-      if (!dateStr) continue;
-      const eventDate = new Date(dateStr);
-      if (isNaN(eventDate.getTime())) continue;
-      if (eventDate > now) {
-        upcoming.push(order);
-      } else {
-        past.push(order);
-      }
-    }
-    return { upcomingOrders: upcoming, pastOrders: past };
-  }, [orders]);
+  const { upcomingOrders, pastOrders } = useMemo(
+    () => splitOrdersByEventDate(orders),
+    [orders]
+  );
 
   const displayOrders = activeTab === 'upcoming' ? upcomingOrders : pastOrders;
 
@@ -205,11 +174,17 @@ const MyTicketsPage = () => {
                     <path d="M13 11v2" />
                   </svg>
                 </div>
-                <p className="my-tickets-empty-text">No tickets found</p>
-                <p className="my-tickets-empty-hint">
-                  Make sure you’re signed in with the same account you used to buy. Your ticket is also sent to your email after purchase.
+                <p className="my-tickets-empty-text">
+                  {activeTab === 'upcoming' ? 'No upcoming tickets' : 'No past events'}
                 </p>
-                {activeTab === 'upcoming' && orders.length === 0 && (
+                <p className="my-tickets-empty-hint">
+                  {orders.length === 0
+                    ? `Tickets purchased with ${user?.email || 'your email'} will appear here after payment is confirmed.`
+                    : activeTab === 'upcoming'
+                      ? 'You have past tickets — check the Past Events tab.'
+                      : 'You have upcoming tickets — check the Upcoming tab.'}
+                </p>
+                {orders.length === 0 && (
                   <Link to="/events" className="my-tickets-cta">Browse events</Link>
                 )}
               </div>

@@ -151,7 +151,8 @@ The system is split into two main parts:
 
 - Requires sign-in; redirects to login with return path
 - Fetches `GET /api/user/orders` (falls back to `GET /api/orders` if the user route returns 404)
-- Tabs: **Upcoming** vs **Past** (based on event date)
+- Shows all **paid** orders for the signed-in account **or** any order purchased with the same email (guest checkout included)
+- Tabs: **Upcoming** vs **Past** (based on event date; orders without a date go under Past Events)
 - QR code encodes ticket verification data for door entry
 - Supports highlighting a specific order when arriving from `/ticket/:orderId`
 
@@ -220,8 +221,8 @@ All paths below are relative to that base (e.g. `GET /api/events`).
 | POST | `/api/orders/coupon-preview` | No | Validate coupon and return discounted totals |
 | POST | `/api/orders/verify` | No | Verify payment reference (e.g. Paystack return) |
 | POST | `/api/orders/manual-payment-notify` | No | Notify admin after buyer confirms bank transfer |
-| GET | `/api/user/orders` | Bearer | Current user’s orders |
-| GET | `/api/orders` | Bearer | Fallback orders list |
+| GET | `/api/user/orders` | Bearer | Current user’s paid tickets (by account id **or** purchase email) |
+| GET | `/api/orders` | Bearer | Same as `/api/user/orders` (fallback route) |
 | GET | `/api/landing/videos` | No | Marketing videos for landing |
 | GET | `/api/landing/top-users` | No | Featured users for carousel |
 
