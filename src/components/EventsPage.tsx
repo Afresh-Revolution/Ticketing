@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { shareEvent } from "../utils/shareEvent";
+import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
 import Navbar from "./Navbar";
 import Logo from "./Logo";
 import "./EventsPage.css";
@@ -22,6 +23,7 @@ interface Event {
   date: string;
   category: string;
   location: string;
+  state: string;
   time: string;
   price: string;
   image: string;
@@ -31,6 +33,7 @@ const EventsPage = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [selectedState, setSelectedState] = useState<string>("All");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [shareCopiedId, setShareCopiedId] = useState<string | null>(null);
@@ -61,18 +64,31 @@ const EventsPage = () => {
         const res = await fetch(apiUrl('/api/events'));
         if (res.ok) {
           const data = await res.json();
-          interface ApiEvent { id: string; title: string; date: string; category?: string; location?: string; venue?: string; startTime?: string; price?: number; imageUrl?: string }
+          interface ApiEvent {
+            id: string;
+            title: string;
+            date: string;
+            category?: string;
+            location?: string;
+            venue?: string;
+            city?: string;
+            state?: string;
+            startTime?: string;
+            price?: number;
+            imageUrl?: string;
+          }
           const formattedEvents = data.map((e: ApiEvent) => {
             const dateObj = new Date(e.date);
             const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
             const day = dateObj.getDate();
-            
+
             return {
               id: e.id,
               title: e.title,
               date: `${month} ${day}`,
               category: e.category || 'General',
               location: e.location || e.venue || 'TBD',
+              state: resolveEventState(e),
               time: e.startTime || 'TBD',
               price: e.price ? e.price.toLocaleString() : 'Free',
               image: e.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'
@@ -93,15 +109,17 @@ const EventsPage = () => {
     return events.filter((event) => {
       const matchesCategory =
         selectedCategory === "All" || event.category === selectedCategory;
+      const matchesState = eventMatchesState(event.state, selectedState);
       const q = searchQuery.trim().toLowerCase();
       const matchesSearch =
         !q ||
         event.title.toLowerCase().includes(q) ||
         event.location.toLowerCase().includes(q) ||
-        event.category.toLowerCase().includes(q);
-      return matchesCategory && matchesSearch;
+        event.category.toLowerCase().includes(q) ||
+        event.state.toLowerCase().includes(q);
+      return matchesCategory && matchesState && matchesSearch;
     });
-  }, [searchQuery, selectedCategory, events]);
+  }, [searchQuery, selectedCategory, selectedState, events]);
 
   return (
     <div className="events-page">
@@ -140,7 +158,7 @@ const EventsPage = () => {
               />
               <button
                 type="button"
-                className={`events-filter-btn${searchQuery.trim() || selectedCategory !== "All" ? " active" : ""}`}
+                className={`events-filter-btn${searchQuery.trim() || selectedCategory !== "All" || selectedState !== "All" ? " active" : ""}`}
                 aria-label="Filter"
               >
                 <svg
@@ -154,6 +172,25 @@ const EventsPage = () => {
                   <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                 </svg>
               </button>
+            </div>
+            <div className="events-state-filter">
+              <label className="events-state-filter-label" htmlFor="events-state-select">
+                State
+              </label>
+              <select
+                id="events-state-select"
+                className="events-state-select"
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value)}
+                aria-label="Filter events by state"
+              >
+                <option value="All">All States</option>
+                {NIGERIAN_STATES.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="events-categories">

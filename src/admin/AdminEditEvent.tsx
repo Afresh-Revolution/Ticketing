@@ -283,6 +283,8 @@ const AdminEditEvent = () => {
         date: dateTimeString,
         venue: formData.venue,
         location: locationString,
+        city: formData.city || undefined,
+        state: formData.state || undefined,
         category: formData.category,
         startTime: formData.startTime,
         price: displayPrice,
@@ -529,6 +531,15 @@ const AdminEditEvent = () => {
             className="admin-input"
             placeholder="City"
             value={formData.city}
+            onChange={handleChange}
+          />
+          <label className="admin-label">State</label>
+          <input
+            type="text"
+            name="state"
+            className="admin-input"
+            placeholder="State"
+            value={formData.state}
             onChange={handleChange}
           />
         </section>

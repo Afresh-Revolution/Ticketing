@@ -161,6 +161,8 @@ const AdminCreateEvent = () => {
         date: dateTimeString,
         venue: formData.venue,
         location: locationString,
+        city: formData.city || undefined,
+        state: formData.state || undefined,
         category: formData.category,
         startTime: formData.startTime,
         price: displayPrice,
