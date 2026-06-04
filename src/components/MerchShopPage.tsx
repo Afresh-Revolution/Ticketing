@@ -7,6 +7,7 @@ import {
   merchForChannel,
   type MerchCartLine,
 } from '../types/merch';
+import MerchImageLightbox from './MerchImageLightbox';
 import './MerchShopPage.css';
 
 type CartMap = Record<string, number>;
@@ -27,6 +28,7 @@ const MerchShopPage = () => {
   const [cart, setCart] = useState<CartMap>({});
   const [selectedColor, setSelectedColor] = useState<Record<string, string>>({});
   const [selectedType, setSelectedType] = useState<Record<string, string>>({});
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (!eventId) return;
@@ -80,8 +82,12 @@ const MerchShopPage = () => {
 
   return (
     <div className="merch-shop-page">
+      {lightboxSrc && (
+        <MerchImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
       <Navbar />
-      <main className="merch-shop-main">        <button type="button" className="merch-shop-back" onClick={() => navigate(`/event/${eventId}`)}>
+      <main className="merch-shop-main">
+        <button type="button" className="merch-shop-back" onClick={() => navigate(`/event/${eventId}`)}>
           ← Back to event
         </button>
         <h1 className="merch-shop-title">{eventTitle} — Merch</h1>
@@ -142,7 +148,14 @@ const MerchShopPage = () => {
                         className={`merch-shop-variant ${soldOut ? 'merch-shop-variant-sold-out' : ''}`}
                       >
                         <div className="merch-shop-variant-media">
-                          <img src={img.imageUrl} alt="" />
+                          <button
+                            type="button"
+                            className="merch-shop-image-open"
+                            onClick={() => setLightboxSrc(img.imageUrl)}
+                            aria-label="View merch image full screen"
+                          >
+                            <img src={img.imageUrl} alt="" />
+                          </button>
                           {soldOut && <span className="merch-shop-sold-badge">Sold out</span>}
                         </div>
                         <div className="merch-shop-variant-body">

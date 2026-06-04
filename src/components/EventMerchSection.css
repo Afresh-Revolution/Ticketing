@@ -45,11 +45,35 @@
   flex-wrap: wrap;
 }
 
-.event-merch-static-images img {
+.event-merch-image-open {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: zoom-in;
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.event-merch-image-open:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+}
+
+.event-merch-image-open:focus-visible {
+  outline: 2px solid var(--accent, #a855f7);
+  outline-offset: 2px;
+}
+
+.event-merch-static-images img,
+.event-merch-image-open img {
   width: 100px;
   height: 100px;
   object-fit: cover;
   border-radius: 8px;
+  display: block;
+  pointer-events: none;
 }
 
 .event-merch-carousel {
@@ -68,7 +92,7 @@
   border: none;
   padding: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: zoom-in;
   opacity: 0;
   position: absolute;
   inset: 0;

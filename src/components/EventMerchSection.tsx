@@ -6,6 +6,7 @@ import {
   merchForChannel,
 } from '../types/merch';
 import { submitMerchSaveRequest } from '../api/merch';
+import MerchImageLightbox from './MerchImageLightbox';
 import './EventMerchSection.css';
 
 type Props = {
@@ -16,7 +17,15 @@ type Props = {
 
 const CAROUSEL_MS = 3000;
 
-function MerchCarousel({ images, merch }: { images: EventMerchDto['images']; merch: EventMerchDto }) {
+function MerchCarousel({
+  images,
+  merch,
+  onImageClick,
+}: {
+  images: EventMerchDto['images'];
+  merch: EventMerchDto;
+  onImageClick: (src: string) => void;
+}) {
   const [index, setIndex] = useState(0);
   const sorted = [...images].sort((a, b) => a.sortOrder - b.sortOrder);
 
@@ -43,8 +52,8 @@ function MerchCarousel({ images, merch }: { images: EventMerchDto['images']; mer
             key={img.id}
             type="button"
             className={`event-merch-carousel-slide ${i === index ? 'active' : ''}`}
-            onClick={() => setIndex(i)}
-            aria-label={`View image ${i + 1}`}
+            onClick={() => onImageClick(img.imageUrl)}
+            aria-label={`View image ${i + 1} full screen`}
           >
             <img src={img.imageUrl} alt="" />
           </button>
@@ -147,8 +156,10 @@ function AtEventSaveForm({
 
 const EventMerchSection = ({ eventId, eventTitle, merch }: Props) => {
   const navigate = useNavigate();
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const online = merchForChannel(merch, 'online');
   const atEvent = merchForChannel(merch, 'at_event');
+  const openImage = useCallback((src: string) => setLightboxSrc(src), []);
 
   const goShop = useCallback(
     (filter?: 'online' | 'at_event') => {
@@ -163,6 +174,9 @@ const EventMerchSection = ({ eventId, eventTitle, merch }: Props) => {
 
   return (
     <section className="event-merch-section" aria-labelledby="event-merch-heading">
+      {lightboxSrc && (
+        <MerchImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
       <h2 id="event-merch-heading" className="event-detail-tickets-heading">
         Merch
       </h2>
@@ -177,11 +191,19 @@ const EventMerchSection = ({ eventId, eventTitle, merch }: Props) => {
               return (
                 <article key={m.id} className="event-merch-card">
                   {m.images.length > 2 ? (
-                    <MerchCarousel images={m.images} merch={m} />
+                    <MerchCarousel images={m.images} merch={m} onImageClick={openImage} />
                   ) : m.images.length > 0 ? (
                     <div className="event-merch-static-images">
                       {m.images.slice(0, 2).map((img) => (
-                        <img key={img.id} src={img.imageUrl} alt="" />
+                        <button
+                          key={img.id}
+                          type="button"
+                          className="event-merch-image-open"
+                          onClick={() => openImage(img.imageUrl)}
+                          aria-label="View merch image full screen"
+                        >
+                          <img src={img.imageUrl} alt="" />
+                        </button>
                       ))}
                       <p className="event-merch-card-desc">{m.description}</p>
                     </div>
@@ -211,7 +233,15 @@ const EventMerchSection = ({ eventId, eventTitle, merch }: Props) => {
                 {m.images.length > 0 && (
                   <div className="event-merch-static-images">
                     {m.images.slice(0, 3).map((img) => (
-                      <img key={img.id} src={img.imageUrl} alt="" />
+                      <button
+                        key={img.id}
+                        type="button"
+                        className="event-merch-image-open"
+                        onClick={() => openImage(img.imageUrl)}
+                        aria-label="View merch image full screen"
+                      >
+                        <img src={img.imageUrl} alt="" />
+                      </button>
                     ))}
                   </div>
                 )}
