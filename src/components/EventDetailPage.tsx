@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
+import { resolveEventState } from "../utils/eventLocation";
 import Navbar from "./Navbar";
 import "./EventDetailPage.css";
 
@@ -21,6 +22,7 @@ interface EventDetail {
   date: string;
   time: string;
   location: string;
+  state: string;
   heroImage: string;
   about: string;
   organizer: string;
@@ -97,6 +99,7 @@ const EventDetailPage = () => {
           date: dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
           time: data.startTime || dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
           location: data.location || data.venue || "TBD",
+          state: resolveEventState(data),
           heroImage: data.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
           about: data.description || "No description available.",
           organizer: resolveOrganizerName(data),
@@ -227,6 +230,20 @@ const EventDetailPage = () => {
                   <span className="event-detail-meta-value">{event.location}</span>
                 </div>
               </div>
+              {event.state && (
+                <div className="event-detail-meta-item">
+                  <span className="event-detail-meta-icon" aria-hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18M3 12h18M3 18h18" />
+                      <path d="M6 3v18M12 3v18M18 3v18" />
+                    </svg>
+                  </span>
+                  <div>
+                    <span className="event-detail-meta-label">State</span>
+                    <span className="event-detail-meta-value">{event.state}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="event-detail-card">
