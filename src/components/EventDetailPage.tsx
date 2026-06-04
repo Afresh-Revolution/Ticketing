@@ -3,6 +3,10 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { resolveEventState } from "../utils/eventLocation";
 import Navbar from "./Navbar";
+import EventMerchSection from "./EventMerchSection";
+import { fetchEventMerch } from "../api/merch";
+import type { EventMerchDto } from "../types/merch";
+import { normalizeEventMerch } from "../types/merch";
 import "./EventDetailPage.css";
 
 interface TicketType {
@@ -12,7 +16,7 @@ interface TicketType {
   price: number;
   quantity: number;
   sold?: number;
-  type?: 'paid' | 'free';
+  type?: "paid" | "free";
 }
 
 interface EventDetail {
@@ -33,19 +37,23 @@ function resolveOrganizerName(data: {
   createdByName?: string | null;
   organizer?: string | null;
   organizerName?: string | null;
-  createdBy?: string | number | { name?: string | null; username?: string | null } | null;
+  createdBy?:
+    | string
+    | number
+    | { name?: string | null; username?: string | null }
+    | null;
 }): string {
   const fromApi =
-    (typeof data.createdByName === 'string' && data.createdByName.trim()) ||
-    (typeof data.organizer === 'string' && data.organizer.trim()) ||
-    (typeof data.organizerName === 'string' && data.organizerName.trim());
+    (typeof data.createdByName === "string" && data.createdByName.trim()) ||
+    (typeof data.organizer === "string" && data.organizer.trim()) ||
+    (typeof data.organizerName === "string" && data.organizerName.trim());
   if (fromApi) return fromApi;
   const cb = data.createdBy;
-  if (cb && typeof cb === 'object') {
-    const nested = (cb.name || cb.username || '').trim();
+  if (cb && typeof cb === "object") {
+    const nested = (cb.name || cb.username || "").trim();
     if (nested) return nested;
   }
-  return 'Organizer';
+  return "Organizer";
 }
 
 const EventDetailPage = () => {
@@ -56,22 +64,18 @@ const EventDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [manualCheckoutBanner, setManualCheckoutBanner] = useState<string | null>(null);
+  const [manualCheckoutBanner, setManualCheckoutBanner] = useState<
+    string | null
+  >(null);
+  const [merch, setMerch] = useState<EventMerchDto[]>([]);
 
   useEffect(() => {
-    const msg = (location.state as { manualCheckoutSuccess?: string } | null)?.manualCheckoutSuccess;
+    const msg = (location.state as { manualCheckoutSuccess?: string } | null)
+      ?.manualCheckoutSuccess;
     if (!msg || !id) return;
     setManualCheckoutBanner(msg);
     navigate(`/event/${id}`, { replace: true, state: {} });
   }, [location.state, id, navigate]);
-
-  useEffect(() => {
-    if (!manualCheckoutBanner) return;
-    const t = window.setTimeout(() => {
-      document.getElementById("event-detail-tickets-heading")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
-    return () => window.clearTimeout(t);
-  }, [manualCheckoutBanner]);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -80,15 +84,26 @@ const EventDetailPage = () => {
         if (!res.ok) throw new Error("Event not found");
         const data = await res.json();
         const rawTickets = data.tickets ?? data.ticketTypes;
-        const tickets = (Array.isArray(rawTickets) ? rawTickets : []).map((t: { id: string; name?: string; ticketName?: string; description?: string; price?: number | string; quantity?: number | string; sold?: number; type?: string }) => ({
-          id: t.id,
-          name: t.name ?? t.ticketName ?? 'Ticket',
-          description: t.description ?? '',
-          price: Number(t.price) || 0,
-          quantity: Number(t.quantity) || 0,
-          sold: Number(t.sold) || 0,
-          type: (t.type === 'free' ? 'free' : 'paid') as 'paid' | 'free',
-        }));
+        const tickets = (Array.isArray(rawTickets) ? rawTickets : []).map(
+          (t: {
+            id: string;
+            name?: string;
+            ticketName?: string;
+            description?: string;
+            price?: number | string;
+            quantity?: number | string;
+            sold?: number;
+            type?: string;
+          }) => ({
+            id: t.id,
+            name: t.name ?? t.ticketName ?? "Ticket",
+            description: t.description ?? "",
+            price: Number(t.price) || 0,
+            quantity: Number(t.quantity) || 0,
+            sold: Number(t.sold) || 0,
+            type: (t.type === "free" ? "free" : "paid") as "paid" | "free",
+          }),
+        );
 
         // Transform data to match UI
         const dateObj = new Date(data.date);
@@ -96,23 +111,46 @@ const EventDetailPage = () => {
           id: data.id,
           title: data.title,
           category: data.category || "General",
-          date: dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-          time: data.startTime || dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          date: dateObj.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          time:
+            data.startTime ||
+            dateObj.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
           location: data.location || data.venue || "TBD",
           state: resolveEventState(data),
-          heroImage: data.imageUrl || "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
+          heroImage:
+            data.imageUrl ||
+            "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
           about: data.description || "No description available.",
           organizer: resolveOrganizerName(data),
-          tickets
+          tickets,
         };
-        
+
         setEvent(formattedEvent);
+        const embeddedMerch = normalizeEventMerch(
+          data.merch ?? data.eventMerch,
+        );
+        if (embeddedMerch.length > 0) {
+          setMerch(embeddedMerch);
+        } else if (id) {
+          fetchEventMerch(id)
+            .then(setMerch)
+            .catch(() => setMerch([]));
+        }
 
         // Initialize quantities from normalized tickets
         const initialQty: Record<string, number> = {};
-        tickets.forEach((t: TicketType) => { initialQty[t.id] = 0; });
+        tickets.forEach((t: TicketType) => {
+          initialQty[t.id] = 0;
+        });
         setQuantities(initialQty);
-
       } catch (err) {
         setError("Could not load event details.");
         console.error(err);
@@ -148,8 +186,17 @@ const EventDetailPage = () => {
     });
   };
 
-  if (loading) return <div className="event-detail-loading">Loading event...</div>;
-  if (error || !event) return <div className="event-detail-error">{error || "Event not found"}</div>;
+  if (loading)
+    return <div className="event-detail-loading">Loading event...</div>;
+  if (error || !event)
+    return (
+      <div className="event-detail-error">{error || "Event not found"}</div>
+    );
+
+  const renderMerchSection = () =>
+    merch.length > 0 && id ? (
+      <EventMerchSection eventId={id} eventTitle={event.title} merch={merch} />
+    ) : null;
 
   return (
     <div className="event-detail-page">
@@ -160,10 +207,14 @@ const EventDetailPage = () => {
           type="button"
           className="event-detail-hero"
           style={{ backgroundImage: `url(${event.heroImage})` }}
-          onClick={() => window.open(event.heroImage, "_blank", "noopener,noreferrer")}
+          onClick={() =>
+            window.open(event.heroImage, "_blank", "noopener,noreferrer")
+          }
           aria-label="Open full event image"
         />
-        <span className="event-detail-hero-tag">{event.category.toUpperCase()}</span>
+        <span className="event-detail-hero-tag">
+          {event.category.toUpperCase()}
+        </span>
       </div>
 
       <main className="event-detail-main">
@@ -175,28 +226,59 @@ const EventDetailPage = () => {
         >
           ← Back to events
         </button>
+
+        {manualCheckoutBanner && (
+          <div className="event-detail-manual-success" role="status">
+            <p className="event-detail-manual-success-text">
+              {manualCheckoutBanner}
+            </p>
+            <button
+              type="button"
+              className="event-detail-manual-success-dismiss"
+              onClick={() => setManualCheckoutBanner(null)}
+              aria-label="Dismiss message"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         <div className="event-detail-layout">
           <div className="event-detail-poster-col">
             <button
               type="button"
               className="event-detail-poster"
-              onClick={() => window.open(event.heroImage, "_blank", "noopener,noreferrer")}
+              onClick={() =>
+                window.open(event.heroImage, "_blank", "noopener,noreferrer")
+              }
               aria-label="Open full event poster"
             >
               <img src={event.heroImage} alt={event.title} />
             </button>
+            {merch.length > 0 && id && (
+              <div className="event-detail-merch-slot event-detail-merch-slot--desktop">
+                {renderMerchSection()}
+              </div>
+            )}
           </div>
 
           <div className="event-detail-info-col">
             <div className="event-detail-title-wrap">
-              <span className="event-detail-mini-tag">{event.category.toUpperCase()}</span>
+              <span className="event-detail-mini-tag">
+                {event.category.toUpperCase()}
+              </span>
               <h1 className="event-detail-title">{event.title}</h1>
             </div>
 
             <div className="event-detail-meta event-detail-meta-grid">
               <div className="event-detail-meta-item">
                 <span className="event-detail-meta-icon" aria-hidden>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <rect x="3" y="4" width="18" height="18" rx="2" />
                     <path d="M16 2v4M8 2v4M3 10h18" />
                   </svg>
@@ -208,7 +290,12 @@ const EventDetailPage = () => {
               </div>
               <div className="event-detail-meta-item">
                 <span className="event-detail-meta-icon" aria-hidden>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 6v6l4 2" />
                   </svg>
@@ -220,27 +307,41 @@ const EventDetailPage = () => {
               </div>
               <div className="event-detail-meta-item">
                 <span className="event-detail-meta-icon" aria-hidden>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
                 </span>
                 <div>
                   <span className="event-detail-meta-label">Location</span>
-                  <span className="event-detail-meta-value">{event.location}</span>
+                  <span className="event-detail-meta-value">
+                    {event.location}
+                  </span>
                 </div>
               </div>
               {event.state && (
                 <div className="event-detail-meta-item">
                   <span className="event-detail-meta-icon" aria-hidden>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M3 6h18M3 12h18M3 18h18" />
                       <path d="M6 3v18M12 3v18M18 3v18" />
                     </svg>
                   </span>
                   <div>
                     <span className="event-detail-meta-label">State</span>
-                    <span className="event-detail-meta-value">{event.state}</span>
+                    <span className="event-detail-meta-value">
+                      {event.state}
+                    </span>
                   </div>
                 </div>
               )}
@@ -254,39 +355,53 @@ const EventDetailPage = () => {
               <p className="event-detail-card-text">{event.about}</p>
             </div>
             <div className="event-detail-card event-detail-card-organizer">
-              <span className="event-detail-card-icon event-detail-card-icon-lg" aria-hidden>
-                {(event.organizer.trim()[0] || 'O').toUpperCase()}
+              <span
+                className="event-detail-card-icon event-detail-card-icon-lg"
+                aria-hidden
+              >
+                {(event.organizer.trim()[0] || "O").toUpperCase()}
               </span>
               <div>
-                <span className="event-detail-organizer-label">Organized by</span>
-                <span className="event-detail-organizer-name">{event.organizer}</span>
+                <span className="event-detail-organizer-label">
+                  Organized by
+                </span>
+                <span className="event-detail-organizer-name">
+                  {event.organizer}
+                </span>
               </div>
             </div>
+            {merch.length > 0 && id && (
+              <div className="event-detail-merch-slot event-detail-merch-slot--mobile">
+                {renderMerchSection()}
+              </div>
+            )}
           </div>
         </div>
 
-        {manualCheckoutBanner && (
-          <div className="event-detail-manual-success" role="status">
-            <p className="event-detail-manual-success-text">{manualCheckoutBanner}</p>
-            <button
-              type="button"
-              className="event-detail-manual-success-dismiss"
-              onClick={() => setManualCheckoutBanner(null)}
-              aria-label="Dismiss message"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
-
-        <section className="event-detail-tickets" aria-labelledby="event-detail-tickets-heading">
-          <h2 id="event-detail-tickets-heading" className="event-detail-tickets-heading">Select Tickets</h2>
+        <section
+          className="event-detail-tickets"
+          aria-labelledby="event-detail-tickets-heading"
+        >
+          <h2
+            id="event-detail-tickets-heading"
+            className="event-detail-tickets-heading"
+          >
+            Select Tickets
+          </h2>
           <div className="event-detail-ticket-list">
             {event.tickets.length === 0 ? (
               <div className="event-detail-ticket-list-empty">
-                <span className="event-detail-ticket-list-empty-icon" aria-hidden>🎫</span>
+                <span
+                  className="event-detail-ticket-list-empty-icon"
+                  aria-hidden
+                >
+                  🎫
+                </span>
                 <p>No tickets available for this event.</p>
-                <p className="event-detail-ticket-list-empty-hint">The organizer may add ticket types later. Check back or contact support.</p>
+                <p className="event-detail-ticket-list-empty-hint">
+                  The organizer may add ticket types later. Check back or
+                  contact support.
+                </p>
               </div>
             ) : (
               <>
@@ -296,20 +411,35 @@ const EventDetailPage = () => {
                   const total = ticket.quantity ?? 0;
                   const isSoldOut = total > 0 && sold >= total;
                   return (
-                    <div key={ticket.id} className={`event-detail-ticket-card ${isSoldOut ? 'event-detail-ticket-card-sold-out' : ''}`}>
+                    <div
+                      key={ticket.id}
+                      className={`event-detail-ticket-card ${isSoldOut ? "event-detail-ticket-card-sold-out" : ""}`}
+                    >
                       <div className="event-detail-ticket-info">
-                        <h4 className="event-detail-ticket-name">{ticket.name}</h4>
-                        <p className="event-detail-ticket-desc">{ticket.description || '—'}</p>
-                        <span className="event-detail-ticket-count">{sold}/{total}</span>
+                        <h4 className="event-detail-ticket-name">
+                          {ticket.name}
+                        </h4>
+                        <p className="event-detail-ticket-desc">
+                          {ticket.description || "—"}
+                        </p>
+                        <span className="event-detail-ticket-count">
+                          {sold}/{total}
+                        </span>
                         {isSoldOut ? (
-                          <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">Sold Out</span>
+                          <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">
+                            Sold Out
+                          </span>
                         ) : (
-                          <span className="event-detail-ticket-badge">Available</span>
+                          <span className="event-detail-ticket-badge">
+                            Available
+                          </span>
                         )}
                       </div>
                       <div className="event-detail-ticket-right">
                         <span className="event-detail-ticket-price">
-                          {ticket.price === 0 ? 'Free' : `₦${Number(ticket.price).toLocaleString()}`}
+                          {ticket.price === 0
+                            ? "Free"
+                            : `₦${Number(ticket.price).toLocaleString()}`}
                         </span>
                         <div className="event-detail-qty-controls">
                           <button
@@ -321,7 +451,10 @@ const EventDetailPage = () => {
                           >
                             −
                           </button>
-                          <span className="event-detail-qty-value" aria-live="polite">
+                          <span
+                            className="event-detail-qty-value"
+                            aria-live="polite"
+                          >
                             {qty}
                           </span>
                           <button
@@ -329,7 +462,7 @@ const EventDetailPage = () => {
                             className="event-detail-qty-btn"
                             onClick={() => adjustQty(ticket.id, 1)}
                             aria-label={`Increase ${ticket.name}`}
-                            disabled={isSoldOut || (sold + (qty + 1) > total)}
+                            disabled={isSoldOut || sold + (qty + 1) > total}
                           >
                             +
                           </button>
@@ -349,12 +482,18 @@ const EventDetailPage = () => {
               {totalQty} Ticket{totalQty !== 1 ? "s" : ""}
             </span>
             <span className="event-detail-checkout-total">
-              {totalPrice === 0 ? 'Free' : `₦${totalPrice.toLocaleString()}`}
+              {totalPrice === 0 ? "Free" : `₦${totalPrice.toLocaleString()}`}
             </span>
           </div>
           {(() => {
-            const allSoldOut = event.tickets.length > 0 && event.tickets.every((t) => (t.sold ?? 0) >= (t.quantity ?? 0));
-            const buttonLabel = allSoldOut ? 'Sold Out' : totalPrice === 0 ? 'Get' : 'CheckOut';
+            const allSoldOut =
+              event.tickets.length > 0 &&
+              event.tickets.every((t) => (t.sold ?? 0) >= (t.quantity ?? 0));
+            const buttonLabel = allSoldOut
+              ? "Sold Out"
+              : totalPrice === 0
+                ? "Get"
+                : "CheckOut";
             return (
               <button
                 type="button"
@@ -368,11 +507,11 @@ const EventDetailPage = () => {
                       name: t.name,
                       quantity: quantities[t.id],
                       price: t.price,
-                      type: t.type ?? (t.price === 0 ? 'free' : 'paid'),
+                      type: t.type ?? (t.price === 0 ? "free" : "paid"),
                     }));
 
                   if (totalQty > 0 && !allSoldOut) {
-                    navigate('/checkout', {
+                    navigate("/checkout", {
                       state: {
                         totalPrice,
                         eventId: id,

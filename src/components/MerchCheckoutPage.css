@@ -1,0 +1,373 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap");
+@import "../styles/world-class-theme.css";
+
+.merch-checkout-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 85% 60% at 0% 0%, rgba(168, 85, 247, 0.16), transparent 55%),
+    radial-gradient(ellipse 65% 50% at 100% 100%, rgba(34, 211, 238, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--wc-bg-mid) 0%, var(--wc-bg-deep) 100%);
+  color: var(--wc-ink);
+  font-family: var(--wc-font-body);
+  display: flex;
+  flex-direction: column;
+}
+
+.merch-checkout-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: calc(var(--navbar-total-height, 56px) + 1.5rem) 1.25rem 3rem;
+  box-sizing: border-box;
+}
+
+.merch-checkout-back {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--wc-border);
+  color: var(--wc-muted);
+  border-radius: var(--wc-radius-pill);
+  padding: 0.5rem 0.95rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.merch-checkout-back:hover {
+  border-color: rgba(168, 85, 247, 0.45);
+  color: var(--wc-ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.merch-checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.35rem;
+  align-items: start;
+}
+
+@media (min-width: 840px) {
+  .merch-checkout-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+    gap: 1.75rem;
+  }
+}
+
+.merch-checkout-summary {
+  background: var(--wc-bg-card);
+  border: 1px solid var(--wc-border);
+  border-radius: var(--wc-radius-lg);
+  padding: 1.35rem 1.25rem;
+  box-shadow: var(--wc-shadow-card);
+}
+
+.merch-checkout-heading {
+  font-family: var(--wc-font-display);
+  font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  line-height: 1.2;
+}
+
+.merch-checkout-event {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  color: var(--wc-muted);
+}
+
+.merch-checkout-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.merch-checkout-line {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  padding: 0.75rem;
+  border-radius: var(--wc-radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--wc-border);
+}
+
+.merch-checkout-line-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(3, 0, 20, 0.5);
+}
+
+.merch-checkout-line-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.merch-checkout-line-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--wc-ink);
+}
+
+.merch-checkout-line-meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--wc-muted);
+}
+
+.merch-checkout-line-price {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--wc-font-display);
+  color: var(--wc-ink);
+  white-space: nowrap;
+}
+
+.merch-checkout-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--wc-border);
+  gap: 1rem;
+}
+
+.merch-checkout-total-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--wc-muted);
+}
+
+.merch-checkout-total-value {
+  font-family: var(--wc-font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--wc-ink);
+}
+
+.merch-checkout-form-card {
+  background: var(--wc-bg-card);
+  border: 1px solid var(--wc-border);
+  border-radius: var(--wc-radius-lg);
+  padding: 1.35rem 1.25rem;
+  box-shadow: var(--wc-shadow-card);
+}
+
+.merch-checkout-form-title {
+  font-family: var(--wc-font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.merch-checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.merch-checkout-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--wc-faint);
+  margin-bottom: 0.35rem;
+}
+
+.merch-checkout-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--wc-radius-md);
+  border: 1px solid var(--wc-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--wc-ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.merch-checkout-input::placeholder {
+  color: var(--wc-faint);
+}
+
+.merch-checkout-input:focus {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.15);
+}
+
+.merch-checkout-error {
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--wc-radius-md);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.merch-checkout-pay-btn {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.85rem 1.25rem;
+  border: none;
+  border-radius: var(--wc-radius-pill);
+  background: linear-gradient(135deg, #e9d5ff, var(--wc-accent));
+  color: #121212;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s;
+}
+
+.merch-checkout-pay-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.merch-checkout-pay-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.merch-checkout-manual-link {
+  width: 100%;
+  padding: 0.65rem;
+  border: none;
+  background: transparent;
+  color: var(--wc-muted);
+  font-family: inherit;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+}
+
+.merch-checkout-manual-link:hover {
+  color: var(--wc-ink);
+}
+
+.merch-checkout-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--wc-muted);
+}
+
+.merch-checkout-empty button {
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--wc-radius-pill);
+  border: 1px solid var(--wc-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--wc-ink);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Modals */
+.merch-checkout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(3, 0, 20, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.merch-checkout-modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--wc-bg-mid);
+  border: 1px solid var(--wc-border);
+  border-radius: var(--wc-radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--wc-shadow-soft);
+}
+
+.merch-checkout-modal h3 {
+  font-family: var(--wc-font-display);
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+.merch-checkout-modal-list {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--wc-muted);
+  font-size: 0.9rem;
+}
+
+.merch-checkout-modal-total {
+  margin: 0 0 1rem;
+  font-family: var(--wc-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.merch-checkout-modal-bank p {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--wc-muted);
+  line-height: 1.45;
+}
+
+.merch-checkout-modal-bank a {
+  color: var(--wc-accent);
+}
+
+.merch-checkout-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.merch-checkout-modal-actions button {
+  min-height: 42px;
+  border-radius: var(--wc-radius-md);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--wc-border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--wc-ink);
+}
+
+.merch-checkout-modal-actions .merch-checkout-pay-btn {
+  margin-top: 0;
+  color: #fff;
+  border: none;
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+}
+
+.merch-checkout-modal-actions .merch-checkout-pay-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}

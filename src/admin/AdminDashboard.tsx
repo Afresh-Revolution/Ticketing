@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
+import AdminMerchPanel from './AdminMerchPanel';
 import './admin.css';
 
 interface DashboardStats {
@@ -397,6 +398,8 @@ const AdminDashboard = () => {
           </div>
         ))}
       </div>
+
+      <AdminMerchPanel />
 
       <div className="admin-section">
         <div className="admin-section-title-row">

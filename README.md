@@ -216,7 +216,13 @@ All paths below are relative to that base (e.g. `GET /api/events`).
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | GET | `/api/events` | No | List events; `?trending=true&take=N` for trending subset |
-| GET | `/api/events/:id` | No | Event detail with ticket types |
+| GET | `/api/events/:id` | No | Event detail with ticket types and merch |
+| GET | `/api/events/:eventId/merch` | No | Merch list for an event |
+| POST | `/api/merch-orders` | Optional Bearer | Create merch order |
+| POST | `/api/merch-orders/initialize-payment` | Optional Bearer | Paystack checkout for merch |
+| POST | `/api/merch-orders/verify` | No | Verify merch Paystack payment |
+| POST | `/api/merch-orders/manual-payment-notify` | No | Notify admin of pending merch transfer |
+| POST | `/api/merch-save-requests` | No | At-event merch save request |
 | POST | `/api/orders` | Optional Bearer | Create order |
 | POST | `/api/orders/coupon-preview` | No | Validate coupon and return discounted totals |
 | POST | `/api/orders/verify` | No | Verify payment reference (e.g. Paystack return) |
@@ -245,6 +251,7 @@ All paths below are relative to that base (e.g. `GET /api/events`).
 |------|----------------|
 | Profile | `/api/admin/me`, `/api/admin/password-change-status`, `/api/admin/verify-password`, `/api/admin/change-password` |
 | Dashboard | `/api/admin/dashboard` |
+| Merch | `/api/admin/merch-orders`, `/api/admin/merch-save-requests`, status PATCH endpoints |
 | Events | `/api/admin/events`, `/api/admin/events/:id`, `/api/admin/events/:id/visibility`, `/api/admin/events/:id/ticket-adjustments` |
 | Public event writes | `POST /api/events`, `PATCH/PUT /api/events/:id`, `POST /api/events/upload-image`, `DELETE /api/events/:id`, `PATCH /api/events/:id/trending` |
 | Sales | `/api/admin/sales`, `/api/admin/sales/:id/status`, `/api/admin/sales/:id/resend` |

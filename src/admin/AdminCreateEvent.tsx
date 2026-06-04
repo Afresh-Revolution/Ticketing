@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api/config';
+import AdminMerchForm from './AdminMerchForm';
+import { merchFormToPayload, type MerchFormItem } from '../types/merch';
 import './admin.css';
 
 type TicketPool = {
@@ -32,6 +34,7 @@ const AdminCreateEvent = () => {
   const [imageUploadError, setImageUploadError] = useState('');
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
+  const [merchItems, setMerchItems] = useState<MerchFormItem[]>([]);
   const [me, setMe] = useState<Me>(null);
 
   useEffect(() => {
@@ -169,6 +172,7 @@ const AdminCreateEvent = () => {
         currency: 'NGN',
         imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
         ticketTypes,
+        merch: merchFormToPayload(merchItems),
       };
       if (createdBy != null && !Number.isNaN(createdBy) && createdBy > 0) {
         payload.createdBy = createdBy;
@@ -187,6 +191,21 @@ const AdminCreateEvent = () => {
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to create event');
+      }
+
+      const eventId = data.id ?? data.event?.id;
+      const merchPayload = merchFormToPayload(merchItems);
+      if (eventId && merchPayload.length > 0) {
+        await fetch(apiUrl(`/api/events/${eventId}/merch`), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ merch: merchPayload }),
+        }).catch(() => {
+          /* event created; merch endpoint may need backend deploy */
+        });
       }
 
       navigate('/admin/events');
@@ -569,6 +588,8 @@ const AdminCreateEvent = () => {
           )}
           {imageUploadError && <p className="admin-input-hint" style={{ color: '#fca5a5' }}>{imageUploadError}</p>}
         </section>
+
+        <AdminMerchForm items={merchItems} onChange={setMerchItems} />
 
         <div className="admin-form-actions">
           <button type="button" className="admin-btn-secondary" onClick={() => navigate('/admin/events')}>
