@@ -14,6 +14,8 @@ import MyTicketsPage from './components/MyTicketsPage'
 import TicketShareRedirect from './components/TicketShareRedirect'
 import EventDetailPage from './components/EventDetailPage'
 import CheckoutPage from './components/CheckoutPage'
+import MerchShopPage from './components/MerchShopPage'
+import MerchCheckoutPage from './components/MerchCheckoutPage'
 import AdminLogin from './admin/AdminLogin'
 import ProtectedAdminRoute from './admin/ProtectedAdminRoute'
 import AdminDashboard from './admin/AdminDashboard'
@@ -64,6 +66,8 @@ function AnimatedRoutes() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
+        <Route path="/event/:id/merch" element={<MerchShopPage />} />
+        <Route path="/event/:id/merch/checkout" element={<MerchCheckoutPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/ticket/:orderId" element={<TicketShareRedirect />} />

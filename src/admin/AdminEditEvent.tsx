@@ -1,6 +1,13 @@
 import { useState, type FormEvent, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { apiUrl } from '../api/config';
+import { fetchEventMerch } from '../api/merch';
+import AdminMerchForm from './AdminMerchForm';
+import {
+  merchDtoToFormItem,
+  merchFormToPayload,
+  type MerchFormItem,
+} from '../types/merch';
 import './admin.css';
 
 type TicketPool = {
@@ -68,6 +75,7 @@ const AdminEditEvent = () => {
   const [adjustmentLoading, setAdjustmentLoading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
+  const [merchItems, setMerchItems] = useState<MerchFormItem[]>([]);
 
   const authHeaders = (): HeadersInit => {
     const token = localStorage.getItem('adminToken');
@@ -193,6 +201,10 @@ const AdminEditEvent = () => {
         );
       } else {
         setPools([defaultPool()]);
+      }
+      if (id) {
+        const merchList = await fetchEventMerch(id);
+        setMerchItems(merchList.map(merchDtoToFormItem));
       }
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Failed to load event');
@@ -335,6 +347,16 @@ const AdminEditEvent = () => {
       if (!updated) {
         throw new Error(lastError);
       }
+
+      const merchPayload = merchFormToPayload(merchItems);
+      if (merchPayload.length > 0 && id) {
+        await fetch(apiUrl(`/api/events/${id}/merch`), {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ merch: merchPayload }),
+        }).catch(() => undefined);
+      }
+
       const elapsed = Date.now() - submitStartedAt;
       if (elapsed < minSavingMs) {
         await new Promise((resolve) => setTimeout(resolve, minSavingMs - elapsed));
@@ -700,6 +722,8 @@ const AdminEditEvent = () => {
           )}
           {imageUploadError && <p className="admin-input-hint" style={{ color: '#fca5a5' }}>{imageUploadError}</p>}
         </section>
+
+        <AdminMerchForm items={merchItems} onChange={setMerchItems} />
 
         <div className="admin-form-actions">
           <button type="button" className="admin-btn-secondary" onClick={() => navigate('/admin/events')}>

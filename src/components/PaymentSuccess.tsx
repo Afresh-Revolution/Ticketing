@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { apiUrl } from "../api/config";
+import { verifyMerchPayment } from "../api/merch";
 import "./PaymentSuccess.css";
 
 const PaymentSuccess = () => {
@@ -19,6 +20,8 @@ const PaymentSuccess = () => {
   const queryEventTitle = params.get("eventTitle");
   const queryEmail = params.get("email");
   const queryEventId = params.get("eventId") || "";
+  const orderType = params.get("type") || "";
+  const isMerchOrder = orderType === "merch";
   const paymentCancelled = !!queryOrderId && !queryReference;
   const paymentFailedStatus = queryStatus === "failed";
 
@@ -39,17 +42,21 @@ const PaymentSuccess = () => {
       setVerifying(true);
       setVerifyError("");
       try {
-        const res = await fetch(apiUrl("/api/orders/verify"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId: queryOrderId,
-            reference: queryReference,
-          }),
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({} as { error?: string }));
-          throw new Error(data.error || "Unable to verify payment");
+        if (isMerchOrder) {
+          await verifyMerchPayment(queryOrderId, queryReference);
+        } else {
+          const res = await fetch(apiUrl("/api/orders/verify"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              orderId: queryOrderId,
+              reference: queryReference,
+            }),
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({} as { error?: string }));
+            throw new Error(data.error || "Unable to verify payment");
+          }
         }
         if (!cancelled) setVerifiedSuccessfully(true);
       } catch (err) {
@@ -64,11 +71,12 @@ const PaymentSuccess = () => {
     return () => {
       cancelled = true;
     };
-  }, [queryOrderId, queryReference]);
+  }, [queryOrderId, queryReference, isMerchOrder]);
 
   useEffect(() => {
     if (!verifiedSuccessfully) return;
     localStorage.removeItem("pendingCheckout");
+    localStorage.removeItem("pendingMerchCheckout");
   }, [verifiedSuccessfully]);
 
   const handleRetryPayment = () => {

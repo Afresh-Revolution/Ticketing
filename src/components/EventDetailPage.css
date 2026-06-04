@@ -5,8 +5,16 @@
 .event-detail-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 8%, rgba(126, 84, 255, 0.22), transparent 36%),
-    radial-gradient(circle at 88% 12%, rgba(37, 208, 194, 0.15), transparent 30%),
+    radial-gradient(
+      circle at 12% 8%,
+      rgba(126, 84, 255, 0.22),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 88% 12%,
+      rgba(37, 208, 194, 0.15),
+      transparent 30%
+    ),
     var(--wc-bg-deep);
   color: var(--wc-ink);
   font-family: var(--wc-font-body, "Arimo", sans-serif);
@@ -96,7 +104,11 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #f6f1ff;
-  background: linear-gradient(115deg, rgba(157, 109, 255, 0.9), rgba(87, 42, 185, 0.96));
+  background: linear-gradient(
+    115deg,
+    rgba(157, 109, 255, 0.9),
+    rgba(87, 42, 185, 0.96)
+  );
 }
 
 .event-detail-title {
@@ -122,6 +134,51 @@
 
 .event-detail-poster-col {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Merch: under poster on desktop, under organizer on mobile */
+.event-detail-merch-slot--desktop {
+  display: block;
+}
+
+.event-detail-merch-slot--mobile {
+  display: none;
+}
+
+.event-detail-merch-slot--desktop .event-merch-section {
+  margin-top: 0;
+}
+
+.event-detail-merch-slot--desktop .event-merch-cards {
+  grid-template-columns: 1fr;
+}
+
+.event-detail-merch-slot--desktop .event-merch-card {
+  background: linear-gradient(
+    165deg,
+    rgba(45, 20, 89, 0.76),
+    rgba(17, 8, 38, 0.92)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .event-detail-merch-slot--desktop {
+    display: none;
+  }
+
+  .event-detail-merch-slot--mobile {
+    display: block;
+  }
+
+  .event-detail-merch-slot--mobile .event-merch-section {
+    margin-top: 1rem;
+  }
 }
 
 .event-detail-poster {
@@ -133,7 +190,9 @@
   cursor: zoom-in;
   background: rgba(255, 255, 255, 0.04);
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .event-detail-poster:hover {
@@ -151,7 +210,11 @@
 .event-detail-info-col {
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(165deg, rgba(45, 20, 89, 0.76), rgba(17, 8, 38, 0.92));
+  background: linear-gradient(
+    165deg,
+    rgba(45, 20, 89, 0.76),
+    rgba(17, 8, 38, 0.92)
+  );
   padding: 1.25rem;
 }
 
@@ -627,14 +690,16 @@
   }
 }
 
-/* Manual checkout success (return from bank transfer flow) */
+/* Manual checkout success — directly under Back to events */
 .event-detail-manual-success {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0 1.5rem 1rem;
-  padding: 1rem 1.1rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.15rem;
   border-radius: 14px;
   border: 1px solid rgba(34, 197, 94, 0.35);
   background: rgba(34, 197, 94, 0.12);
@@ -643,8 +708,10 @@
 
 .event-detail-manual-success-text {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 0.92rem;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .event-detail-manual-success-dismiss {
@@ -665,12 +732,10 @@
 
 @media (max-width: 520px) {
   .event-detail-manual-success {
-    margin: 0 1rem 0.85rem;
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
   }
 
   .event-detail-manual-success-dismiss {
-    align-self: flex-end;
+    margin-left: auto;
   }
 }
