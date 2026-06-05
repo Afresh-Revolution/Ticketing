@@ -93,9 +93,39 @@ export const defaultMerchFormItem = (): MerchFormItem => ({
   images: [],
 });
 
+export function isMerchItemStarted(m: MerchFormItem): boolean {
+  if (m.availability) return true;
+  if (m.description.trim()) return true;
+  if (m.types.length > 0) return true;
+  if (m.customType.trim()) return true;
+  if (m.images.some((img) => img.imageUrl)) return true;
+  if (m.colors.some((c) => c.color.trim() || c.quantity.trim())) return true;
+  if (m.sharedAmount.trim() || m.sharedQuantity.trim()) return true;
+  return false;
+}
+
+export function isMerchItemComplete(m: MerchFormItem): boolean {
+  if (!m.availability) return false;
+  if (!m.description.trim()) return false;
+  if (m.types.length === 0) return false;
+  if (m.types.includes('other') && !m.customType.trim()) return false;
+  if ((m.availability === 'online' || m.availability === 'both') && m.sameAmount) {
+    if (!String(m.sharedAmount).trim() || !String(m.sharedQuantity).trim()) return false;
+  }
+  return true;
+}
+
+export function getMerchFormError(items: MerchFormItem[]): string | null {
+  const incomplete = items.filter((m) => isMerchItemStarted(m) && !isMerchItemComplete(m));
+  if (incomplete.length > 0) {
+    return 'Complete every merch item you started, or remove it, before saving the event.';
+  }
+  return null;
+}
+
 export function merchFormToPayload(items: MerchFormItem[]) {
   return items
-    .filter((m) => m.availability)
+    .filter(isMerchItemComplete)
     .map((m, index) => ({
       availability: m.availability,
       description: m.description.trim(),
