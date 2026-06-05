@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
+import { AdminCouponsPageSkeleton } from '../components/Skeleton';
 import './admin.css';
 
 type AdminEvent = {
@@ -200,7 +201,7 @@ const AdminCoupons = () => {
   };
 
   if (loading) {
-    return <div className="admin-page">Loading coupons...</div>;
+    return <AdminCouponsPageSkeleton />;
   }
 
   return (

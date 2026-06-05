@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { fetchMyOrders, filterOrdersByEmail, type Order } from '../api/orders';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { MyTicketsListSkeleton } from './Skeleton';
 import './MyTicketsPage.css';
 
 type Tab = 'upcoming' | 'past';
@@ -159,7 +160,7 @@ const MyTicketsPage = () => {
           </button>
         </div>
 
-        {loading && <p className="my-tickets-loading">Loading your tickets…</p>}
+        {loading && <MyTicketsListSkeleton />}
         {error && <p className="my-tickets-error">{error}</p>}
 
         {!loading && !error && (

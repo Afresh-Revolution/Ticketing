@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
+import { AdminMerchPanelSkeleton } from '../components/Skeleton';
 
 type MerchOrder = {
   id: string;
@@ -159,12 +160,7 @@ const AdminMerchPanel = () => {
   const pendingSaves = saves.filter((s) => s.status === 'pending');
 
   if (loading && orders.length === 0 && saves.length === 0) {
-    return (
-      <div className="admin-section">
-        <h2 className="admin-section-title">Merch</h2>
-        <div className="admin-empty-state">Loading merch data…</div>
-      </div>
-    );
+    return <AdminMerchPanelSkeleton />;
   }
 
   if (orders.length === 0 && saves.length === 0) {

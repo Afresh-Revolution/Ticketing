@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { apiUrl } from '../api/config';
 import { shareEvent } from '../utils/shareEvent';
+import { GetTicketsSkeleton } from './Skeleton';
 import '../FeaturesPage/css/GetTickets.css';
 
 interface TrendingEvent {
@@ -133,14 +134,7 @@ const GetTickets = () => {
   };
 
   if (loading) {
-    return (
-      <section className="get-tickets">
-        <div className="gt-inner">
-          <h2 className="gt-heading">Selling now</h2>
-          <p className="gt-sub">Loading hottest events…</p>
-        </div>
-      </section>
-    );
+    return <GetTicketsSkeleton />;
   }
 
   if (events.length === 0) {

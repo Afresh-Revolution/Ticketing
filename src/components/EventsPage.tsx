@@ -5,6 +5,7 @@ import { shareEvent } from "../utils/shareEvent";
 import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
 import Navbar from "./Navbar";
 import Logo from "./Logo";
+import { EventsGridSkeleton } from "./Skeleton";
 import "./EventsPage.css";
 
 const CATEGORIES = [
@@ -208,9 +209,7 @@ const EventsPage = () => {
         </section>
 
         {loading ? (
-          <div className="events-loading" style={{ textAlign: 'center', padding: '2rem', color: '#fff' }}>
-            Loading events...
-          </div>
+          <EventsGridSkeleton />
         ) : (
           <>
             <h2 className="events-count">{filteredEvents.length} Events Found</h2>
