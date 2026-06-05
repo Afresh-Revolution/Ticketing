@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiUrl } from '../api/config';
 import ScrollReveal from './ScrollReveal';
+import { TopUsersCarouselSkeleton } from './Skeleton';
 import './TopUsersCarousel.css';
 
 export interface TopUser {
@@ -37,7 +38,7 @@ const TopUsersCarousel = () => {
     };
   }, []);
 
-  if (loading) return null;
+  if (loading) return <TopUsersCarouselSkeleton />;
   if (users.length === 0) return null;
 
   const duplicated = [...users, ...users, ...users];

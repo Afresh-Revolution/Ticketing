@@ -8,6 +8,7 @@ import {
   type MerchCartLine,
 } from '../types/merch';
 import MerchImageLightbox from './MerchImageLightbox';
+import { MerchShopSkeleton } from './Skeleton';
 import './MerchShopPage.css';
 
 type CartMap = Record<string, number>;
@@ -75,7 +76,7 @@ const MerchShopPage = () => {
     return (
       <div className="merch-shop-page">
         <Navbar />
-        <div className="merch-shop-loading">Loading merch…</div>
+        <MerchShopSkeleton />
       </div>
     );
   }

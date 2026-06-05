@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api/config';
+import { AdminTableSkeleton } from '../components/Skeleton';
 import './admin.css';
 
 interface TopUser {
@@ -490,7 +491,7 @@ const AdminTopUsers = () => {
 
       <h2 className="admin-section-title">Current list</h2>
       {loading ? (
-        <p>Loading...</p>
+        <AdminTableSkeleton columns={5} rows={4} />
       ) : list.length === 0 ? (
         <p className="admin-muted">No top users yet. Add one above.</p>
       ) : (

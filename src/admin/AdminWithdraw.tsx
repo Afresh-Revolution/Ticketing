@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { apiUrl } from '../api/config';
+import { AdminWithdrawPageSkeleton } from '../components/Skeleton';
 import './admin.css';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -681,13 +682,7 @@ const AdminWithdraw = () => {
   };
 
   if (loading) {
-    return (
-      <div className="admin-page admin-withdraw-page">
-        <div className="admin-withdraw-scroll">
-          <div className="admin-empty-state">Loading withdraw data…</div>
-        </div>
-      </div>
-    );
+    return <AdminWithdrawPageSkeleton />;
   }
 
   if (error || !data) {

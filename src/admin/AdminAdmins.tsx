@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiUrl } from '../api/config';
+import { AdminTableRowsSkeleton } from '../components/Skeleton';
 import './admin.css';
 
 interface AdminUser {
@@ -139,11 +140,7 @@ const AdminAdmins = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="admin-table-empty">
-                    Loading…
-                  </td>
-                </tr>
+                <AdminTableRowsSkeleton columns={7} rows={5} />
               ) : admins.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="admin-table-empty">

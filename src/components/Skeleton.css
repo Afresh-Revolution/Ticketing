@@ -1,0 +1,329 @@
+.skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton--admin {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.skeleton--rounded-none { border-radius: 0; }
+.skeleton--rounded-sm { border-radius: 4px; }
+.skeleton--rounded-md { border-radius: 8px; }
+.skeleton--rounded-lg { border-radius: 12px; }
+.skeleton--rounded-xl { border-radius: 16px; }
+.skeleton--rounded-pill { border-radius: 999px; }
+.skeleton--rounded-full { border-radius: 50%; }
+
+.skeleton-loading-region {
+  pointer-events: none;
+}
+
+.skeleton-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Event card */
+.skeleton-event-card {
+  background: var(--wc-bg-card, rgba(255, 255, 255, 0.035));
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--wc-border, rgba(255, 255, 255, 0.09));
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-event-card-image {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+}
+
+.skeleton-event-card-body {
+  padding: 1rem 1.1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.skeleton-event-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Get tickets cards */
+.skeleton-gt-card {
+  background: var(--lp-bg-card, rgba(255, 255, 255, 0.035));
+  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
+  border-radius: var(--lp-radius-lg, 20px);
+  overflow: hidden;
+}
+
+.skeleton-gt-card-media {
+  height: 240px;
+  width: 100%;
+}
+
+.skeleton-gt-card-body {
+  padding: 1.1rem 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+/* Top users carousel */
+.skeleton-tuc-wrap {
+  padding: clamp(2.5rem, 8vw, 4rem) 0;
+}
+
+.skeleton-tuc-cards {
+  display: flex;
+  gap: 1rem;
+  overflow: hidden;
+  margin-top: 1.5rem;
+}
+
+.skeleton-tuc-card {
+  flex: 0 0 220px;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* My tickets */
+.skeleton-ticket-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.skeleton-ticket-card-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+/* Merch shop */
+.skeleton-merch-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.skeleton-merch-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.85rem;
+}
+
+.skeleton-merch-variant {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.skeleton-merch-variant-image {
+  aspect-ratio: 1;
+  width: 100%;
+}
+
+.skeleton-merch-variant-body {
+  padding: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Event detail */
+.skeleton-event-detail-hero {
+  height: 220px;
+  width: 100%;
+}
+
+.skeleton-event-detail-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.75rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.skeleton-event-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .skeleton-event-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skeleton-ticket-row {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Admin */
+.skeleton-admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-admin-kpi-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.15rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.skeleton-admin-kpi-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.skeleton-admin-kpi-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.skeleton-admin-table-wrap {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.skeleton-admin-table-head {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skeleton-admin-table-row {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+}
+
+.skeleton-admin-table-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-admin-event-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.skeleton-admin-event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.skeleton-admin-event-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.skeleton-admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.skeleton-admin-form-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 480px;
+  margin-bottom: 2rem;
+}
+
+.skeleton-admin-withdraw-events {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.skeleton-admin-withdraw-event {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: rgba(255, 255, 255, 0.08);
+  }
+}

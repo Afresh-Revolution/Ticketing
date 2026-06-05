@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
 import AdminMerchPanel from './AdminMerchPanel';
+import { AdminTableSkeleton, Skeleton } from '../components/Skeleton';
 import './admin.css';
 
 interface DashboardStats {
@@ -387,7 +388,7 @@ const AdminDashboard = () => {
             <div className="admin-kpi-content">
               <span className="admin-kpi-label">{kpi.label}</span>
               <span className="admin-kpi-value">
-                {loading ? <span style={{ opacity: 0.4 }}>Loading…</span> : kpi.value}
+                {loading ? <Skeleton height={28} width={80} rounded="sm" variant="admin" /> : kpi.value}
               </span>
               {kpi.subLabel && !loading && (
                 <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: '0.25rem' }}>
@@ -418,7 +419,7 @@ const AdminDashboard = () => {
           aria-label="Search pending sales"
         />
         {loading ? (
-          <div className="admin-empty-state">Loading…</div>
+          <AdminTableSkeleton columns={7} rows={4} />
         ) : pendingSales.length === 0 ? (
           <div className="admin-empty-state">No pending sales found.</div>
         ) : (
@@ -500,7 +501,7 @@ const AdminDashboard = () => {
           aria-label="Search recent sales"
         />
         {loading ? (
-          <div className="admin-empty-state">Loading…</div>
+          <AdminTableSkeleton columns={8} rows={4} />
         ) : filteredRecentSales.length === 0 ? (
           <div className="admin-empty-state">No sales yet.</div>
         ) : (
@@ -597,7 +598,7 @@ const AdminDashboard = () => {
           aria-label="Search sales records"
         />
         {loading ? (
-          <div className="admin-empty-state">Loading…</div>
+          <AdminTableSkeleton columns={5} rows={3} />
         ) : salesRecordGroups.length === 0 ? (
           <div className="admin-empty-state">No sales records found.</div>
         ) : (

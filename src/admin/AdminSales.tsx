@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
+import { AdminTableSkeleton } from '../components/Skeleton';
 import './admin.css';
 
 interface Sale {
@@ -717,7 +718,7 @@ const AdminSales = () => {
 
         {/* ── Online Sales by Event ── */}
         {loading ? (
-          <div className="admin-table-empty">Loading…</div>
+          <AdminTableSkeleton columns={4} rows={3} />
         ) : eventGroups.length === 0 ? (
           <div className="admin-table-empty">No sales records found.</div>
         ) : (

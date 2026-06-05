@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { apiUrl } from "../api/config";
+import { AdminEventsPageSkeleton } from "../components/Skeleton";
 import "./admin.css";
 
 // Type definition for backend Event
@@ -179,7 +180,7 @@ const AdminEvents = () => {
     }
   };
 
-  if (loading) return <div className="admin-page">Loading events...</div>;
+  if (loading) return <AdminEventsPageSkeleton />;
 
   return (
     <div className="admin-page">

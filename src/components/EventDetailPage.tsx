@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { resolveEventState } from "../utils/eventLocation";
 import Navbar from "./Navbar";
+import { EventDetailSkeleton } from "./Skeleton";
 import EventMerchSection from "./EventMerchSection";
 import { fetchEventMerch } from "../api/merch";
 import type { EventMerchDto } from "../types/merch";
@@ -187,7 +188,12 @@ const EventDetailPage = () => {
   };
 
   if (loading)
-    return <div className="event-detail-loading">Loading event...</div>;
+    return (
+      <>
+        <Navbar />
+        <EventDetailSkeleton />
+      </>
+    );
   if (error || !event)
     return (
       <div className="event-detail-error">{error || "Event not found"}</div>
