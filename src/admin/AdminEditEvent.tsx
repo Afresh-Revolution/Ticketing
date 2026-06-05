@@ -6,6 +6,7 @@ import AdminMerchForm from './AdminMerchForm';
 import {
   merchDtoToFormItem,
   merchFormToPayload,
+  getMerchFormError,
   type MerchFormItem,
 } from '../types/merch';
 import './admin.css';
@@ -275,6 +276,12 @@ const AdminEditEvent = () => {
     setSubmitError('');
 
     try {
+      const merchError = getMerchFormError(merchItems);
+      if (merchError) {
+        setSubmitError(merchError);
+        return;
+      }
+
       let locationString = formData.venue;
       if (formData.city) locationString += `, ${formData.city}`;
       const dateTimeString = `${formData.startDate}T${formData.startTime}:00`;
@@ -349,7 +356,7 @@ const AdminEditEvent = () => {
       }
 
       const merchPayload = merchFormToPayload(merchItems);
-      if (merchPayload.length > 0 && id) {
+      if (id) {
         await fetch(apiUrl(`/api/events/${id}/merch`), {
           method: 'POST',
           headers,

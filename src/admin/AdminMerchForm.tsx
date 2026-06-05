@@ -152,7 +152,7 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
         </button>
       </div>
       <p className="admin-input-hint">
-        Configure merch for online sale, at-event pickup, or both. Up to 5 images per item.
+        Optional — configure merch for online sale, at-event pickup, or both. Up to 5 images per item.
       </p>
 
       {items.length === 0 && (
@@ -172,7 +172,7 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
             </button>
           </div>
 
-          <label className="admin-label">Availability *</label>
+          <label className="admin-label">Availability</label>
           <select
             className="admin-select"
             value={merch.availability}
@@ -181,7 +181,6 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                 availability: e.target.value as MerchFormItem['availability'],
               })
             }
-            required
           >
             <option value="">Select availability</option>
             {AVAILABILITY_OPTIONS.map((o) => (
@@ -195,7 +194,7 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
             merch.availability === 'at_event' ||
             merch.availability === 'both') && (
             <>
-              <label className="admin-label">Merch type(s) *</label>
+              <label className="admin-label">Merch type(s)</label>
               <div className="admin-merch-types">
                 {MERCH_TYPE_OPTIONS.map((t) => (
                   <label key={t} className="admin-merch-type-chip">
@@ -210,14 +209,13 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
               </div>
               {merch.types.includes('other') && (
                 <>
-                  <label className="admin-label">Custom type *</label>
+                  <label className="admin-label">Custom type</label>
                   <input
                     type="text"
                     className="admin-input"
                     placeholder="Describe merch type"
                     value={merch.customType}
                     onChange={(e) => updateItem(merch.id, { customType: e.target.value })}
-                    required
                   />
                 </>
               )}
@@ -291,12 +289,11 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                 + Add color
               </button>
 
-              <label className="admin-label">Description *</label>
+              <label className="admin-label">Description</label>
               <textarea
                 className="admin-textarea"
                 value={merch.description}
                 onChange={(e) => updateItem(merch.id, { description: e.target.value })}
-                required
                 placeholder="Describe this merch item"
               />
 
@@ -313,7 +310,7 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                   {merch.sameAmount ? (
                     <div className="admin-form-row">
                       <div>
-                        <label className="admin-label">Price (₦) *</label>
+                        <label className="admin-label">Price (₦)</label>
                         <input
                           type="number"
                           className="admin-input"
@@ -322,11 +319,10 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                           onChange={(e) =>
                             updateItem(merch.id, { sharedAmount: e.target.value })
                           }
-                          required
                         />
                       </div>
                       <div>
-                        <label className="admin-label">Stock per image *</label>
+                        <label className="admin-label">Stock per image</label>
                         <input
                           type="number"
                           className="admin-input"
@@ -335,7 +331,6 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                           onChange={(e) =>
                             updateItem(merch.id, { sharedQuantity: e.target.value })
                           }
-                          required
                         />
                       </div>
                     </div>
