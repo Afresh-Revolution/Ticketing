@@ -8,7 +8,7 @@ import {
   updateStreamConfig,
   type StreamableEvent,
 } from '../api/stream';
-import { STREAM_PROVIDERS } from '../utils/eventStream';
+import { STREAM_PROVIDERS, validateStreamUrl } from '../utils/eventStream';
 import './admin.css';
 
 const AdminOnline = () => {
@@ -23,7 +23,36 @@ const AdminOnline = () => {
   const [ending, setEnding] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [streamUrlError, setStreamUrlError] = useState('');
   const [guideOpen, setGuideOpen] = useState(false);
+
+  const validateCurrentStreamUrl = (required: boolean) => {
+    const result = validateStreamUrl(streamUrl, streamProvider, { allowEmpty: !required });
+    if (!result.valid) {
+      setStreamUrlError(result.error);
+      return null;
+    }
+    setStreamUrlError('');
+    return result.url;
+  };
+
+  const handleStreamUrlChange = (value: string) => {
+    setStreamUrl(value);
+    if (!value.trim()) {
+      setStreamUrlError('');
+      return;
+    }
+    const result = validateStreamUrl(value, streamProvider, { allowEmpty: true });
+    setStreamUrlError(result.valid ? '' : result.error);
+  };
+
+  const handleStreamProviderChange = (value: string) => {
+    setStreamProvider(value);
+    if (streamUrl.trim()) {
+      const result = validateStreamUrl(streamUrl, value, { allowEmpty: true });
+      setStreamUrlError(result.valid ? '' : result.error);
+    }
+  };
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -58,7 +87,14 @@ const AdminOnline = () => {
         if (cancelled) return;
         setSelected(event);
         setStreamUrl(event.streamUrl || '');
-        setStreamProvider(event.streamProvider || 'youtube');
+        const provider = event.streamProvider || 'youtube';
+        setStreamProvider(provider);
+        if (event.streamUrl?.trim()) {
+          const result = validateStreamUrl(event.streamUrl, provider, { allowEmpty: true });
+          setStreamUrlError(result.valid ? '' : result.error);
+        } else {
+          setStreamUrlError('');
+        }
       } catch (e) {
         if (!cancelled) {
           setError(e instanceof Error ? e.message : 'Failed to load event');
@@ -73,11 +109,13 @@ const AdminOnline = () => {
 
   const handleSave = async () => {
     if (!selectedId) return;
+    const safeUrl = validateCurrentStreamUrl(false);
+    if (safeUrl === null) return;
     setSaving(true);
     setError('');
     setMessage('');
     try {
-      const updated = await updateStreamConfig(selectedId, { streamUrl: streamUrl.trim(), streamProvider });
+      const updated = await updateStreamConfig(selectedId, { streamUrl: safeUrl, streamProvider });
       setSelected(updated);
       setMessage('Stream settings saved.');
     } catch (e) {
@@ -89,16 +127,14 @@ const AdminOnline = () => {
 
   const handleGoLive = async () => {
     if (!selectedId) return;
+    const safeUrl = validateCurrentStreamUrl(true);
+    if (safeUrl === null) return;
     setGoingLive(true);
     setError('');
     setMessage('');
     try {
-      if (!streamUrl.trim()) {
-        setError('Add a stream URL before going live.');
-        return;
-      }
       if (!selected?.streamUrl?.trim()) {
-        await updateStreamConfig(selectedId, { streamUrl: streamUrl.trim(), streamProvider });
+        await updateStreamConfig(selectedId, { streamUrl: safeUrl, streamProvider });
       }
       const result = await goLive(selectedId);
       setMessage(
@@ -210,7 +246,7 @@ const AdminOnline = () => {
                   id="stream-provider"
                   className="admin-select"
                   value={streamProvider}
-                  onChange={(e) => setStreamProvider(e.target.value)}
+                  onChange={(e) => handleStreamProviderChange(e.target.value)}
                 >
                   {STREAM_PROVIDERS.map((p) => (
                     <option key={p.value} value={p.value}>
@@ -228,15 +264,26 @@ const AdminOnline = () => {
                   className="admin-input"
                   placeholder="https://www.youtube.com/watch?v=… or embed URL from OBS/YouTube"
                   value={streamUrl}
-                  onChange={(e) => setStreamUrl(e.target.value)}
+                  onChange={(e) => handleStreamUrlChange(e.target.value)}
+                  aria-invalid={Boolean(streamUrlError)}
+                  aria-describedby={streamUrlError ? 'stream-url-error' : undefined}
                 />
+                {streamUrlError ? (
+                  <p id="stream-url-error" className="admin-input-hint" style={{ color: '#fca5a5' }}>
+                    {streamUrlError}
+                  </p>
+                ) : (
+                  <p className="admin-input-hint">
+                    HTTPS links only — YouTube watch/live/embed URLs. Do not paste RTMP ingest links.
+                  </p>
+                )}
 
                 <div className="admin-online-actions">
                   <button
                     type="button"
                     className="admin-btn-secondary"
                     onClick={() => void handleSave()}
-                    disabled={saving || goingLive || ending}
+                    disabled={saving || goingLive || ending || Boolean(streamUrlError)}
                   >
                     {saving ? 'Saving…' : 'Save settings'}
                   </button>
@@ -245,7 +292,7 @@ const AdminOnline = () => {
                       type="button"
                       className="admin-btn-danger"
                       onClick={() => void handleGoLive()}
-                      disabled={goingLive || ending || saving}
+                      disabled={goingLive || ending || saving || Boolean(streamUrlError) || !streamUrl.trim()}
                     >
                       {goingLive ? 'Going live…' : 'Go live & email attendees'}
                     </button>
