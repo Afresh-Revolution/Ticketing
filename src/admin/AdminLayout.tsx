@@ -96,6 +96,9 @@ const AdminLayout = () => {
             <NavLink to="/admin/events" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
               Events
             </NavLink>
+            <NavLink to="/admin/online" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+              Online
+            </NavLink>
             <NavLink to="/admin/sales" className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
               Sales
             </NavLink>

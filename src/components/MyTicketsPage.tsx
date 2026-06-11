@@ -3,12 +3,29 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchMyOrders, filterOrdersByEmail, type Order } from '../api/orders';
+import { isOnlineTicket, normalizeEventFormat } from '../utils/eventStream';
+import { OnlineTicketAccessPanel } from './OnlineTicketAccessPanel';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { MyTicketsListSkeleton } from './Skeleton';
 import './MyTicketsPage.css';
 
 type Tab = 'upcoming' | 'past';
+
+function orderShowsOnlineAccess(order: Order): boolean {
+  const eventType = order.event?.eventType;
+  if (normalizeEventFormat(eventType) === 'online') return true;
+  if (!order.items.length) return false;
+  return order.items.some((item) => isOnlineTicket(item, eventType));
+}
+
+function orderShowsVenueQr(order: Order): boolean {
+  if (!order.ticketCode) return false;
+  const eventType = order.event?.eventType;
+  if (normalizeEventFormat(eventType) === 'online') return false;
+  if (!order.items.length) return normalizeEventFormat(eventType) !== 'online';
+  return order.items.some((item) => !isOnlineTicket(item, eventType));
+}
 
 function getEventDate(order: Order): Date | null {
   const dateStr = order.event?.date ?? order.createdAt;
@@ -46,8 +63,14 @@ const MyTicketsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
+  const [now, setNow] = useState(() => new Date());
   const orderCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const highlightOrderId = (location.state as { highlightOrderId?: string } | null)?.highlightOrderId;
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
@@ -220,7 +243,14 @@ const MyTicketsPage = () => {
                         </div>
                       ))}
                     </div>
-                    {order.ticketCode && (
+                    {orderShowsOnlineAccess(order) && (
+                      <OnlineTicketAccessPanel
+                        event={order.event}
+                        eventId={order.eventId}
+                        now={now}
+                      />
+                    )}
+                    {orderShowsVenueQr(order) && order.ticketCode && (
                       <div className="my-tickets-ticket-section">
                         <p className="my-tickets-ticket-label">Ticket code</p>
                         <p className="my-tickets-ticket-code">{order.ticketCode}</p>

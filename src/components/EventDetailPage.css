@@ -406,12 +406,29 @@
   background: rgba(58, 31, 91, 0.95);
 }
 
+.event-detail-reservation-card {
+  background: rgba(58, 31, 91, 0.85);
+  border-radius: 12px;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid rgba(90, 44, 143, 0.4);
+}
+
+.event-detail-reservation-hint {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .event-detail-ticket-info {
   flex: 1;
   min-width: 180px;
 }
 
 .event-detail-ticket-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   font-size: 1rem;
   font-weight: 700;
   margin: 0 0 0.25rem;

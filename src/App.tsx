@@ -28,6 +28,8 @@ import AdminScanner from './admin/AdminScanner'
 import AdminWithdraw from './admin/AdminWithdraw'
 import AdminTopUsers from './admin/AdminTopUsers'
 import AdminCoupons from './admin/AdminCoupons'
+import AdminOnline from './admin/AdminOnline'
+import EventWatchPage from './components/EventWatchPage'
 import './App.css'
 import { getRouteTransitionVariant, type RouteTransitionVariant } from './routeTransitions'
 
@@ -66,6 +68,7 @@ function AnimatedRoutes() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
+        <Route path="/event/:id/watch" element={<EventWatchPage />} />
         <Route path="/event/:id/merch" element={<MerchShopPage />} />
         <Route path="/event/:id/merch/checkout" element={<MerchCheckoutPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
@@ -79,6 +82,7 @@ function AnimatedRoutes() {
           <Route path="events" element={<AdminEvents />} />
           <Route path="events/create" element={<AdminCreateEvent />} />
           <Route path="events/edit/:id" element={<AdminEditEvent />} />
+          <Route path="online" element={<AdminOnline />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="withdraw" element={<AdminWithdraw />} />

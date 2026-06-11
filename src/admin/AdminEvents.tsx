@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { apiUrl } from "../api/config";
 import { AdminEventsPageSkeleton } from "../components/Skeleton";
 import "./admin.css";
@@ -86,9 +87,11 @@ const AdminEvents = () => {
     }
   };
 
-  const handleDeleteEvent = async (eventId: string, title: string) => {
+  const handleDeleteEvent = (eventId: string, title: string) => {
     setDeleteConfirm({ eventId, title });
   };
+
+  const modalHost = typeof document !== "undefined" ? document.body : null;
 
   const handleConfirmDelete = async () => {
     if (!deleteConfirm) return;
@@ -308,55 +311,63 @@ const AdminEvents = () => {
         </div>
       </div>
 
-      {deleteConfirm && (
-        <div
-          className="admin-modal-overlay"
-          onClick={() => !deleting && setDeleteConfirm(null)}
-        >
+      {deleteConfirm &&
+        modalHost &&
+        createPortal(
           <div
-            className="admin-modal-container"
-            onClick={(e) => e.stopPropagation()}
+            className="admin-modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-event-modal-title"
+            onClick={() => !deleting && setDeleteConfirm(null)}
           >
-            <div className="admin-modal-header">
-              <h2 className="admin-modal-title">Delete event</h2>
-              <button
-                type="button"
-                className="admin-modal-close"
-                onClick={() => !deleting && setDeleteConfirm(null)}
-                disabled={deleting}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="admin-modal-form">
-              <p className="admin-delete-confirm-message">
-                Are you sure you want to delete{" "}
-                <strong>"{deleteConfirm.title}"</strong>? This action cannot be
-                undone.
-              </p>
-              <div className="admin-modal-actions">
+            <div
+              className="admin-modal-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="admin-modal-header">
+                <h2 id="delete-event-modal-title" className="admin-modal-title">
+                  Delete event
+                </h2>
                 <button
                   type="button"
-                  className="admin-btn-cancel"
+                  className="admin-modal-close"
                   onClick={() => !deleting && setDeleteConfirm(null)}
                   disabled={deleting}
+                  aria-label="Close"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="admin-btn-danger"
-                  onClick={handleConfirmDelete}
-                  disabled={deleting}
-                >
-                  {deleting ? "Deleting…" : "Delete event"}
+                  ✕
                 </button>
               </div>
+              <div className="admin-modal-form">
+                <p className="admin-delete-confirm-message">
+                  Are you sure you want to delete{" "}
+                  <strong>"{deleteConfirm.title}"</strong>? This action cannot be
+                  undone.
+                </p>
+                <div className="admin-modal-actions">
+                  <button
+                    type="button"
+                    className="admin-btn-cancel"
+                    onClick={() => !deleting && setDeleteConfirm(null)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn-danger"
+                    onClick={() => void handleConfirmDelete()}
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting…" : "Delete event"}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          modalHost,
+        )}
     </div>
   );
 };
