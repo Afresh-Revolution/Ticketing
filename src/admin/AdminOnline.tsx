@@ -218,7 +218,9 @@ const AdminOnline = () => {
                   onChange={(e) => setStreamUrl(e.target.value)}
                 />
                 <p className="admin-input-hint">
-                  Use your YouTube live watch URL, Twitch channel, or a direct embed URL. Paid ticket holders receive a
+                  Paste the <strong>watch link</strong> attendees open in a browser — not the RTMP ingest URL from OBS
+                  (e.g. <code>rtmp://a.rtmp.youtube.com/live2</code>). While live, copy from YouTube:
+                  <code>https://www.youtube.com/watch?v=…</code> or <code>/live/…</code>. Paid ticket holders receive a
                   private join link by email when you go live.
                 </p>
 
