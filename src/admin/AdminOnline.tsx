@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { BookOpen } from 'lucide-react';
 import {
   endLive,
   fetchStreamableEvents,
@@ -22,6 +23,7 @@ const AdminOnline = () => {
   const [ending, setEnding] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const loadEvents = useCallback(async () => {
     setLoading(true);
@@ -189,7 +191,18 @@ const AdminOnline = () => {
 
             {selected && (
               <section className="admin-section admin-online-controls">
-                <h2 className="admin-section-title">Stream setup</h2>
+                <div className="admin-section-title-row">
+                  <h2 className="admin-section-title">Stream setup</h2>
+                  <button
+                    type="button"
+                    className="admin-guide-badge"
+                    onClick={() => setGuideOpen(true)}
+                    aria-label="Open stream setup guide"
+                  >
+                    <BookOpen size={14} strokeWidth={2.25} aria-hidden />
+                    Guide
+                  </button>
+                </div>
                 <label className="admin-label" htmlFor="stream-provider">
                   Platform
                 </label>
@@ -217,12 +230,6 @@ const AdminOnline = () => {
                   value={streamUrl}
                   onChange={(e) => setStreamUrl(e.target.value)}
                 />
-                <p className="admin-input-hint">
-                  Paste the <strong>watch link</strong> not the RTMP ingest URL
-                  (e.g. <code>rtmp://a.rtmp.youtube.com/live2</code>). While live, copy from YouTube/Tiktok etc:
-                  <code>https://www.youtube.com/watch?v=…</code> or <code>/live/…</code>. Paid ticket holders receive a
-                  private join link by email when you go live.
-                </p>
 
                 <div className="admin-online-actions">
                   <button
@@ -269,6 +276,60 @@ const AdminOnline = () => {
           </div>
         )}
       </div>
+
+      {guideOpen && (
+        <div className="admin-modal-overlay" onClick={() => setGuideOpen(false)}>
+          <div
+            className="admin-modal-container admin-modal-container--stream-guide"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="stream-guide-title"
+          >
+            <div className="admin-modal-header">
+              <h2 className="admin-modal-title" id="stream-guide-title">
+                Stream setup guide
+              </h2>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setGuideOpen(false)}
+                aria-label="Close guide"
+              >
+                ×
+              </button>
+            </div>
+            <div className="admin-modal-body admin-stream-guide-body">
+              <div className="admin-stream-guide-callout">
+                Set your YouTube live stream to <strong>Unlisted</strong> so only people with the link can find it on
+                YouTube. GateWav ticket holders watch through their private emailed link.
+              </div>
+              <ol className="admin-stream-guide-steps">
+                <li>
+                  In YouTube Studio, create or schedule your live stream and set visibility to{' '}
+                  <strong>Unlisted</strong>.
+                </li>
+                <li>
+                  In OBS (or your streaming app), use the <strong>RTMP ingest URL</strong> and stream key from YouTube,
+                  not in GateWav. Example ingest and Stream key: <code>rtmp://a.rtmp.youtube.com/live2</code> & <code>5fvy-at0h-9ibr-b3vz-e6797</code>.
+                </li>
+                <li>
+                  Start streaming. Once live, open the stream on YouTube and copy the <strong>watch link</strong> (e.g.{' '}
+                  <code>https://www.youtube.com/watch?v=…</code> or <code>/live/…</code>).
+                </li>
+                <li>
+                  Paste that watch link into <strong>Stream URL</strong> above, save settings, then click{' '}
+                  <strong>Go live &amp; email attendees</strong>.
+                </li>
+              </ol>
+              <p className="admin-modal-muted admin-stream-guide-note">
+                Do not paste the RTMP ingest URL into GateWav; browsers cannot play it. Attendees receive a private
+                watch link by email when you go live.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
