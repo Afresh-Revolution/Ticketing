@@ -3,6 +3,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { apiUrl } from '../api/config';
 import { shareEvent } from '../utils/shareEvent';
+import { formatEventDateTag } from '../utils/eventDates';
+import { primaryEventImage, resolveEventImages } from '../utils/eventImages';
+import { isReservationEvent } from '../utils/eventTickets';
+import { EventCardImageCarousel } from './EventCardImageCarousel';
 import { GetTicketsSkeleton } from './Skeleton';
 import '../FeaturesPage/css/GetTickets.css';
 
@@ -10,10 +14,14 @@ interface TrendingEvent {
   id: string;
   title: string;
   date: string; // ISO string
+  endDate?: string;
   location: string;
   price: number;
   imageUrl: string;
+  images: string[];
   startTime: string;
+  tickets?: { type?: string; price?: number }[];
+  isReservation?: boolean;
 }
 
 function parseEventsResponse(data: unknown): unknown[] {
@@ -40,7 +48,14 @@ function toTrendingEvent(raw: unknown): TrendingEvent | null {
     location: typeof e.location === 'string' ? e.location : typeof e.venue === 'string' ? e.venue : '',
     price: Number.isFinite(price) ? price : 0,
     imageUrl: typeof e.imageUrl === 'string' ? e.imageUrl : typeof e.image === 'string' ? e.image : '',
+    images: resolveEventImages(
+      Array.isArray(e.imageUrls) ? e.imageUrls as string[] : null,
+      typeof e.imageUrl === 'string' ? e.imageUrl : typeof e.image === 'string' ? e.image : '',
+    ),
     startTime: typeof e.startTime === 'string' ? e.startTime : typeof e.time === 'string' ? e.time : '',
+    endDate: typeof e.endDate === 'string' ? e.endDate : undefined,
+    tickets: Array.isArray(e.tickets) ? e.tickets as TrendingEvent['tickets'] : undefined,
+    isReservation: Array.isArray(e.tickets) ? isReservationEvent(e.tickets as { type?: string }[]) : false,
   };
 }
 
@@ -122,12 +137,8 @@ const GetTickets = () => {
     };
   }, []);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleString('default', { month: 'short' }).toUpperCase();
-    return `${month} ${day}`;
-  };
+  const formatDate = (event: TrendingEvent) =>
+    formatEventDateTag(event.date, event.endDate);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(price);
@@ -178,12 +189,12 @@ const GetTickets = () => {
               aria-label={`Open ${event.title}`}
             >
               <div className="gt-card-media">
-                <img 
-                  src={event.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'} 
-                  alt={event.title} 
-                  className="gt-card-img" 
+                <EventCardImageCarousel
+                  images={event.images}
+                  alt={event.title}
+                  imageClassName="gt-card-img"
                 />
-                <div className="gt-date-badge">{formatDate(event.date)}</div>
+                <div className="gt-date-badge">{formatDate(event)}</div>
               </div>
               <div className="gt-card-body">
                 <h3 className="gt-card-title">{event.title}</h3>
@@ -207,8 +218,10 @@ const GetTickets = () => {
                 <div className="gt-card-footer">
                   <div className="gt-price-block">
                     <div className="gt-price-wrap">
-                      <span className="gt-price-label">From</span>
-                      <span className="gt-price-value">{formatPrice(event.price)}</span>
+                      <span className="gt-price-label">{event.isReservation ? 'Type' : 'From'}</span>
+                      <span className="gt-price-value">
+                        {event.isReservation ? 'Reservation' : formatPrice(event.price)}
+                      </span>
                     </div>
                   </div>
                   <div className="gt-card-actions">
@@ -219,12 +232,12 @@ const GetTickets = () => {
                         navigate(`/event/${event.id}`);
                       }}
                     >
-                      Get Tickets
+                      {event.isReservation ? 'Reserve' : 'Get Tickets'}
                     </button>
                     <button
                       type="button"
                       className="gt-share-btn"
-                      onClick={(e) => handleShareEvent(e, event.id, event.title, event.imageUrl)}
+                      onClick={(e) => handleShareEvent(e, event.id, event.title, primaryEventImage(event.images, event.imageUrl))}
                       title="Share event"
                       aria-label={shareCopiedId === event.id ? 'Link copied' : 'Share event'}
                     >

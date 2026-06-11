@@ -2,8 +2,14 @@ import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { resolveEventState } from "../utils/eventLocation";
+import { formatEventDateLong } from "../utils/eventDates";
+import { fetchLiveStatus } from "../api/stream";
+import { isOnlineTicket, normalizeEventFormat } from "../utils/eventStream";
+import { isReservationEvent, normalizeTicketType } from "../utils/eventTickets";
+import { TicketDeliveryBadge } from "./TicketDeliveryBadge";
 import Navbar from "./Navbar";
 import { EventDetailSkeleton } from "./Skeleton";
+import ReservationContactButtons from "./ReservationContactButtons";
 import EventMerchSection from "./EventMerchSection";
 import { fetchEventMerch } from "../api/merch";
 import type { EventMerchDto } from "../types/merch";
@@ -17,7 +23,10 @@ interface TicketType {
   price: number;
   quantity: number;
   sold?: number;
-  type?: "paid" | "free";
+  type?: "paid" | "free" | "reservation";
+  deliveryMode?: "in_person" | "online";
+  contactEmail?: string | null;
+  contactPhone?: string | null;
 }
 
 interface EventDetail {
@@ -32,6 +41,8 @@ interface EventDetail {
   about: string;
   organizer: string;
   tickets: TicketType[];
+  eventType: string;
+  isLive: boolean;
 }
 
 function resolveOrganizerName(data: {
@@ -69,6 +80,7 @@ const EventDetailPage = () => {
     string | null
   >(null);
   const [merch, setMerch] = useState<EventMerchDto[]>([]);
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     const msg = (location.state as { manualCheckoutSuccess?: string } | null)
@@ -95,6 +107,9 @@ const EventDetailPage = () => {
             quantity?: number | string;
             sold?: number;
             type?: string;
+            deliveryMode?: string;
+            contactEmail?: string | null;
+            contactPhone?: string | null;
           }) => ({
             id: t.id,
             name: t.name ?? t.ticketName ?? "Ticket",
@@ -102,28 +117,33 @@ const EventDetailPage = () => {
             price: Number(t.price) || 0,
             quantity: Number(t.quantity) || 0,
             sold: Number(t.sold) || 0,
-            type: (t.type === "free" ? "free" : "paid") as "paid" | "free",
+            type: normalizeTicketType({ type: t.type, price: Number(t.price) || 0 }),
+            deliveryMode: (String(t.deliveryMode || "").toLowerCase() === "online"
+              ? "online"
+              : "in_person") as TicketType["deliveryMode"],
+            contactEmail: t.contactEmail ?? null,
+            contactPhone: t.contactPhone ?? null,
           }),
         );
 
-        // Transform data to match UI
-        const dateObj = new Date(data.date);
+        const eventType = normalizeEventFormat(data.eventType);
+        setIsLive(Boolean(data.isLive));
+
+        const dateObj = data.date ? new Date(data.date) : null;
+        const validDate = dateObj instanceof Date && !Number.isNaN(dateObj.getTime());
         const formattedEvent: EventDetail = {
           id: data.id,
           title: data.title,
           category: data.category || "General",
-          date: dateObj.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }),
+          date: formatEventDateLong(data.date, data.endDate),
           time:
             data.startTime ||
-            dateObj.toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            (validDate
+              ? dateObj!.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "TBD"),
           location: data.location || data.venue || "TBD",
           state: resolveEventState(data),
           heroImage:
@@ -132,6 +152,8 @@ const EventDetailPage = () => {
           about: data.description || "No description available.",
           organizer: resolveOrganizerName(data),
           tickets,
+          eventType,
+          isLive: Boolean(data.isLive),
         };
 
         setEvent(formattedEvent);
@@ -159,8 +181,33 @@ const EventDetailPage = () => {
         setLoading(false);
       }
     };
-    if (id) fetchEvent();
+    if (id)     fetchEvent();
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !event) return undefined;
+    const hasOnline =
+      event.eventType === "online" ||
+      event.eventType === "hybrid" ||
+      event.tickets.some((t) => isOnlineTicket(t, event.eventType));
+    if (!hasOnline) return undefined;
+
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const status = await fetchLiveStatus(id);
+        if (!cancelled) setIsLive(Boolean(status.isLive));
+      } catch {
+        /* ignore */
+      }
+    };
+    void poll();
+    const timer = window.setInterval(poll, 20000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [id, event]);
 
   const { totalQty, totalPrice } = useMemo(() => {
     if (!event) return { totalQty: 0, totalPrice: 0 };
@@ -203,6 +250,8 @@ const EventDetailPage = () => {
     merch.length > 0 && id ? (
       <EventMerchSection eventId={id} eventTitle={event.title} merch={merch} />
     ) : null;
+
+  const reservationOnly = isReservationEvent(event.tickets);
 
   return (
     <div className="event-detail-page">
@@ -392,7 +441,7 @@ const EventDetailPage = () => {
             id="event-detail-tickets-heading"
             className="event-detail-tickets-heading"
           >
-            Select Tickets
+            {reservationOnly ? "Details" : "Select Tickets"}
           </h2>
           <div className="event-detail-ticket-list">
             {event.tickets.length === 0 ? (
@@ -409,6 +458,24 @@ const EventDetailPage = () => {
                   contact support.
                 </p>
               </div>
+            ) : reservationOnly ? (
+              event.tickets.map((ticket) => (
+                <div key={ticket.id} className="event-detail-reservation-card">
+                  {event.tickets.length > 1 && (
+                    <h4 className="event-detail-ticket-name">{ticket.name}</h4>
+                  )}
+                  {ticket.description ? (
+                    <p className="event-detail-ticket-desc">{ticket.description}</p>
+                  ) : null}
+                  <p className="event-detail-reservation-hint">
+                    Contact the organizer to reserve your spot.
+                  </p>
+                  <ReservationContactButtons
+                    email={ticket.contactEmail ?? undefined}
+                    phone={ticket.contactPhone ?? undefined}
+                  />
+                </div>
+              ))
             ) : (
               <>
                 {event.tickets.map((ticket) => {
@@ -424,6 +491,12 @@ const EventDetailPage = () => {
                       <div className="event-detail-ticket-info">
                         <h4 className="event-detail-ticket-name">
                           {ticket.name}
+                          {isOnlineTicket(ticket, event.eventType) && (
+                            <TicketDeliveryBadge
+                              deliveryMode="online"
+                              isLive={isLive}
+                            />
+                          )}
                         </h4>
                         <p className="event-detail-ticket-desc">
                           {ticket.description || "—"}
@@ -443,9 +516,11 @@ const EventDetailPage = () => {
                       </div>
                       <div className="event-detail-ticket-right">
                         <span className="event-detail-ticket-price">
-                          {ticket.price === 0
-                            ? "Free"
-                            : `₦${Number(ticket.price).toLocaleString()}`}
+                          {ticket.type === "reservation"
+                            ? "Reservation"
+                            : ticket.price === 0
+                              ? "Free"
+                              : `₦${Number(ticket.price).toLocaleString()}`}
                         </span>
                         <div className="event-detail-qty-controls">
                           <button
@@ -482,57 +557,59 @@ const EventDetailPage = () => {
           </div>
         </section>
 
-        <div className="event-detail-checkout-bar">
-          <div className="event-detail-checkout-summary">
-            <span className="event-detail-checkout-count">
-              {totalQty} Ticket{totalQty !== 1 ? "s" : ""}
-            </span>
-            <span className="event-detail-checkout-total">
-              {totalPrice === 0 ? "Free" : `₦${totalPrice.toLocaleString()}`}
-            </span>
-          </div>
-          {(() => {
-            const allSoldOut =
-              event.tickets.length > 0 &&
-              event.tickets.every((t) => (t.sold ?? 0) >= (t.quantity ?? 0));
-            const buttonLabel = allSoldOut
-              ? "Sold Out"
-              : totalPrice === 0
-                ? "Get"
-                : "CheckOut";
-            return (
-              <button
-                type="button"
-                className="event-detail-checkout-btn"
-                disabled={totalQty === 0 || allSoldOut}
-                onClick={() => {
-                  const items = event.tickets
-                    .filter((t) => (quantities[t.id] ?? 0) > 0)
-                    .map((t) => ({
-                      ticketTypeId: t.id,
-                      name: t.name,
-                      quantity: quantities[t.id],
-                      price: t.price,
-                      type: t.type ?? (t.price === 0 ? "free" : "paid"),
-                    }));
+        {!reservationOnly && (
+          <div className="event-detail-checkout-bar">
+            <div className="event-detail-checkout-summary">
+              <span className="event-detail-checkout-count">
+                {totalQty} Ticket{totalQty !== 1 ? "s" : ""}
+              </span>
+              <span className="event-detail-checkout-total">
+                {totalPrice === 0 ? "Free" : `₦${totalPrice.toLocaleString()}`}
+              </span>
+            </div>
+            {(() => {
+              const allSoldOut =
+                event.tickets.length > 0 &&
+                event.tickets.every((t) => (t.sold ?? 0) >= (t.quantity ?? 0));
+              const buttonLabel = allSoldOut
+                ? "Sold Out"
+                : totalPrice === 0
+                  ? "Get"
+                  : "CheckOut";
+              return (
+                <button
+                  type="button"
+                  className="event-detail-checkout-btn"
+                  disabled={totalQty === 0 || allSoldOut}
+                  onClick={() => {
+                    const items = event.tickets
+                      .filter((t) => (quantities[t.id] ?? 0) > 0)
+                      .map((t) => ({
+                        ticketTypeId: t.id,
+                        name: t.name,
+                        quantity: quantities[t.id],
+                        price: t.price,
+                        type: t.type ?? (t.price === 0 ? "free" : "paid"),
+                      }));
 
-                  if (totalQty > 0 && !allSoldOut) {
-                    navigate("/checkout", {
-                      state: {
-                        totalPrice,
-                        eventId: id,
-                        eventTitle: event.title,
-                        items,
-                      },
-                    });
-                  }
-                }}
-              >
-                {buttonLabel}
-              </button>
-            );
-          })()}
-        </div>
+                    if (totalQty > 0 && !allSoldOut) {
+                      navigate("/checkout", {
+                        state: {
+                          totalPrice,
+                          eventId: id,
+                          eventTitle: event.title,
+                          items,
+                        },
+                      });
+                    }
+                  }}
+                >
+                  {buttonLabel}
+                </button>
+              );
+            })()}
+          </div>
+        )}
       </main>
     </div>
   );

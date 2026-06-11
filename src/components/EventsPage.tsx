@@ -3,6 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { shareEvent } from "../utils/shareEvent";
 import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
+import { formatEventDateTag } from "../utils/eventDates";
+import { primaryEventImage, resolveEventImages } from "../utils/eventImages";
+import { isReservationEvent } from "../utils/eventTickets";
+import { EventCardImageCarousel } from "./EventCardImageCarousel";
 import Navbar from "./Navbar";
 import Logo from "./Logo";
 import { EventsGridSkeleton } from "./Skeleton";
@@ -27,7 +31,8 @@ interface Event {
   state: string;
   time: string;
   price: string;
-  image: string;
+  images: string[];
+  isReservation: boolean;
 }
 
 const EventsPage = () => {
@@ -69,6 +74,7 @@ const EventsPage = () => {
             id: string;
             title: string;
             date: string;
+            endDate?: string;
             category?: string;
             location?: string;
             venue?: string;
@@ -77,22 +83,24 @@ const EventsPage = () => {
             startTime?: string;
             price?: number;
             imageUrl?: string;
+            imageUrls?: string[];
+            tickets?: { type?: string; price?: number }[];
           }
           const formattedEvents = data.map((e: ApiEvent) => {
-            const dateObj = new Date(e.date);
-            const month = dateObj.toLocaleString('default', { month: 'short' }).toUpperCase();
-            const day = dateObj.getDate();
+            const tickets = Array.isArray(e.tickets) ? e.tickets : [];
+            const reservation = isReservationEvent(tickets);
 
             return {
               id: e.id,
               title: e.title,
-              date: `${month} ${day}`,
+              date: formatEventDateTag(e.date, e.endDate),
               category: e.category || 'General',
               location: e.location || e.venue || 'TBD',
               state: resolveEventState(e),
               time: e.startTime || 'TBD',
-              price: e.price ? e.price.toLocaleString() : 'Free',
-              image: e.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'
+              price: reservation ? 'Reservation' : e.price ? e.price.toLocaleString() : 'Free',
+              images: resolveEventImages(e.imageUrls, e.imageUrl),
+              isReservation: reservation,
             };
           });
           setEvents(formattedEvents);
@@ -231,7 +239,11 @@ const EventsPage = () => {
                   aria-label={`Open ${event.title}`}
                 >
                   <div className="event-card-image-wrap">
-                    <img src={event.image} alt="" className="event-card-image" />
+                    <EventCardImageCarousel
+                      images={event.images}
+                      alt={event.title}
+                      imageClassName="event-card-image"
+                    />
                     <span className="event-date-tag">{event.date}</span>
                     <span className="event-category-tag">{event.category}</span>
                   </div>
@@ -266,19 +278,21 @@ const EventsPage = () => {
                     <hr className="event-card-hr" />
                     <div className="event-card-bottom">
                       <p className="event-card-price">
-                        <span className="event-card-price-label">Starting from</span>
+                        <span className="event-card-price-label">
+                          {event.isReservation ? "Type" : "Starting from"}
+                        </span>
                         <strong className="event-card-price-amount">
-                          ₦{event.price}
+                          {event.isReservation ? event.price : `₦${event.price}`}
                         </strong>
                       </p>
                       <div className="event-card-cta-row">
                         <Link to={`/event/${event.id}`} className="event-card-cta">
-                          Get Tickets
+                          {event.isReservation ? "Reserve" : "Get Tickets"}
                         </Link>
                         <button
                           type="button"
                           className="event-card-share-btn"
-                          onClick={(e) => handleShareEvent(e, event.id, event.title, event.image)}
+                          onClick={(e) => handleShareEvent(e, event.id, event.title, primaryEventImage(event.images))}
                           title="Share event"
                           aria-label={shareCopiedId === event.id ? "Link copied" : "Share event"}
                         >

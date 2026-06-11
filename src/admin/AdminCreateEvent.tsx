@@ -3,25 +3,59 @@ import { useNavigate } from 'react-router-dom';
 import { apiUrl } from '../api/config';
 import AdminMerchForm from './AdminMerchForm';
 import { merchFormToPayload, getMerchFormError, type MerchFormItem } from '../types/merch';
+import { DEFAULT_EVENT_IMAGE, MAX_EVENT_IMAGES } from '../utils/eventImages';
+import { STREAM_PROVIDERS, type DeliveryMode, type EventFormat } from '../utils/eventStream';
+import { AddTicketTypeControl } from './AddTicketTypeDropdown';
 import './admin.css';
 
 type TicketPool = {
   id: string;
   ticketName: string;
-  ticketType: 'paid' | 'free';
+  ticketType: 'paid' | 'free' | 'reservation';
+  deliveryMode: DeliveryMode;
   price: string;
   quantity: string;
   description: string;
+  contactEmail: string;
+  contactPhone: string;
 };
 
-const defaultPool = (): TicketPool => ({
+const defaultPool = (deliveryMode: DeliveryMode = 'in_person'): TicketPool => ({
   id: crypto.randomUUID(),
   ticketName: 'General Admission',
   ticketType: 'paid',
+  deliveryMode,
   price: '0',
   quantity: '100',
   description: '',
+  contactEmail: '',
+  contactPhone: '',
 });
+
+function validatePools(pools: TicketPool[]): string | null {
+  for (const p of pools) {
+    if (p.ticketType !== 'reservation') continue;
+    const email = p.contactEmail.trim();
+    const phone = p.contactPhone.trim();
+    if (!email && !phone) {
+      return `Contact email or phone is required for reservation ticket "${p.ticketName || 'pool'}".`;
+    }
+  }
+  return null;
+}
+
+function poolsToTicketTypes(pools: TicketPool[], eventType: EventFormat) {
+  return pools.map((p) => ({
+    name: p.ticketName,
+    description: p.description || null,
+    type: p.ticketType,
+    deliveryMode: eventType === 'online' ? 'online' : p.deliveryMode,
+    price: p.ticketType === 'paid' ? parseInt(p.price, 10) || 0 : 0,
+    quantity: parseInt(p.quantity, 10) || 0,
+    contactEmail: p.ticketType === 'reservation' ? p.contactEmail.trim() || null : null,
+    contactPhone: p.ticketType === 'reservation' ? p.contactPhone.trim() || null : null,
+  }));
+}
 
 type Me = { id: number; role?: string } | null;
 
@@ -33,7 +67,7 @@ const AdminCreateEvent = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [imageUploadError, setImageUploadError] = useState('');
   const imageInputRef = useRef<HTMLInputElement | null>(null);
-  const [pools, setPools] = useState<TicketPool[]>([defaultPool()]);
+  const [pools, setPools] = useState<TicketPool[]>([defaultPool('in_person')]);
   const [merchItems, setMerchItems] = useState<MerchFormItem[]>([]);
   const [me, setMe] = useState<Me>(null);
 
@@ -64,18 +98,38 @@ const AdminCreateEvent = () => {
     country: 'Nigeria',
     capacity: '500',
     minTickets: '1',
-    imageUrl: '' 
+    imageUrls: [] as string[],
+    streamUrl: '',
+    streamProvider: 'youtube',
   });
+
+  const eventFormat = (formData.eventType || 'in-person') as EventFormat;
+  const isOnlineOnly = eventFormat === 'online';
+  const isHybrid = eventFormat === 'hybrid';
+  const showStreamFields = isOnlineOnly || isHybrid;
+  const locationRequired = !isOnlineOnly;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'eventType') {
+      const next = value as EventFormat;
+      if (next === 'online') {
+        setPools((prev) => prev.map((p) => ({ ...p, deliveryMode: 'online' as DeliveryMode })));
+      } else if (next === 'in-person') {
+        setPools((prev) => prev.map((p) => ({ ...p, deliveryMode: 'in_person' as DeliveryMode })));
+      }
+    }
   };
 
   const handleImageUpload = async (file: File) => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
       setImageUploadError('You must be logged in to upload an image.');
+      return;
+    }
+    if (formData.imageUrls.length >= MAX_EVENT_IMAGES) {
+      setImageUploadError(`You can upload at most ${MAX_EVENT_IMAGES} images per event.`);
       return;
     }
 
@@ -110,12 +164,27 @@ const AdminCreateEvent = () => {
 
         xhr.send(data);
       });
-      setFormData((prev) => ({ ...prev, imageUrl: payload.imageUrl ?? '' }));
+      const uploadedUrl = payload.imageUrl ?? '';
+      if (!uploadedUrl) {
+        throw new Error('Image upload failed');
+      }
+      setFormData((prev) => ({
+        ...prev,
+        imageUrls: [...prev.imageUrls, uploadedUrl].slice(0, MAX_EVENT_IMAGES),
+      }));
     } catch (e) {
       setImageUploadError(e instanceof Error ? e.message : 'Image upload failed');
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      imageUrls: prev.imageUrls.filter((_, i) => i !== index),
+    }));
+    setImageUploadError('');
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -144,6 +213,12 @@ const AdminCreateEvent = () => {
         return;
       }
 
+      const poolError = validatePools(pools);
+      if (poolError) {
+        setError(poolError);
+        return;
+      }
+
       const merchError = getMerchFormError(merchItems);
       if (merchError) {
         setError(merchError);
@@ -155,29 +230,29 @@ const AdminCreateEvent = () => {
       if (formData.city) locationString += `, ${formData.city}`;
 
       const dateTimeString = `${formData.startDate}T${formData.startTime}:00`;
-      const displayPrice = pools.length > 0 ? pools[0].price : '0';
-
-      const ticketTypes = pools.map((p) => ({
-        name: p.ticketName,
-        description: p.description || null,
-        type: p.ticketType,
-        price: p.ticketType === 'free' ? 0 : parseInt(p.price, 10) || 0,
-        quantity: parseInt(p.quantity, 10) || 0,
-      }));
+      const firstPaid = pools.find((p) => p.ticketType === 'paid');
+      const displayPrice = firstPaid ? firstPaid.price : '0';
+      const ticketTypes = poolsToTicketTypes(pools, eventFormat);
 
       const payload: Record<string, unknown> = {
         title: formData.title,
         description: formData.description,
         date: dateTimeString,
-        venue: formData.venue,
-        location: locationString,
+        endDate: formData.endDate || formData.startDate,
+        endTime: formData.endTime || formData.startTime,
+        venue: formData.venue || (isOnlineOnly ? 'Online' : ''),
+        location: locationString || (isOnlineOnly ? 'Online' : locationString),
         city: formData.city || undefined,
         state: formData.state || undefined,
         category: formData.category,
+        eventType: eventFormat,
         startTime: formData.startTime,
         price: displayPrice,
         currency: 'NGN',
-        imageUrl: formData.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
+        imageUrls: formData.imageUrls,
+        imageUrl: formData.imageUrls[0] || DEFAULT_EVENT_IMAGE,
+        streamUrl: showStreamFields ? formData.streamUrl.trim() || undefined : undefined,
+        streamProvider: showStreamFields ? formData.streamProvider : undefined,
         ticketTypes,
       };
       if (merchPayload.length > 0) {
@@ -376,52 +451,86 @@ const AdminCreateEvent = () => {
           </div>
         </section>
 
+        {showStreamFields && (
+          <section className="admin-section">
+            <h2 className="admin-section-title">
+              <span className="admin-section-icon" aria-hidden>📡</span>
+              Online stream
+            </h2>
+            <p className="admin-input-hint">
+              Configure your YouTube, Twitch, or embed URL here. Go live from the Online section in the admin sidebar.
+            </p>
+            <label className="admin-label">Platform</label>
+            <select
+              name="streamProvider"
+              className="admin-select"
+              value={formData.streamProvider}
+              onChange={handleChange}
+            >
+              {STREAM_PROVIDERS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <label className="admin-label">Stream URL</label>
+            <input
+              type="url"
+              name="streamUrl"
+              className="admin-input"
+              placeholder="https://www.youtube.com/watch?v=…"
+              value={formData.streamUrl}
+              onChange={handleChange}
+            />
+          </section>
+        )}
+
         {/* Location */}
         <section className="admin-section">
           <h2 className="admin-section-title">
             <span className="admin-section-icon" aria-hidden>📍</span>
-            Location
+            {isOnlineOnly ? 'Location (optional)' : 'Location'}
           </h2>
-          <label className="admin-label">Venue Name *</label>
+          <label className="admin-label">Venue Name {locationRequired ? '*' : ''}</label>
           <input 
             type="text" 
             name="venue"
             className="admin-input" 
-            required 
+            required={locationRequired}
             value={formData.venue}
             onChange={handleChange}
           />
-          <label className="admin-label">Address *</label>
+          <label className="admin-label">Address {locationRequired ? '*' : ''}</label>
           <input 
             type="text" 
             name="address"
             className="admin-input" 
             placeholder="Street address" 
-            required 
+            required={locationRequired}
             value={formData.address}
             onChange={handleChange}
           />
           <div className="admin-form-row">
             <div>
-              <label className="admin-label">City *</label>
+              <label className="admin-label">City {locationRequired ? '*' : ''}</label>
               <input 
                 type="text" 
                 name="city"
                 className="admin-input" 
                 placeholder="City" 
-                required 
+                required={locationRequired}
                 value={formData.city}
                 onChange={handleChange}
               />
             </div>
             <div>
-              <label className="admin-label">State *</label>
+              <label className="admin-label">State {locationRequired ? '*' : ''}</label>
               <input 
                 type="text" 
                 name="state"
                 className="admin-input" 
                 placeholder="State" 
-                required 
+                required={locationRequired}
                 value={formData.state}
                 onChange={handleChange}
               />
@@ -450,13 +559,12 @@ const AdminCreateEvent = () => {
           <div className="admin-pools-wrap">
             <div className="admin-pools-heading">
               <h3 className="admin-pools-title">Ticket Types</h3>
-              <button
-                type="button"
-                className="admin-btn-add-ticket"
-                onClick={() => setPools((prev) => [...prev, defaultPool()])}
-              >
-                + Add Ticket Type
-              </button>
+              <AddTicketTypeControl
+                eventFormat={eventFormat}
+                onAdd={(deliveryMode) =>
+                  setPools((prev) => [...prev, defaultPool(deliveryMode)])
+                }
+              />
             </div>
             <div className="admin-pools-list">
               {pools.map((pool) => (
@@ -491,36 +599,78 @@ const AdminCreateEvent = () => {
                       <select
                         className="admin-select"
                         value={pool.ticketType}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const next = e.target.value as TicketPool['ticketType'];
                           setPools((prev) =>
                             prev.map((p) =>
                               p.id === pool.id
-                                ? { ...p, ticketType: e.target.value as 'paid' | 'free', price: e.target.value === 'free' ? '0' : p.price }
+                                ? {
+                                    ...p,
+                                    ticketType: next,
+                                    price: next === 'paid' ? p.price : '0',
+                                  }
                                 : p
                             )
-                          )
-                        }
+                          );
+                        }}
                       >
                         <option value="paid">Paid</option>
                         <option value="free">Free</option>
+                        <option value="reservation">Reservation</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="admin-label">Price (₦) *</label>
-                      <input
-                        type="number"
-                        className="admin-input"
-                        value={pool.price}
-                        onChange={(e) =>
-                          setPools((prev) =>
-                            prev.map((p) => (p.id === pool.id ? { ...p, price: e.target.value } : p))
-                          )
-                        }
-                        min={0}
-                        required={pool.ticketType === 'paid'}
-                        disabled={pool.ticketType === 'free'}
-                      />
-                    </div>
+                    {pool.ticketType === 'paid' ? (
+                      <div>
+                        <label className="admin-label">Price (₦) *</label>
+                        <input
+                          type="number"
+                          className="admin-input"
+                          value={pool.price}
+                          onChange={(e) =>
+                            setPools((prev) =>
+                              prev.map((p) => (p.id === pool.id ? { ...p, price: e.target.value } : p))
+                            )
+                          }
+                          min={0}
+                          required
+                        />
+                      </div>
+                    ) : pool.ticketType === 'reservation' ? (
+                      <div>
+                        <label className="admin-label">Contact email</label>
+                        <input
+                          type="email"
+                          className="admin-input"
+                          value={pool.contactEmail}
+                          onChange={(e) =>
+                            setPools((prev) =>
+                              prev.map((p) => (p.id === pool.id ? { ...p, contactEmail: e.target.value } : p))
+                            )
+                          }
+                          placeholder="organizer@example.com"
+                        />
+                      </div>
+                    ) : (
+                      <div aria-hidden />
+                    )}
+                    {isHybrid && (
+                      <div>
+                        <label className="admin-label">Access *</label>
+                        <select
+                          className="admin-select"
+                          value={pool.deliveryMode}
+                          onChange={(e) => {
+                            const deliveryMode = e.target.value as DeliveryMode;
+                            setPools((prev) =>
+                              prev.map((p) => (p.id === pool.id ? { ...p, deliveryMode } : p)),
+                            );
+                          }}
+                        >
+                          <option value="in_person">In person</option>
+                          <option value="online">Online</option>
+                        </select>
+                      </div>
+                    )}
                     <div>
                       <label className="admin-label">Quantity *</label>
                       <input
@@ -537,6 +687,29 @@ const AdminCreateEvent = () => {
                       />
                     </div>
                   </div>
+                  {pool.ticketType === 'reservation' && (
+                    <div className="admin-form-row">
+                      <div>
+                        <label className="admin-label">Contact phone</label>
+                        <input
+                          type="tel"
+                          className="admin-input"
+                          value={pool.contactPhone}
+                          onChange={(e) =>
+                            setPools((prev) =>
+                              prev.map((p) => (p.id === pool.id ? { ...p, contactPhone: e.target.value } : p))
+                            )
+                          }
+                          placeholder="+234 800 000 0000"
+                        />
+                      </div>
+                      <div>
+                        <p className="admin-input-hint" style={{ marginTop: '1.65rem' }}>
+                          Provide email and/or phone. Attendees will use these to reserve.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -550,15 +723,21 @@ const AdminCreateEvent = () => {
             Event Media
           </h2>
           <p className="admin-input-hint">
-            Upload any image type below.
+            Upload up to {MAX_EVENT_IMAGES} images. The first image is used as the cover.
           </p>
           <div className="admin-upload-zone">
             <div className="admin-upload-icon">🖼</div>
-            <p>{uploadingImage ? 'Uploading image...' : 'Select an image file (PNG, JPG, WEBP, GIF, SVG, etc.)'}</p>
+            <p>
+              {uploadingImage
+                ? 'Uploading image...'
+                : formData.imageUrls.length >= MAX_EVENT_IMAGES
+                  ? `Maximum of ${MAX_EVENT_IMAGES} images reached`
+                  : `Select an image file (${formData.imageUrls.length}/${MAX_EVENT_IMAGES} uploaded)`}
+            </p>
             <button
               type="button"
               className="admin-btn-primary"
-              disabled={uploadingImage}
+              disabled={uploadingImage || formData.imageUrls.length >= MAX_EVENT_IMAGES}
               onClick={() => imageInputRef.current?.click()}
             >
               {uploadingImage ? 'Uploading...' : 'Upload Image'}
@@ -578,10 +757,23 @@ const AdminCreateEvent = () => {
               }}
             />
           </div>
-          {formData.imageUrl && !uploadingImage && (
-            <p className="admin-input-hint" style={{ color: '#86efac' }}>
-              Image uploaded successfully.
-            </p>
+          {formData.imageUrls.length > 0 && (
+            <div className="admin-event-images-grid">
+              {formData.imageUrls.map((url, index) => (
+                <div key={`${url}-${index}`} className="admin-event-image-thumb">
+                  <img src={url} alt={`Event image ${index + 1}`} />
+                  <button
+                    type="button"
+                    className="admin-event-image-remove"
+                    onClick={() => handleRemoveImage(index)}
+                    aria-label={`Remove image ${index + 1}`}
+                  >
+                    ✕
+                  </button>
+                  {index === 0 && <span className="admin-event-image-cover">Cover</span>}
+                </div>
+              ))}
+            </div>
           )}
           {uploadingImage && (
             <div className="admin-upload-progress-wrap">

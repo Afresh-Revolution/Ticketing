@@ -100,7 +100,8 @@
   transition: transform 0.5s var(--lp-ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
-.gt-card:hover .gt-card-img {
+.gt-card:hover .gt-card-img,
+.gt-card:hover .event-card-carousel-img {
   transform: scale(1.06);
 }
 
