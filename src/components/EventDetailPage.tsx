@@ -498,12 +498,9 @@ const EventDetailPage = () => {
                             />
                           )}
                         </h4>
-                        <p className="event-detail-ticket-desc">
-                          {ticket.description || "—"}
-                        </p>
-                        <span className="event-detail-ticket-count">
-                          {sold}/{total}
-                        </span>
+                        {ticket.description ? (
+                          <p className="event-detail-ticket-desc">{ticket.description}</p>
+                        ) : null}
                         {isSoldOut ? (
                           <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">
                             Sold Out
