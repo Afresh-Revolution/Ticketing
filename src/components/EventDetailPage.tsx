@@ -310,11 +310,6 @@ const EventDetailPage = () => {
             >
               <img src={event.heroImage} alt={event.title} />
             </button>
-            {merch.length > 0 && id && (
-              <div className="event-detail-merch-slot event-detail-merch-slot--desktop">
-                {renderMerchSection()}
-              </div>
-            )}
           </div>
 
           <div className="event-detail-info-col">
@@ -425,11 +420,6 @@ const EventDetailPage = () => {
                 </span>
               </div>
             </div>
-            {merch.length > 0 && id && (
-              <div className="event-detail-merch-slot event-detail-merch-slot--mobile">
-                {renderMerchSection()}
-              </div>
-            )}
           </div>
         </div>
 
@@ -606,6 +596,10 @@ const EventDetailPage = () => {
               );
             })()}
           </div>
+        )}
+
+        {merch.length > 0 && id && (
+          <div className="event-detail-merch-slot">{renderMerchSection()}</div>
         )}
       </main>
     </div>

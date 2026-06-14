@@ -139,46 +139,21 @@
   gap: 1.25rem;
 }
 
-/* Merch: under poster on desktop, under organizer on mobile */
-.event-detail-merch-slot--desktop {
-  display: block;
+/* Merch: below ticket checkout bar */
+.event-detail-merch-slot {
+  margin-top: 1.5rem;
 }
 
-.event-detail-merch-slot--mobile {
-  display: none;
-}
-
-.event-detail-merch-slot--desktop .event-merch-section {
+.event-detail-merch-slot .event-merch-section {
   margin-top: 0;
 }
 
-.event-detail-merch-slot--desktop .event-merch-cards {
-  grid-template-columns: 1fr;
+.event-detail-tickets + .event-detail-merch-slot {
+  margin-top: 1.5rem;
 }
 
-.event-detail-merch-slot--desktop .event-merch-card {
-  background: linear-gradient(
-    165deg,
-    rgba(45, 20, 89, 0.76),
-    rgba(17, 8, 38, 0.92)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 1.25rem;
-}
-
-@media (max-width: 768px) {
-  .event-detail-merch-slot--desktop {
-    display: none;
-  }
-
-  .event-detail-merch-slot--mobile {
-    display: block;
-  }
-
-  .event-detail-merch-slot--mobile .event-merch-section {
-    margin-top: 1rem;
-  }
+.event-detail-checkout-bar + .event-detail-merch-slot {
+  margin-top: 1.25rem;
 }
 
 .event-detail-poster {
