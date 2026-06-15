@@ -297,7 +297,9 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                 placeholder="Describe this merch item"
               />
 
-              {(merch.availability === 'online' || merch.availability === 'both') && (
+              {(merch.availability === 'online' ||
+                merch.availability === 'at_event' ||
+                merch.availability === 'both') && (
                 <>
                   <label className="admin-label admin-merch-checkbox-label">
                     <input
@@ -369,7 +371,10 @@ const AdminMerchForm = ({ items, onChange }: Props) => {
                       }}
                     />
                   </div>
-                  {!merch.sameAmount && (merch.availability === 'online' || merch.availability === 'both') && (
+                  {!merch.sameAmount &&
+                    (merch.availability === 'online' ||
+                      merch.availability === 'at_event' ||
+                      merch.availability === 'both') && (
                     <div className="admin-form-row">
                       <div>
                         <label className="admin-label">Price (₦)</label>

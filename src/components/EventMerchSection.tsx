@@ -17,6 +17,22 @@ type Props = {
 
 const CAROUSEL_MS = 3000;
 
+function formatNaira(amount: number): string {
+  return `₦${Math.max(0, Number(amount) || 0).toLocaleString('en-NG')}`;
+}
+
+function formatMerchAmount(merch: EventMerchDto): string | null {
+  const price = getMerchDisplayPrice(merch);
+  if (price <= 0) return null;
+  if (merch.sameAmount) return formatNaira(price);
+  const prices = merch.images
+    .map((img) => img.unitPrice)
+    .filter((p): p is number => p != null && p > 0);
+  const unique = [...new Set(prices)];
+  if (unique.length <= 1) return formatNaira(price);
+  return `From ${formatNaira(price)}`;
+}
+
 function MerchCarousel({
   images,
   merch,
@@ -62,7 +78,7 @@ function MerchCarousel({
       <div className="event-merch-carousel-meta">
         <p className="event-merch-carousel-desc">{merch.description}</p>
         <span className="event-merch-carousel-stock">
-          {current.quantityAvailable} left · ₦{Number(price).toLocaleString()}
+          {current.quantityAvailable} left · {formatNaira(price)}
         </span>
         {sorted.length > 1 && (
           <div className="event-merch-carousel-dots">
@@ -228,7 +244,9 @@ const EventMerchSection = ({ eventId, eventTitle, merch }: Props) => {
         <div className="event-merch-block">
           <h3 className="event-merch-subheading">At the event</h3>
           <div className="event-merch-cards">
-            {atEvent.map((m) => (
+            {atEvent.map((m) => {
+              const amountLabel = formatMerchAmount(m);
+              return (
               <article key={m.id} className="event-merch-card event-merch-card-at-event">
                 {m.images.length > 0 && (
                   <div className="event-merch-static-images">
@@ -246,9 +264,13 @@ const EventMerchSection = ({ eventId, eventTitle, merch }: Props) => {
                   </div>
                 )}
                 <p className="event-merch-card-desc">{m.description}</p>
+                {amountLabel && (
+                  <p className="event-merch-card-amount">{amountLabel}</p>
+                )}
                 <AtEventSaveForm eventId={eventId} merch={m} />
               </article>
-            ))}
+            );
+            })}
           </div>
         </div>
       )}

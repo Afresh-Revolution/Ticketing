@@ -109,7 +109,12 @@ export function isMerchItemComplete(m: MerchFormItem): boolean {
   if (!m.description.trim()) return false;
   if (m.types.length === 0) return false;
   if (m.types.includes('other') && !m.customType.trim()) return false;
-  if ((m.availability === 'online' || m.availability === 'both') && m.sameAmount) {
+  if (
+    (m.availability === 'online' ||
+      m.availability === 'at_event' ||
+      m.availability === 'both') &&
+    m.sameAmount
+  ) {
     if (!String(m.sharedAmount).trim() || !String(m.sharedQuantity).trim()) return false;
   }
   return true;
