@@ -518,6 +518,35 @@ select.admin-select option:checked {
   background: var(--admin-input);
 }
 
+.admin-btn-reject {
+  background: rgba(220, 38, 38, 0.16);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.admin-btn-reject:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.3);
+  border-color: rgba(220, 38, 38, 0.65);
+}
+
+.admin-btn-reject:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-merch-save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Upload zone */
 .admin-upload-zone {
   border: 2px dashed var(--admin-border);
