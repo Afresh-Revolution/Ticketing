@@ -547,6 +547,37 @@ select.admin-select option:checked {
   gap: 0.5rem;
 }
 
+.admin-merch-save-tabs {
+  margin-bottom: 0.75rem;
+}
+
+.admin-merch-save-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.admin-merch-save-status-pending {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.admin-merch-save-status-approved {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.admin-merch-save-status-rejected {
+  background: rgba(220, 38, 38, 0.16);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+}
+
 /* Upload zone */
 .admin-upload-zone {
   border: 2px dashed var(--admin-border);
