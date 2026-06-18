@@ -36,6 +36,15 @@ const SAVE_STATUS_ORDER: Record<string, number> = {
   rejected: 2,
 };
 
+type SaveStatusFilter = 'all' | 'pending' | 'approved' | 'rejected';
+
+const SAVE_STATUS_TABS: { id: SaveStatusFilter; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'pending', label: 'Pending' },
+  { id: 'approved', label: 'Approved' },
+  { id: 'rejected', label: 'Rejected' },
+];
+
 function formatExportDateTime(value: string): string {
   if (!value) return '';
   const d = new Date(value);
@@ -62,6 +71,13 @@ function statusSelectClass(status: string): string {
   return 'admin-sales-status-select admin-sales-status-pending';
 }
 
+function saveStatusClass(status: string): string {
+  const s = status.toLowerCase();
+  if (s === 'approved') return 'admin-merch-save-status admin-merch-save-status-approved';
+  if (s === 'rejected') return 'admin-merch-save-status admin-merch-save-status-rejected';
+  return 'admin-merch-save-status admin-merch-save-status-pending';
+}
+
 const AdminMerchPanel = () => {
   const [orders, setOrders] = useState<MerchOrder[]>([]);
   const [saves, setSaves] = useState<SaveRequest[]>([]);
@@ -72,6 +88,7 @@ const AdminMerchPanel = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<MerchOrder | null>(null);
   const [deleteSaveConfirm, setDeleteSaveConfirm] = useState<SaveRequest | null>(null);
   const [saveSearch, setSaveSearch] = useState('');
+  const [saveStatusFilter, setSaveStatusFilter] = useState<SaveStatusFilter>('all');
 
   const headers = (): HeadersInit => {
     const token = localStorage.getItem('adminToken');
@@ -244,9 +261,25 @@ const AdminMerchPanel = () => {
     URL.revokeObjectURL(url);
   };
 
+  const saveStatusCounts = useMemo(() => {
+    const counts = { all: saves.length, pending: 0, approved: 0, rejected: 0 };
+    for (const s of saves) {
+      const status = s.status.toLowerCase();
+      if (status === 'pending') counts.pending += 1;
+      else if (status === 'approved') counts.approved += 1;
+      else if (status === 'rejected') counts.rejected += 1;
+    }
+    return counts;
+  }, [saves]);
+
   const filteredSaves = useMemo(
-    () => saves.filter((s) => matchesSaveSearch(s, saveSearch.trim())),
-    [saves, saveSearch]
+    () =>
+      saves.filter((s) => {
+        const status = s.status.toLowerCase();
+        if (saveStatusFilter !== 'all' && status !== saveStatusFilter) return false;
+        return matchesSaveSearch(s, saveSearch.trim());
+      }),
+    [saves, saveSearch, saveStatusFilter]
   );
 
   if (loading && orders.length === 0 && saves.length === 0) {
@@ -331,6 +364,21 @@ const AdminMerchPanel = () => {
               Download Excel
             </button>
           </div>
+          <div className="withdraw-tabs admin-merch-save-tabs">
+            {SAVE_STATUS_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`withdraw-tab ${saveStatusFilter === tab.id ? 'withdraw-tab-active' : ''}`}
+                onClick={() => setSaveStatusFilter(tab.id)}
+              >
+                {tab.label}
+                {saveStatusCounts[tab.id] > 0 && (
+                  <span className="withdraw-tab-badge">{saveStatusCounts[tab.id]}</span>
+                )}
+              </button>
+            ))}
+          </div>
           <input
             type="search"
             className="admin-input"
@@ -341,7 +389,13 @@ const AdminMerchPanel = () => {
             aria-label="Search merch save requests"
           />
           {filteredSaves.length === 0 ? (
-            <div className="admin-empty-state">No merch save requests match your search.</div>
+            <div className="admin-empty-state">
+              {saveSearch.trim()
+                ? 'No merch save requests match your search.'
+                : saveStatusFilter === 'all'
+                  ? 'No merch save requests yet.'
+                  : `No ${saveStatusFilter} merch save requests.`}
+            </div>
           ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">
@@ -363,7 +417,11 @@ const AdminMerchPanel = () => {
                       {s.fullName}
                       <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{s.email}</div>
                     </td>
-                    <td style={{ textTransform: 'capitalize' }}>{s.status}</td>
+                    <td>
+                      <span className={saveStatusClass(s.status)} style={{ textTransform: 'capitalize' }}>
+                        {s.status}
+                      </span>
+                    </td>
                     <td>
                       <div className="admin-merch-save-actions">
                       {s.status === 'pending' && (
