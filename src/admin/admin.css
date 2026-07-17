@@ -3934,3 +3934,24 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
   margin: 0.5rem 0 1rem;
   padding-left: 1.25rem;
 }
+
+.admin-discount-tiers {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 12px;
+  background: rgba(168, 85, 247, 0.06);
+}
+
+.admin-discount-tiers .admin-pool-card-header {
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.admin-discount-tiers .admin-form-row {
+  align-items: end;
+}
+
+.admin-discount-tiers .admin-pool-remove {
+  margin-bottom: 0.15rem;
+}

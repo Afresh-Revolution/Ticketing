@@ -11,7 +11,13 @@ import {
 } from '../types/merch';
 import { MAX_EVENT_IMAGES, parseStoredEventImages } from '../utils/eventImages';
 import { STREAM_PROVIDERS, type DeliveryMode, type EventFormat, normalizeDeliveryMode } from '../utils/eventStream';
+import {
+  normalizeDiscountTiers,
+  validateDiscountTiers,
+  type TicketDiscountTier,
+} from '../utils/ticketDiscounts';
 import { AddTicketTypeControl } from './AddTicketTypeDropdown';
+import TicketDiscountTierEditor from './TicketDiscountTierEditor';
 import './admin.css';
 
 type TicketPool = {
@@ -24,6 +30,7 @@ type TicketPool = {
   description: string;
   contactEmail: string;
   contactPhone: string;
+  discountTiers: TicketDiscountTier[];
 };
 
 type EventTicket = {
@@ -37,6 +44,7 @@ type EventTicket = {
   deliveryMode?: string;
   contactEmail?: string | null;
   contactPhone?: string | null;
+  discountTiers?: TicketDiscountTier[];
 };
 
 type EventApiResponse = {
@@ -74,13 +82,17 @@ const defaultPool = (deliveryMode: DeliveryMode = 'in_person'): TicketPool => ({
   description: '',
   contactEmail: '',
   contactPhone: '',
+  discountTiers: [],
 });
 
 function validatePools(pools: TicketPool[]): string | null {
   for (const p of pools) {
-    if (p.ticketType !== 'reservation') continue;
-    if (!p.contactEmail.trim() && !p.contactPhone.trim()) {
+    if (p.ticketType === 'reservation' && !p.contactEmail.trim() && !p.contactPhone.trim()) {
       return `Contact email or phone is required for reservation ticket "${p.ticketName || 'pool'}".`;
+    }
+    if (p.ticketType === 'paid') {
+      const discountError = validateDiscountTiers(p.discountTiers);
+      if (discountError) return `${p.ticketName || 'Ticket'}: ${discountError}`;
     }
   }
   return null;
@@ -97,6 +109,8 @@ function poolsToTicketTypes(pools: TicketPool[], eventType: EventFormat) {
     quantity: parseInt(p.quantity, 10) || 0,
     contactEmail: p.ticketType === 'reservation' ? p.contactEmail.trim() || null : null,
     contactPhone: p.ticketType === 'reservation' ? p.contactPhone.trim() || null : null,
+    discountTiers:
+      p.ticketType === 'paid' ? normalizeDiscountTiers(p.discountTiers) : [],
   }));
 }
 
@@ -257,6 +271,7 @@ const AdminEditEvent = () => {
             description: t.description ?? '',
             contactEmail: t.contactEmail ?? '',
             contactPhone: t.contactPhone ?? '',
+            discountTiers: normalizeDiscountTiers(t.discountTiers),
           }))
         );
       } else {
@@ -868,6 +883,16 @@ const AdminEditEvent = () => {
                         </p>
                       </div>
                     </div>
+                  )}
+                  {pool.ticketType === 'paid' && (
+                    <TicketDiscountTierEditor
+                      tiers={pool.discountTiers}
+                      onChange={(discountTiers) =>
+                        setPools((prev) =>
+                          prev.map((p) => (p.id === pool.id ? { ...p, discountTiers } : p))
+                        )
+                      }
+                    />
                   )}
                 </div>
               ))}

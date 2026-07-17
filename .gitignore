@@ -17,6 +17,9 @@ dist-ssr
 !.env.example
 *.tsbuildinfo
 
+# Backend is maintained as a separate repository
+/Ticketing-back/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
