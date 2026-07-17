@@ -39,6 +39,7 @@
   padding: calc(0.35rem + env(safe-area-inset-top, 0px)) 1.5rem 0.5rem;
   background: rgba(8, 4, 24, 0.85);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--admin-border);
 }
 
@@ -89,6 +90,7 @@
   background: rgba(8, 4, 24, 0.72);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--admin-border);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .admin-btn {
@@ -190,7 +192,8 @@
   border-right: 1px solid var(--admin-border);
   padding: 1.5rem 0 0.5rem 0;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
+  -webkit-backdrop-filter: blur(8px);
+  }
 
 .admin-nav {
   display: flex;
@@ -1959,6 +1962,7 @@ select.admin-select option:checked {
 .admin-login-card {
   background: rgba(8, 4, 24, 0.72);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--admin-border);
   border-radius: 20px;
   padding: 2.5rem;
@@ -2255,6 +2259,7 @@ select.admin-select option:checked {
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
