@@ -281,6 +281,11 @@
   font-size: 1.2rem;
 }
 
+.event-detail-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .event-detail-card-title {
   font-size: 0.95rem;
   font-weight: 600;
