@@ -419,8 +419,10 @@ const EventDetailPage = () => {
               <span className="event-detail-card-icon" aria-hidden>
                 Q
               </span>
-              <h3 className="event-detail-card-title">About the Event</h3>
-              <p className="event-detail-card-text">{event.about}</p>
+              <div className="event-detail-card-content">
+                <h3 className="event-detail-card-title">About the Event</h3>
+                <p className="event-detail-card-text">{event.about}</p>
+              </div>
             </div>
             <div className="event-detail-card event-detail-card-organizer">
               <span
