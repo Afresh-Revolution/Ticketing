@@ -5,6 +5,8 @@ import "./CheckoutPage.css";
 
 interface CheckoutState {
   totalPrice?: number;
+  originalPrice?: number;
+  quantityDiscount?: number;
   eventId?: string;
   eventTitle?: string;
   items?: Array<{
@@ -153,6 +155,8 @@ const CheckoutPage = () => {
       JSON.stringify({
         checkoutState: {
           totalPrice,
+          originalPrice: state.originalPrice,
+          quantityDiscount: state.quantityDiscount,
           eventId: state.eventId,
           eventTitle: state.eventTitle,
           items: state.items,
@@ -685,9 +689,22 @@ const CheckoutPage = () => {
 
             {couponPreview && (
               <div className="checkout-summary-row">
-                <span>Discount</span>
+                <span>Coupon discount</span>
                 <span>-₦{toSafeNumber(couponPreview.discountAmount).toLocaleString()}</span>
               </div>
+            )}
+
+            {toSafeNumber(state.quantityDiscount) > 0 && (
+              <>
+                <div className="checkout-summary-row">
+                  <span>Ticket subtotal</span>
+                  <span>₦{toSafeNumber(state.originalPrice).toLocaleString()}</span>
+                </div>
+                <div className="checkout-summary-row">
+                  <span>Quantity discount</span>
+                  <span>-₦{toSafeNumber(state.quantityDiscount).toLocaleString()}</span>
+                </div>
+              </>
             )}
 
             <div className="checkout-summary-row checkout-summary-row-total">

@@ -5,7 +5,13 @@ import AdminMerchForm from './AdminMerchForm';
 import { merchFormToPayload, getMerchFormError, type MerchFormItem } from '../types/merch';
 import { DEFAULT_EVENT_IMAGE, MAX_EVENT_IMAGES } from '../utils/eventImages';
 import { STREAM_PROVIDERS, type DeliveryMode, type EventFormat } from '../utils/eventStream';
+import {
+  normalizeDiscountTiers,
+  validateDiscountTiers,
+  type TicketDiscountTier,
+} from '../utils/ticketDiscounts';
 import { AddTicketTypeControl } from './AddTicketTypeDropdown';
+import TicketDiscountTierEditor from './TicketDiscountTierEditor';
 import './admin.css';
 
 type TicketPool = {
@@ -18,6 +24,7 @@ type TicketPool = {
   description: string;
   contactEmail: string;
   contactPhone: string;
+  discountTiers: TicketDiscountTier[];
 };
 
 const defaultPool = (deliveryMode: DeliveryMode = 'in_person'): TicketPool => ({
@@ -30,15 +37,23 @@ const defaultPool = (deliveryMode: DeliveryMode = 'in_person'): TicketPool => ({
   description: '',
   contactEmail: '',
   contactPhone: '',
+  discountTiers: [],
 });
 
 function validatePools(pools: TicketPool[]): string | null {
   for (const p of pools) {
-    if (p.ticketType !== 'reservation') continue;
-    const email = p.contactEmail.trim();
-    const phone = p.contactPhone.trim();
-    if (!email && !phone) {
-      return `Contact email or phone is required for reservation ticket "${p.ticketName || 'pool'}".`;
+    if (p.ticketType === 'reservation') {
+      const email = p.contactEmail.trim();
+      const phone = p.contactPhone.trim();
+      if (!email && !phone) {
+        return `Contact email or phone is required for reservation ticket "${p.ticketName || 'pool'}".`;
+      }
+    }
+    if (p.ticketType === 'paid') {
+      const discountError = validateDiscountTiers(p.discountTiers);
+      if (discountError) {
+        return `${p.ticketName || 'Ticket'}: ${discountError}`;
+      }
     }
   }
   return null;
@@ -54,6 +69,8 @@ function poolsToTicketTypes(pools: TicketPool[], eventType: EventFormat) {
     quantity: parseInt(p.quantity, 10) || 0,
     contactEmail: p.ticketType === 'reservation' ? p.contactEmail.trim() || null : null,
     contactPhone: p.ticketType === 'reservation' ? p.contactPhone.trim() || null : null,
+    discountTiers:
+      p.ticketType === 'paid' ? normalizeDiscountTiers(p.discountTiers) : [],
   }));
 }
 
@@ -709,6 +726,16 @@ const AdminCreateEvent = () => {
                         </p>
                       </div>
                     </div>
+                  )}
+                  {pool.ticketType === 'paid' && (
+                    <TicketDiscountTierEditor
+                      tiers={pool.discountTiers}
+                      onChange={(discountTiers) =>
+                        setPools((prev) =>
+                          prev.map((p) => (p.id === pool.id ? { ...p, discountTiers } : p))
+                        )
+                      }
+                    />
                   )}
                 </div>
               ))}

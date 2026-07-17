@@ -6,6 +6,11 @@ import { formatEventDateLong } from "../utils/eventDates";
 import { fetchLiveStatus } from "../api/stream";
 import { isOnlineTicket, normalizeEventFormat } from "../utils/eventStream";
 import { isReservationEvent, normalizeTicketType } from "../utils/eventTickets";
+import {
+  calculateTicketLinePrice,
+  normalizeDiscountTiers,
+  type TicketDiscountTier,
+} from "../utils/ticketDiscounts";
 import { TicketDeliveryBadge } from "./TicketDeliveryBadge";
 import Navbar from "./Navbar";
 import { EventDetailSkeleton } from "./Skeleton";
@@ -27,6 +32,7 @@ interface TicketType {
   deliveryMode?: "in_person" | "online";
   contactEmail?: string | null;
   contactPhone?: string | null;
+  discountTiers: TicketDiscountTier[];
 }
 
 interface EventDetail {
@@ -110,6 +116,7 @@ const EventDetailPage = () => {
             deliveryMode?: string;
             contactEmail?: string | null;
             contactPhone?: string | null;
+            discountTiers?: TicketDiscountTier[];
           }) => ({
             id: t.id,
             name: t.name ?? t.ticketName ?? "Ticket",
@@ -123,6 +130,7 @@ const EventDetailPage = () => {
               : "in_person") as TicketType["deliveryMode"],
             contactEmail: t.contactEmail ?? null,
             contactPhone: t.contactPhone ?? null,
+            discountTiers: normalizeDiscountTiers(t.discountTiers),
           }),
         );
 
@@ -209,16 +217,26 @@ const EventDetailPage = () => {
     };
   }, [id, event]);
 
-  const { totalQty, totalPrice } = useMemo(() => {
-    if (!event) return { totalQty: 0, totalPrice: 0 };
+  const { totalQty, totalPrice, originalPrice, quantityDiscount } = useMemo(() => {
+    if (!event) {
+      return { totalQty: 0, totalPrice: 0, originalPrice: 0, quantityDiscount: 0 };
+    }
     let qty = 0;
-    let price = 0;
+    let original = 0;
+    let final = 0;
     event.tickets.forEach((t) => {
       const n = quantities[t.id] ?? 0;
+      const linePrice = calculateTicketLinePrice(t.price, n, t.discountTiers);
       qty += n;
-      price += n * t.price;
+      original += linePrice.originalAmount;
+      final += linePrice.finalAmount;
     });
-    return { totalQty: qty, totalPrice: price };
+    return {
+      totalQty: qty,
+      totalPrice: final,
+      originalPrice: original,
+      quantityDiscount: original - final,
+    };
   }, [event, quantities]);
 
   const adjustQty = (ticketId: string, delta: number) => {
@@ -491,6 +509,15 @@ const EventDetailPage = () => {
                         {ticket.description ? (
                           <p className="event-detail-ticket-desc">{ticket.description}</p>
                         ) : null}
+                        {ticket.discountTiers.length > 0 && (
+                          <div className="event-detail-ticket-discounts">
+                            {ticket.discountTiers.map((tier) => (
+                              <span key={tier.minimumQuantity}>
+                                Buy {tier.minimumQuantity}+, save {tier.discountPercent}%
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {isSoldOut ? (
                           <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">
                             Sold Out
@@ -553,6 +580,11 @@ const EventDetailPage = () => {
               <span className="event-detail-checkout-total">
                 {totalPrice === 0 ? "Free" : `₦${totalPrice.toLocaleString()}`}
               </span>
+              {quantityDiscount > 0 && (
+                <span className="event-detail-checkout-saving">
+                  Save ₦{quantityDiscount.toLocaleString()}
+                </span>
+              )}
             </div>
             {(() => {
               const allSoldOut =
@@ -583,6 +615,8 @@ const EventDetailPage = () => {
                       navigate("/checkout", {
                         state: {
                           totalPrice,
+                          originalPrice,
+                          quantityDiscount,
                           eventId: id,
                           eventTitle: event.title,
                           items,

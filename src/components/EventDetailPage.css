@@ -723,3 +723,26 @@
     margin-left: auto;
   }
 }
+
+.event-detail-ticket-discounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+}
+
+.event-detail-ticket-discounts span {
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.12);
+  color: #e9d5ff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.event-detail-checkout-saving {
+  color: #86efac;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
