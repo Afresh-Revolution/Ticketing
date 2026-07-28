@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
+import {
+  fetchManualPaymentDetails,
+  type ManualPaymentDetails,
+} from "../api/manualPayment";
 import "./CheckoutPage.css";
 
 interface CheckoutState {
@@ -20,14 +24,6 @@ interface CheckoutState {
 import { useAuth } from "../contexts/AuthContext";
 
 const PENDING_CHECKOUT_KEY = "pendingCheckout";
-const MANUAL_PAYMENT_ACCOUNT_NAME =
-  (import.meta.env.VITE_MANUAL_PAYMENT_ACCOUNT_NAME as string | undefined) || "AFRESH BIZ & ENT LTD";
-const MANUAL_PAYMENT_ACCOUNT_NUMBER =
-  (import.meta.env.VITE_MANUAL_PAYMENT_ACCOUNT_NUMBER as string | undefined) || "5080265397";
-const MANUAL_PAYMENT_BANK_NAME =
-  (import.meta.env.VITE_MANUAL_PAYMENT_BANK_NAME as string | undefined) || "Fidelity bank";
-const MANUAL_PAYMENT_CONTACT_URL =
-  (import.meta.env.VITE_MANUAL_PAYMENT_CONTACT_URL as string | undefined) || "https://wa.link/7lo5b5";
 
 type CouponPreview = {
   valid: boolean;
@@ -83,6 +79,8 @@ const CheckoutPage = () => {
   const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
   const [copiedDetailKey, setCopiedDetailKey] = useState<string | null>(null);
   const [manualPaidLoading, setManualPaidLoading] = useState(false);
+  const [manualPayment, setManualPayment] = useState<ManualPaymentDetails | null>(null);
+  const [manualPaymentError, setManualPaymentError] = useState("");
   const discountedTotal = toSafeNumber(couponPreview?.finalAmount, totalPrice);
 
   // Pre-fill email and name from logged-in user when available.
@@ -91,6 +89,26 @@ const CheckoutPage = () => {
     if (user.email) setEmail((prev) => (prev ? prev : user.email ?? ""));
     if (user.name) setFullName((prev) => (prev ? prev : user.name ?? ""));
   }, [user?.email, user?.name]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchManualPaymentDetails()
+      .then((details) => {
+        if (!cancelled) {
+          setManualPayment(details);
+          setManualPaymentError("");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualPayment(null);
+          setManualPaymentError("Could not load bank transfer details. Please try again.");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!pendingCheckout?.attendee) return;
@@ -738,59 +756,98 @@ const CheckoutPage = () => {
             <p className="checkout-cancel-text">
               Transfer <strong>₦{toSafeNumber(discountedTotal).toLocaleString()}</strong> to the account below.
             </p>
-            <div className="checkout-manual-detail-list">
-              <div className="checkout-manual-detail-item">
-                <div>
-                  <span className="checkout-manual-detail-label">Account Name</span>
-                  <span className="checkout-manual-detail-value">{MANUAL_PAYMENT_ACCOUNT_NAME}</span>
+            {manualPaymentError ? (
+              <p className="checkout-cancel-text">{manualPaymentError}</p>
+            ) : !manualPayment ? (
+              <p className="checkout-cancel-text">Loading payment details…</p>
+            ) : (
+              <>
+                <div className="checkout-manual-detail-list">
+                  <div className="checkout-manual-detail-item">
+                    <div>
+                      <span className="checkout-manual-detail-label">Account Name</span>
+                      <span className="checkout-manual-detail-value">
+                        {manualPayment.accountName || "—"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="checkout-manual-copy-btn"
+                      onClick={() => copyDetail("name", manualPayment.accountName)}
+                      aria-label="Copy account name"
+                      disabled={!manualPayment.accountName}
+                    >
+                      <span className="checkout-manual-copy-icon" aria-hidden>
+                        {copiedDetailKey === "name" ? "✓" : "⧉"}
+                      </span>
+                    </button>
+                  </div>
+                  {copiedDetailKey === "name" && <span className="checkout-manual-copied-badge">Detail copied</span>}
+                  <div className="checkout-manual-detail-item">
+                    <div>
+                      <span className="checkout-manual-detail-label">Account Number</span>
+                      <span className="checkout-manual-detail-value">
+                        {manualPayment.accountNumber || "—"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="checkout-manual-copy-btn"
+                      onClick={() => copyDetail("number", manualPayment.accountNumber)}
+                      aria-label="Copy account number"
+                      disabled={!manualPayment.accountNumber}
+                    >
+                      <span className="checkout-manual-copy-icon" aria-hidden>
+                        {copiedDetailKey === "number" ? "✓" : "⧉"}
+                      </span>
+                    </button>
+                  </div>
+                  {copiedDetailKey === "number" && <span className="checkout-manual-copied-badge">Detail copied</span>}
+                  <div className="checkout-manual-detail-item">
+                    <div>
+                      <span className="checkout-manual-detail-label">Bank</span>
+                      <span className="checkout-manual-detail-value">
+                        {manualPayment.bankName || "—"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="checkout-manual-copy-btn"
+                      onClick={() => copyDetail("bank", manualPayment.bankName)}
+                      aria-label="Copy bank name"
+                      disabled={!manualPayment.bankName}
+                    >
+                      <span className="checkout-manual-copy-icon" aria-hidden>
+                        {copiedDetailKey === "bank" ? "✓" : "⧉"}
+                      </span>
+                    </button>
+                  </div>
+                  {copiedDetailKey === "bank" && <span className="checkout-manual-copied-badge">Detail copied</span>}
                 </div>
-                <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("name", MANUAL_PAYMENT_ACCOUNT_NAME)} aria-label="Copy account name">
-                  <span className="checkout-manual-copy-icon" aria-hidden>
-                    {copiedDetailKey === "name" ? "✓" : "⧉"}
-                  </span>
-                </button>
-              </div>
-              {copiedDetailKey === "name" && <span className="checkout-manual-copied-badge">Detail copied</span>}
-              <div className="checkout-manual-detail-item">
-                <div>
-                  <span className="checkout-manual-detail-label">Account Number</span>
-                  <span className="checkout-manual-detail-value">{MANUAL_PAYMENT_ACCOUNT_NUMBER}</span>
-                </div>
-                <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("number", MANUAL_PAYMENT_ACCOUNT_NUMBER)} aria-label="Copy account number">
-                  <span className="checkout-manual-copy-icon" aria-hidden>
-                    {copiedDetailKey === "number" ? "✓" : "⧉"}
-                  </span>
-                </button>
-              </div>
-              {copiedDetailKey === "number" && <span className="checkout-manual-copied-badge">Detail copied</span>}
-              <div className="checkout-manual-detail-item">
-                <div>
-                  <span className="checkout-manual-detail-label">Bank</span>
-                  <span className="checkout-manual-detail-value">{MANUAL_PAYMENT_BANK_NAME}</span>
-                </div>
-                <button type="button" className="checkout-manual-copy-btn" onClick={() => copyDetail("bank", MANUAL_PAYMENT_BANK_NAME)} aria-label="Copy bank name">
-                  <span className="checkout-manual-copy-icon" aria-hidden>
-                    {copiedDetailKey === "bank" ? "✓" : "⧉"}
-                  </span>
-                </button>
-              </div>
-              {copiedDetailKey === "bank" && <span className="checkout-manual-copied-badge">Detail copied</span>}
-            </div>
-            <p className="checkout-cancel-text checkout-manual-paid-hint">
-              After you send the transfer, tap <strong>Paid</strong> below so we can register your purchase for the team to review. Include your email in the transfer narration if your bank allows it.
-            </p>
-            <p className="checkout-cancel-text">
-              After successful payment, contact William by clicking this:{" "}
-              <a href={MANUAL_PAYMENT_CONTACT_URL} target="_blank" rel="noreferrer" className="checkout-manual-link">
-                {MANUAL_PAYMENT_CONTACT_URL}
-              </a>
-            </p>
+                <p className="checkout-cancel-text checkout-manual-paid-hint">
+                  After you send the transfer, tap <strong>Paid</strong> below so we can register your purchase for the team to review. Include your email in the transfer narration if your bank allows it.
+                </p>
+                {manualPayment.contactUrl ? (
+                  <p className="checkout-cancel-text">
+                    After successful payment, contact William by clicking this:{" "}
+                    <a
+                      href={manualPayment.contactUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="checkout-manual-link"
+                    >
+                      {manualPayment.contactUrl}
+                    </a>
+                  </p>
+                ) : null}
+              </>
+            )}
             <div className="checkout-cancel-actions">
               <button
                 type="button"
                 className="checkout-cancel-btn checkout-cancel-btn-add"
                 onClick={handlePaidClick}
-                disabled={manualPaidLoading}
+                disabled={manualPaidLoading || !manualPayment?.accountNumber}
               >
                 {manualPaidLoading ? "Submitting…" : "Paid"}
               </button>

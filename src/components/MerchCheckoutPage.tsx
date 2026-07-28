@@ -6,20 +6,15 @@ import {
   initMerchPayment,
   notifyMerchManualPayment,
 } from '../api/merch';
+import {
+  fetchManualPaymentDetails,
+  type ManualPaymentDetails,
+} from '../api/manualPayment';
 import type { MerchCartLine } from '../types/merch';
 import Navbar from './Navbar';
 import './MerchCheckoutPage.css';
 
 const PENDING_MERCH_KEY = 'pendingMerchCheckout';
-
-const MANUAL_PAYMENT_ACCOUNT_NAME =
-  (import.meta.env.VITE_MANUAL_PAYMENT_ACCOUNT_NAME as string | undefined) || 'AFRESH BIZ & ENT LTD';
-const MANUAL_PAYMENT_ACCOUNT_NUMBER =
-  (import.meta.env.VITE_MANUAL_PAYMENT_ACCOUNT_NUMBER as string | undefined) || '5080265397';
-const MANUAL_PAYMENT_BANK_NAME =
-  (import.meta.env.VITE_MANUAL_PAYMENT_BANK_NAME as string | undefined) || 'Fidelity bank';
-const MANUAL_PAYMENT_CONTACT_URL =
-  (import.meta.env.VITE_MANUAL_PAYMENT_CONTACT_URL as string | undefined) || 'https://wa.link/7lo5b5';
 
 type CheckoutState = {
   eventTitle?: string;
@@ -51,11 +46,33 @@ const MerchCheckoutPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showManual, setShowManual] = useState(false);
   const [manualLoading, setManualLoading] = useState(false);
+  const [manualPayment, setManualPayment] = useState<ManualPaymentDetails | null>(null);
+  const [manualPaymentError, setManualPaymentError] = useState('');
 
   useEffect(() => {
     if (user?.email) setEmail((p) => p || user.email || '');
     if (user?.name) setFullName((p) => p || user.name || '');
   }, [user?.email, user?.name]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchManualPaymentDetails()
+      .then((details) => {
+        if (!cancelled) {
+          setManualPayment(details);
+          setManualPaymentError('');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setManualPayment(null);
+          setManualPaymentError('Could not load bank transfer details.');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (!eventId || lines.length === 0) {
     return (
@@ -305,19 +322,29 @@ const MerchCheckoutPage = () => {
         <div className="merch-checkout-overlay" role="dialog" aria-modal="true">
           <div className="merch-checkout-modal merch-checkout-modal-bank">
             <h3>Bank transfer</h3>
-            <p>
-              <strong>{MANUAL_PAYMENT_ACCOUNT_NAME}</strong>
-              <br />
-              {MANUAL_PAYMENT_BANK_NAME}
-              <br />
-              {MANUAL_PAYMENT_ACCOUNT_NUMBER}
-            </p>
-            <p>
-              Amount: <strong>{formatNaira(total)}</strong>
-            </p>
-            <a href={MANUAL_PAYMENT_CONTACT_URL} target="_blank" rel="noreferrer">
-              Contact support
-            </a>
+            {manualPaymentError ? (
+              <p>{manualPaymentError}</p>
+            ) : !manualPayment ? (
+              <p>Loading payment details…</p>
+            ) : (
+              <>
+                <p>
+                  <strong>{manualPayment.accountName || '—'}</strong>
+                  <br />
+                  {manualPayment.bankName || '—'}
+                  <br />
+                  {manualPayment.accountNumber || '—'}
+                </p>
+                <p>
+                  Amount: <strong>{formatNaira(total)}</strong>
+                </p>
+                {manualPayment.contactUrl ? (
+                  <a href={manualPayment.contactUrl} target="_blank" rel="noreferrer">
+                    Contact support
+                  </a>
+                ) : null}
+              </>
+            )}
             <div className="merch-checkout-modal-actions">
               <button type="button" onClick={() => setShowManual(false)}>
                 Close
@@ -325,7 +352,7 @@ const MerchCheckoutPage = () => {
               <button
                 type="button"
                 className="merch-checkout-pay-btn"
-                disabled={manualLoading}
+                disabled={manualLoading || !manualPayment?.accountNumber}
                 onClick={() => void handleManualPaid()}
               >
                 {manualLoading ? 'Submitting…' : "I've paid"}
