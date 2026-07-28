@@ -2,8 +2,8 @@
 
 /* Pixel-perfect checkout – #1A122E bg, #3A1F5B inputs, #8A2BE2 button */
 .checkout-page {
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   min-height: -webkit-fill-available;
   background: #1a122e;
   color: #fff;
@@ -31,7 +31,7 @@
 }
 
 .checkout-header-inner {
-  max-width: 520px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -234,19 +234,19 @@
 /* Main content: constrained width, consistent horizontal padding */
 .checkout-main {
   flex: 1;
-  max-width: 520px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 32px 24px 40px;
+  padding: 32px 24px 56px;
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .checkout-form {
   background: rgba(42, 24, 69, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -290,9 +290,11 @@
 }
 
 .checkout-summary {
-  margin-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 0.9rem;
+  margin-top: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(26, 18, 46, 0.55);
+  padding: 1rem 1.1rem 1.05rem;
 }
 
 .checkout-summary-row {
@@ -305,15 +307,16 @@
 }
 
 .checkout-summary-row-total {
-  margin-top: 0.2rem;
-  padding-top: 0.6rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+  padding: 0.75rem 0.15rem 0.15rem;
   border-top: 1px dashed rgba(255, 255, 255, 0.18);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .checkout-coupon-wrap {
-  margin: 0.6rem 0 0.75rem;
+  margin: 0 0 0.85rem;
 }
 
 .checkout-coupon-label {
@@ -325,7 +328,7 @@
 
 .checkout-coupon-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.6rem;
   align-items: center;
 }
@@ -458,9 +461,27 @@
   color: #fff;
 }
 
+@media (min-width: 769px) {
+  .checkout-main {
+    padding: 40px 32px 72px;
+  }
+
+  .checkout-form {
+    padding: 28px;
+  }
+
+  .checkout-summary {
+    padding: 1.15rem 1.25rem 1.2rem;
+  }
+
+  .checkout-coupon-btn {
+    min-width: 96px;
+  }
+}
+
 @media (max-width: 768px) {
   .checkout-main {
-    padding: 24px 20px 32px;
+    padding: 24px 20px 40px;
     max-width: 100%;
   }
 
@@ -470,6 +491,7 @@
 
   .checkout-header-inner {
     padding: 0 20px;
+    max-width: 100%;
   }
 }
 
