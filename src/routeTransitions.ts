@@ -19,7 +19,7 @@ export function getRouteTransitionVariant(pathname: string): RouteTransitionVari
   const p = pathname.replace(/\/+$/, '') || '/'
 
   if (p === '/' || p === '') return 'lr'
-  if (p === '/events') return 'rl'
+  if (p === '/events' || p === '/events/past') return 'rl'
   if (p.startsWith('/event/')) return 'tb'
   if (p === '/login' || p === '/signup') return 'bt'
   if (p === '/organizer-form') return 'lr'

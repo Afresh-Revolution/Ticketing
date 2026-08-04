@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import FeaturesPage from './FeaturesPage';
 import Navbar from './Navbar';
 import TopUsersCarousel from './TopUsersCarousel';
-import { usePWA } from '../contexts/PWAContext';
 import { apiUrl } from '../api/config';
-import { brandAssetUrl } from '../branding/version';
 import '../LandingPage/css/LandingPage.css';
 
-interface HeroTrendingEvent {
+interface LandingEventCard {
   id: string;
   title: string;
   date: string;
@@ -17,13 +15,15 @@ interface HeroTrendingEvent {
 }
 
 const HERO_TYPEWRITER_PHRASES = ['before you arrive.', 'With GateWav'] as const;
+const LIST_LIMIT = 6;
 
-function toHeroTrendingEvent(raw: unknown): HeroTrendingEvent | null {
+function toLandingEventCard(raw: unknown): LandingEventCard | null {
   if (!raw || typeof raw !== 'object') return null;
   const e = raw as Record<string, unknown>;
-  if (typeof e.id !== 'string' || !e.id) return null;
+  const id = e.id != null ? String(e.id) : '';
+  if (!id) return null;
   return {
-    id: e.id,
+    id,
     title: typeof e.title === 'string' ? e.title : 'Event',
     date: typeof e.date === 'string' ? e.date : new Date().toISOString(),
     location: typeof e.location === 'string' ? e.location : typeof e.venue === 'string' ? e.venue : 'Venue TBA',
@@ -34,11 +34,23 @@ function toHeroTrendingEvent(raw: unknown): HeroTrendingEvent | null {
   };
 }
 
+function eventDayStart(isoDate: string): number {
+  const raw = String(isoDate || '');
+  const day = /^\d{4}-\d{2}-\d{2}/.test(raw) ? raw.slice(0, 10) : '';
+  if (day) return new Date(`${day}T00:00:00`).getTime();
+  const parsed = new Date(raw).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function startOfToday(): number {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+}
+
 const LandingPage = () => {
   const navigate = useNavigate();
-  const pwa = usePWA();
-  const [heroTrending, setHeroTrending] = useState<HeroTrendingEvent[]>([]);
-  const [heroSlideIndex, setHeroSlideIndex] = useState(0);
+  const [trendingEvents, setTrendingEvents] = useState<LandingEventCard[]>([]);
+  const [allEvents, setAllEvents] = useState<LandingEventCard[]>([]);
   const [heroTypewriterText, setHeroTypewriterText] = useState<string>(HERO_TYPEWRITER_PHRASES[0]);
   const typewriterTimersRef = useRef<ReturnType<typeof setInterval>[]>([]);
   const typewriterTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -46,49 +58,53 @@ const LandingPage = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const loadHeroTrending = async () => {
+    const loadEvents = async () => {
       try {
-        const trendingRes = await fetch(apiUrl('/api/events?trending=true&take=6'));
-        let rows: unknown[] = [];
+        const [trendingRes, allRes] = await Promise.all([
+          fetch(apiUrl('/api/events?trending=true&take=6')),
+          fetch(apiUrl('/api/events?take=100')),
+        ]);
 
+        let trendingRows: unknown[] = [];
         if (trendingRes.ok) {
           const data = await trendingRes.json();
-          rows = Array.isArray(data) ? data : [];
+          trendingRows = Array.isArray(data) ? data : [];
         }
 
-        if (rows.length === 0) {
-          const allRes = await fetch(apiUrl('/api/events'));
-          if (allRes.ok) {
-            const data = await allRes.json();
-            rows = Array.isArray(data) ? data : [];
-          }
+        let allRows: unknown[] = [];
+        if (allRes.ok) {
+          const data = await allRes.json();
+          allRows = Array.isArray(data) ? data : [];
         }
 
-        const normalized = rows
-          .map(toHeroTrendingEvent)
-          .filter((x): x is HeroTrendingEvent => x !== null)
-          .slice(0, 6);
+        const normalize = (rows: unknown[]) =>
+          rows.map(toLandingEventCard).filter((x): x is LandingEventCard => x !== null);
 
-        if (!cancelled) setHeroTrending(normalized);
+        let trending = normalize(trendingRows).slice(0, LIST_LIMIT);
+        const catalog = normalize(allRows);
+
+        if (trending.length === 0) {
+          trending = catalog.slice(0, LIST_LIMIT);
+        }
+
+        if (!cancelled) {
+          setTrendingEvents(trending);
+          setAllEvents(catalog);
+        }
       } catch (err) {
-        console.error('Failed to fetch hero trending events:', err);
-        if (!cancelled) setHeroTrending([]);
+        console.error('Failed to fetch landing events:', err);
+        if (!cancelled) {
+          setTrendingEvents([]);
+          setAllEvents([]);
+        }
       }
     };
 
-    loadHeroTrending();
+    loadEvents();
     return () => {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    if (heroTrending.length <= 1) return undefined;
-    const timer = window.setInterval(() => {
-      setHeroSlideIndex((prev) => (prev + 1) % heroTrending.length);
-    }, 2000);
-    return () => window.clearInterval(timer);
-  }, [heroTrending.length]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -163,14 +179,93 @@ const LandingPage = () => {
     };
   }, []);
 
-  const activeHeroEvent = useMemo(() => {
-    if (heroTrending.length === 0) return null;
-    const safeIndex = heroSlideIndex % heroTrending.length;
-    return heroTrending[safeIndex] ?? heroTrending[0];
-  }, [heroSlideIndex, heroTrending]);
+  const today = startOfToday();
 
-  const formatHeroDate = (isoDate: string) =>
+  const recentEvents = useMemo(
+    () =>
+      [...allEvents]
+        .filter((event) => eventDayStart(event.date) >= today)
+        .sort((a, b) => eventDayStart(a.date) - eventDayStart(b.date))
+        .slice(0, LIST_LIMIT),
+    [allEvents, today],
+  );
+
+  const pastEvents = useMemo(
+    () =>
+      [...allEvents]
+        .filter((event) => eventDayStart(event.date) < today)
+        .sort((a, b) => eventDayStart(b.date) - eventDayStart(a.date))
+        .slice(0, LIST_LIMIT),
+    [allEvents, today],
+  );
+
+  const formatEventDate = (isoDate: string) =>
     new Date(isoDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  const renderEventSection = ({
+    id,
+    label,
+    title,
+    events,
+    emptyText,
+    kicker,
+    viewAllPath = '/events',
+  }: {
+    id: string;
+    label: string;
+    title: string;
+    events: LandingEventCard[];
+    emptyText: string;
+    kicker: string;
+    viewAllPath?: string;
+  }) => (
+    <section className="lp-events-section" aria-labelledby={id}>
+      <div className="lp-events-section-header">
+        <div className="lp-events-section-heading">
+          <span className="lp-events-section-label">{label}</span>
+          <h2 id={id} className="lp-events-section-title">
+            {title}
+          </h2>
+        </div>
+        <button
+          type="button"
+          className="lp-events-view-all"
+          onClick={() => navigate(viewAllPath)}
+        >
+          View all
+        </button>
+      </div>
+
+      {events.length > 0 ? (
+        <ul className="lp-events-list">
+          {events.map((eventItem) => (
+            <li key={eventItem.id}>
+              <button
+                type="button"
+                className="lp-trending-card"
+                onClick={() => navigate(`/event/${eventItem.id}`)}
+                aria-label={`Open ${eventItem.title}`}
+              >
+                <img src={eventItem.imageUrl} alt="" className="lp-trending-card-image" />
+                <div className="lp-trending-card-overlay" aria-hidden />
+                <div className="lp-trending-card-content">
+                  <span className="lp-trending-card-kicker">{kicker}</span>
+                  <h3 className="lp-trending-card-title">{eventItem.title}</h3>
+                  <p className="lp-trending-card-meta">
+                    <span>{formatEventDate(eventItem.date)}</span>
+                    <span aria-hidden>•</span>
+                    <span>{eventItem.location}</span>
+                  </p>
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="lp-trending-list-empty">{emptyText}</p>
+      )}
+    </section>
+  );
 
   return (
     <div className="landing-page">
@@ -209,13 +304,6 @@ const LandingPage = () => {
                 <button
                   type="button"
                   className="lp-btn lp-btn-primary lp-reveal lp-reveal--lr lp-d3"
-                  onClick={() => navigate('/events')}
-                >
-                  Explore events
-                </button>
-                <button
-                  type="button"
-                  className="lp-btn lp-btn-ghost lp-reveal lp-reveal--rl lp-d4"
                   onClick={() => navigate('/organizer-form')}
                 >
                   Host with GateWav
@@ -232,91 +320,40 @@ const LandingPage = () => {
                   </span>
                 </button>
               </div>
-
-              <dl className="lp-hero-stats" aria-label="Highlights">
-                <div className="lp-hero-stat lp-reveal lp-reveal--lr lp-d4">
-                  <dt className="lp-hero-stat-label lp-reveal lp-reveal--tb lp-d0">Checkout</dt>
-                  <dd className="lp-hero-stat-value lp-reveal lp-reveal--bu lp-d1">Streamlined</dd>
-                </div>
-                <div className="lp-hero-stat-divider lp-reveal lp-reveal--tb lp-d5" aria-hidden />
-                <div className="lp-hero-stat lp-reveal lp-reveal--rl lp-d5">
-                  <dt className="lp-hero-stat-label lp-reveal lp-reveal--lr lp-d0">Entry</dt>
-                  <dd className="lp-hero-stat-value lp-reveal lp-reveal--rl lp-d1">QR-ready</dd>
-                </div>
-                <div className="lp-hero-stat-divider lp-reveal lp-reveal--bu lp-d6" aria-hidden />
-                <div className="lp-hero-stat lp-reveal lp-reveal--bu lp-d6">
-                  <dt className="lp-hero-stat-label lp-reveal lp-reveal--rl lp-d0">Support</dt>
-                  <dd className="lp-hero-stat-value lp-reveal lp-reveal--lr lp-d1">Human-first</dd>
-                </div>
-              </dl>
-
-              <ul className="lp-hero-pills" aria-label="Trust signals">
-                <li className="lp-hero-pill lp-reveal lp-reveal--lr lp-d6">Encrypted payments</li>
-                <li className="lp-hero-pill lp-reveal lp-reveal--tb lp-d7">Mobile-first tickets</li>
-                <li className="lp-hero-pill lp-reveal lp-reveal--rl lp-d8">Organizer tools</li>
-              </ul>
             </div>
-
-            <aside className="lp-hero-trending lp-reveal lp-reveal--rl lp-d3" aria-label="Trending events carousel">
-              {activeHeroEvent ? (
-                <button
-                  type="button"
-                  className="lp-hero-trending-card"
-                  onClick={() => navigate(`/event/${activeHeroEvent.id}`)}
-                  aria-label={`Open ${activeHeroEvent.title}`}
-                >
-                  <img src={activeHeroEvent.imageUrl} alt={activeHeroEvent.title} className="lp-hero-trending-image" />
-                  <div className="lp-hero-trending-overlay" aria-hidden />
-                  <div className="lp-hero-trending-content">
-                    <span className="lp-hero-trending-kicker lp-reveal lp-reveal--lr lp-d2">Selling now</span>
-                    <h3 className="lp-hero-trending-title lp-reveal lp-reveal--bu lp-d3">{activeHeroEvent.title}</h3>
-                    <p className="lp-hero-trending-meta lp-reveal lp-reveal--rl lp-d4">
-                      <span>{formatHeroDate(activeHeroEvent.date)}</span>
-                      <span aria-hidden>•</span>
-                      <span>{activeHeroEvent.location}</span>
-                    </p>
-                  </div>
-                  {heroTrending.length > 1 && (
-                    <div className="lp-hero-trending-dots lp-reveal lp-reveal--tb lp-d5" aria-hidden>
-                      {heroTrending.map((eventItem, index) => (
-                        <span
-                          key={eventItem.id}
-                          className={`lp-hero-trending-dot ${index === heroSlideIndex ? 'active' : ''}`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </button>
-              ) : (
-                <div className="lp-hero-trending-empty lp-reveal lp-reveal--bu lp-d4">
-                  <span className="lp-reveal lp-reveal--lr lp-d0">Trending events will appear here.</span>
-                </div>
-              )}
-            </aside>
           </div>
         </section>
       </header>
 
       <TopUsersCarousel />
 
-      {pwa?.installable && (
-        <section className="lp-pwa-wrap">
-          <div className="lp-pwa-card lp-reveal lp-reveal--bu lp-d2">
-            <div className="lp-pwa-icon lp-reveal lp-reveal--lr lp-d0" aria-hidden>
-              <img src={brandAssetUrl('/icon-192.png')} alt="" width={48} height={48} />
-            </div>
-            <div className="lp-pwa-text">
-              <h3 className="lp-pwa-title lp-reveal lp-reveal--tb lp-d1">Install GateWav</h3>
-              <p className="lp-pwa-desc lp-reveal lp-reveal--rl lp-d2">
-                Add to your home screen for faster launches and ticket access at the door.
-              </p>
-            </div>
-            <button type="button" className="lp-pwa-btn lp-reveal lp-reveal--lr lp-d3" onClick={pwa.onInstallClick}>
-              Install
-            </button>
-          </div>
-        </section>
-      )}
+      {renderEventSection({
+        id: 'lp-trending-list-heading',
+        label: 'Trending',
+        title: 'Events selling now',
+        events: trendingEvents,
+        emptyText: 'Trending events will appear here.',
+        kicker: 'Selling now',
+      })}
+
+      {renderEventSection({
+        id: 'lp-recent-list-heading',
+        label: 'Upcoming',
+        title: 'Most recent events',
+        events: recentEvents,
+        emptyText: 'No upcoming events yet.',
+        kicker: 'Upcoming',
+      })}
+
+      {renderEventSection({
+        id: 'lp-past-list-heading',
+        label: 'Archive',
+        title: 'Past events',
+        events: pastEvents,
+        emptyText: 'No past events yet.',
+        kicker: 'Past event',
+        viewAllPath: '/events/past',
+      })}
 
       <FeaturesPage />
     </div>

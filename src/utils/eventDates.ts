@@ -132,6 +132,20 @@ export function formatEventDateTag(
   return `${formatShortTag(start)} – ${formatShortTag(end)}`;
 }
 
+/** True when the event's end day (or start day if no end) is before today. */
+export function isEventPast(
+  startDate?: string | null,
+  endDate?: string | null,
+  now = new Date(),
+): boolean {
+  const endKey = datePartFromValue(endDate) || datePartFromValue(startDate);
+  if (!endKey) return false;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const endDay = new Date(`${endKey}T00:00:00`);
+  if (Number.isNaN(endDay.getTime())) return false;
+  return endDay.getTime() < today.getTime();
+}
+
 /** Long form for detail pages. */
 export function formatEventDateLong(
   startDate: string | null | undefined,
