@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { apiUrl } from '../api/config';
 import { shareEvent } from '../utils/shareEvent';
-import { formatEventDateTag } from '../utils/eventDates';
+import { formatEventDateTag, isEventPast } from '../utils/eventDates';
 import { primaryEventImage, resolveEventImages } from '../utils/eventImages';
 import { isReservationEvent } from '../utils/eventTickets';
 import { EventCardImageCarousel } from './EventCardImageCarousel';
@@ -232,7 +232,11 @@ const GetTickets = () => {
                         navigate(`/event/${event.id}`);
                       }}
                     >
-                      {event.isReservation ? 'Reserve' : 'Get Tickets'}
+                      {isEventPast(event.date, event.endDate)
+                        ? 'View Event'
+                        : event.isReservation
+                          ? 'Reserve'
+                          : 'Get Tickets'}
                     </button>
                     <button
                       type="button"

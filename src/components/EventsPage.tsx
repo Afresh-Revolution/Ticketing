@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { shareEvent } from "../utils/shareEvent";
 import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
-import { formatEventDateTag } from "../utils/eventDates";
+import { formatEventDateTag, isEventPast } from "../utils/eventDates";
 import { primaryEventImage, resolveEventImages } from "../utils/eventImages";
 import { isReservationEvent } from "../utils/eventTickets";
 import { EventCardImageCarousel } from "./EventCardImageCarousel";
@@ -26,6 +26,8 @@ interface Event {
   id: string;
   title: string;
   date: string;
+  rawDate: string;
+  rawEndDate?: string | null;
   category: string;
   location: string;
   state: string;
@@ -35,8 +37,15 @@ interface Event {
   isReservation: boolean;
 }
 
-const EventsPage = () => {
+type EventsPageMode = "all" | "past";
+
+type EventsPageProps = {
+  mode?: EventsPageMode;
+};
+
+const EventsPage = ({ mode = "all" }: EventsPageProps) => {
   const navigate = useNavigate();
+  const pastOnly = mode === "past";
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedState, setSelectedState] = useState<string>("All");
@@ -94,6 +103,8 @@ const EventsPage = () => {
               id: e.id,
               title: e.title,
               date: formatEventDateTag(e.date, e.endDate),
+              rawDate: e.date ? String(e.date) : '',
+              rawEndDate: e.endDate != null ? String(e.endDate) : null,
               category: e.category || 'General',
               location: e.location || e.venue || 'TBD',
               state: resolveEventState(e),
@@ -115,7 +126,16 @@ const EventsPage = () => {
   }, []);
 
   const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
+    const scoped = pastOnly
+      ? events
+          .filter((event) => isEventPast(event.rawDate, event.rawEndDate))
+          .sort(
+            (a, b) =>
+              new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime(),
+          )
+      : events;
+
+    return scoped.filter((event) => {
       const matchesCategory =
         selectedCategory === "All" || event.category === selectedCategory;
       const matchesState = eventMatchesState(event.state, selectedState);
@@ -128,7 +148,7 @@ const EventsPage = () => {
         event.state.toLowerCase().includes(q);
       return matchesCategory && matchesState && matchesSearch;
     });
-  }, [searchQuery, selectedCategory, selectedState, events]);
+  }, [searchQuery, selectedCategory, selectedState, events, pastOnly]);
 
   return (
     <div className="events-page">
@@ -159,11 +179,15 @@ const EventsPage = () => {
               </svg>
               <input
                 type="search"
-                placeholder="Search events, venues, artists..."
+                placeholder={
+                  pastOnly
+                    ? "Search past events, venues, artists..."
+                    : "Search events, venues, artists..."
+                }
                 className="events-search-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="Search events"
+                aria-label={pastOnly ? "Search past events" : "Search events"}
               />
               <button
                 type="button"
@@ -220,7 +244,11 @@ const EventsPage = () => {
           <EventsGridSkeleton />
         ) : (
           <>
-            <h2 className="events-count">{filteredEvents.length} Events Found</h2>
+            <h2 className="events-count">
+              {filteredEvents.length}{" "}
+              {pastOnly ? "Past Event" : "Event"}
+              {filteredEvents.length !== 1 ? "s" : ""} Found
+            </h2>
 
             <div className="events-grid">
               {filteredEvents.map((event) => (
@@ -287,7 +315,11 @@ const EventsPage = () => {
                       </p>
                       <div className="event-card-cta-row">
                         <Link to={`/event/${event.id}`} className="event-card-cta">
-                          {event.isReservation ? "Reserve" : "Get Tickets"}
+                          {pastOnly || isEventPast(event.rawDate, event.rawEndDate)
+                            ? "View Event"
+                            : event.isReservation
+                              ? "Reserve"
+                              : "Get Tickets"}
                         </Link>
                         <button
                           type="button"

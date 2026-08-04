@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { resolveEventState } from "../utils/eventLocation";
-import { formatEventDateLong } from "../utils/eventDates";
+import { formatEventDateLong, isEventPast } from "../utils/eventDates";
 import { fetchLiveStatus } from "../api/stream";
 import { isOnlineTicket, normalizeEventFormat } from "../utils/eventStream";
 import { isReservationEvent, normalizeTicketType } from "../utils/eventTickets";
@@ -40,6 +40,8 @@ interface EventDetail {
   title: string;
   category: string;
   date: string;
+  rawDate: string;
+  rawEndDate?: string | null;
   time: string;
   location: string;
   state: string;
@@ -144,6 +146,8 @@ const EventDetailPage = () => {
           title: data.title,
           category: data.category || "General",
           date: formatEventDateLong(data.date, data.endDate),
+          rawDate: data.date ? String(data.date) : "",
+          rawEndDate: data.endDate != null ? String(data.endDate) : null,
           time:
             data.startTime ||
             (validDate
@@ -265,11 +269,12 @@ const EventDetailPage = () => {
     );
 
   const renderMerchSection = () =>
-    merch.length > 0 && id ? (
+    !isEventPast(event.rawDate, event.rawEndDate) && merch.length > 0 && id ? (
       <EventMerchSection eventId={id} eventTitle={event.title} merch={merch} />
     ) : null;
 
   const reservationOnly = isReservationEvent(event.tickets);
+  const eventIsPast = isEventPast(event.rawDate, event.rawEndDate);
 
   return (
     <div className="event-detail-page">
@@ -451,8 +456,17 @@ const EventDetailPage = () => {
             id="event-detail-tickets-heading"
             className="event-detail-tickets-heading"
           >
-            {reservationOnly ? "Details" : "Select Tickets"}
+            {eventIsPast
+              ? "Tickets"
+              : reservationOnly
+                ? "Details"
+                : "Select Tickets"}
           </h2>
+          {eventIsPast && (
+            <p className="event-detail-past-banner">
+              This event has ended. Ticket purchase is closed.
+            </p>
+          )}
           <div className="event-detail-ticket-list">
             {event.tickets.length === 0 ? (
               <div className="event-detail-ticket-list-empty">
@@ -477,13 +491,17 @@ const EventDetailPage = () => {
                   {ticket.description ? (
                     <p className="event-detail-ticket-desc">{ticket.description}</p>
                   ) : null}
-                  <p className="event-detail-reservation-hint">
-                    Contact the organizer to reserve your spot.
-                  </p>
-                  <ReservationContactButtons
-                    email={ticket.contactEmail ?? undefined}
-                    phone={ticket.contactPhone ?? undefined}
-                  />
+                  {!eventIsPast && (
+                    <>
+                      <p className="event-detail-reservation-hint">
+                        Contact the organizer to reserve your spot.
+                      </p>
+                      <ReservationContactButtons
+                        email={ticket.contactEmail ?? undefined}
+                        phone={ticket.contactPhone ?? undefined}
+                      />
+                    </>
+                  )}
                 </div>
               ))
             ) : (
@@ -496,7 +514,7 @@ const EventDetailPage = () => {
                   return (
                     <div
                       key={ticket.id}
-                      className={`event-detail-ticket-card ${isSoldOut ? "event-detail-ticket-card-sold-out" : ""}`}
+                      className={`event-detail-ticket-card ${isSoldOut || eventIsPast ? "event-detail-ticket-card-sold-out" : ""}`}
                     >
                       <div className="event-detail-ticket-info">
                         <h4 className="event-detail-ticket-name">
@@ -511,7 +529,7 @@ const EventDetailPage = () => {
                         {ticket.description ? (
                           <p className="event-detail-ticket-desc">{ticket.description}</p>
                         ) : null}
-                        {ticket.discountTiers.length > 0 && (
+                        {!eventIsPast && ticket.discountTiers.length > 0 && (
                           <div className="event-detail-ticket-discounts">
                             {ticket.discountTiers.map((tier) => (
                               <span key={tier.minimumQuantity}>
@@ -520,7 +538,11 @@ const EventDetailPage = () => {
                             ))}
                           </div>
                         )}
-                        {isSoldOut ? (
+                        {eventIsPast ? (
+                          <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">
+                            Ended
+                          </span>
+                        ) : isSoldOut ? (
                           <span className="event-detail-ticket-badge event-detail-ticket-badge-sold-out">
                             Sold Out
                           </span>
@@ -538,32 +560,34 @@ const EventDetailPage = () => {
                               ? "Free"
                               : `₦${Number(ticket.price).toLocaleString()}`}
                         </span>
-                        <div className="event-detail-qty-controls">
-                          <button
-                            type="button"
-                            className="event-detail-qty-btn"
-                            onClick={() => adjustQty(ticket.id, -1)}
-                            aria-label={`Decrease ${ticket.name}`}
-                            disabled={qty === 0}
-                          >
-                            −
-                          </button>
-                          <span
-                            className="event-detail-qty-value"
-                            aria-live="polite"
-                          >
-                            {qty}
-                          </span>
-                          <button
-                            type="button"
-                            className="event-detail-qty-btn"
-                            onClick={() => adjustQty(ticket.id, 1)}
-                            aria-label={`Increase ${ticket.name}`}
-                            disabled={isSoldOut || sold + (qty + 1) > total}
-                          >
-                            +
-                          </button>
-                        </div>
+                        {!eventIsPast && (
+                          <div className="event-detail-qty-controls">
+                            <button
+                              type="button"
+                              className="event-detail-qty-btn"
+                              onClick={() => adjustQty(ticket.id, -1)}
+                              aria-label={`Decrease ${ticket.name}`}
+                              disabled={qty === 0}
+                            >
+                              −
+                            </button>
+                            <span
+                              className="event-detail-qty-value"
+                              aria-live="polite"
+                            >
+                              {qty}
+                            </span>
+                            <button
+                              type="button"
+                              className="event-detail-qty-btn"
+                              onClick={() => adjustQty(ticket.id, 1)}
+                              aria-label={`Increase ${ticket.name}`}
+                              disabled={isSoldOut || sold + (qty + 1) > total}
+                            >
+                              +
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -573,7 +597,7 @@ const EventDetailPage = () => {
           </div>
         </section>
 
-        {!reservationOnly && (
+        {!reservationOnly && !eventIsPast && (
           <div className="event-detail-checkout-bar">
             <div className="event-detail-checkout-summary">
               <span className="event-detail-checkout-count">

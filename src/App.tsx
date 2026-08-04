@@ -10,6 +10,7 @@ import SignupPage from './components/SignupPage'
 import PaymentSuccess from './components/PaymentSuccess'
 import OrganizerFormPage from './components/OrganizerFormPage'
 import EventsPage from './components/EventsPage'
+import PastEventsPage from './components/PastEventsPage'
 import MyTicketsPage from './components/MyTicketsPage'
 import TicketShareRedirect from './components/TicketShareRedirect'
 import EventDetailPage from './components/EventDetailPage'
@@ -67,6 +68,7 @@ function AnimatedRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/past" element={<PastEventsPage />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/event/:id/watch" element={<EventWatchPage />} />
         <Route path="/event/:id/merch" element={<MerchShopPage />} />
