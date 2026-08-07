@@ -396,10 +396,10 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
             </div>
             <div className="events-footer-col">
               <h4>Legal</h4>
-              <a href="#">Terms & Conditions</a>
-              <a href="#">Privacy Policy</a>
-              <a href="#">Refund Policy</a>
-              <a href="#">Cookie Policy</a>
+              <Link to="/legal/terms">Terms & Conditions</Link>
+              <Link to="/legal/privacy">Privacy Policy</Link>
+              <Link to="/legal/refund">Refund Policy</Link>
+              <Link to="/legal/cookie">Cookie Policy</Link>
             </div>
           </div>
         </div>

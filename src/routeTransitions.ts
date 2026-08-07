@@ -26,6 +26,7 @@ export function getRouteTransitionVariant(pathname: string): RouteTransitionVari
   if (p === '/checkout') return 'rl'
   if (p === '/my-tickets') return 'tb'
   if (p === '/payment-success') return 'bt'
+  if (p.startsWith('/legal')) return 'rl'
   if (p.startsWith('/admin')) {
     if (p === '/admin/login') return 'lr'
     return VARIANTS[hashPath(p) % 4]

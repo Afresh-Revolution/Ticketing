@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react';
 import BuiltForEveryone from './BuiltForEveryone';
 import WhyChooseUs from './WhyChooseUs';
 import ReadyToJoin from './ReadyToJoin';
+import AppDownloadCard from './AppDownloadCard';
 import Footer from './Footer';
 import ScrollReveal from './ScrollReveal';
 import { apiUrl } from '../api/config';
@@ -106,6 +107,7 @@ const FeaturesPage = () => {
         </>
       </ScrollReveal>
       <ReadyToJoin />
+      <AppDownloadCard />
       <Footer />
     </div>
   );

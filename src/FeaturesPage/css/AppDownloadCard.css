@@ -1,0 +1,140 @@
+.app-download {
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 2rem);
+  background: var(--lp-bg-deep, #030014);
+  font-family: var(--lp-font-body, "DM Sans", ui-sans-serif, system-ui, sans-serif);
+}
+
+.app-download-card {
+  max-width: 920px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+  padding: clamp(1.75rem, 4vw, 2.5rem) clamp(1.5rem, 4vw, 2.75rem);
+  border-radius: 24px;
+  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
+  background:
+    radial-gradient(ellipse 70% 80% at 0% 50%, rgba(168, 85, 247, 0.18), transparent 55%),
+    radial-gradient(ellipse 50% 70% at 100% 40%, rgba(34, 211, 238, 0.08), transparent 50%),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.app-download-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-download-label {
+  display: inline-block;
+  margin-bottom: 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lp-accent-strong, #a855f7);
+}
+
+.app-download-title {
+  margin: 0 0 0.65rem;
+  font-family: var(--lp-font-display, "Syne", sans-serif);
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--lp-ink, #f4f0ff);
+}
+
+.app-download-description {
+  margin: 0;
+  max-width: 36rem;
+  font-size: clamp(0.95rem, 1.6vw, 1.05rem);
+  line-height: 1.55;
+  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
+}
+
+.app-download-buttons {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.app-store-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 168px;
+  padding: 0.65rem 1.05rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #0a0520;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.app-store-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(168, 85, 247, 0.55);
+  background: #120830;
+}
+
+.app-store-btn-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.app-store-btn-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  line-height: 1.15;
+}
+
+.app-store-btn-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.app-store-btn-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 760px) {
+  .app-download-card {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .app-download-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .app-download-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-download-buttons {
+    flex-direction: column;
+  }
+
+  .app-store-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
