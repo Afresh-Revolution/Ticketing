@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
+import ProfileModal from './ProfileModal';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -10,6 +11,7 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,13 +46,25 @@ const Navbar = () => {
 
         <div className={`nav-links ${mobileMenuOpen ? 'active' : ''}`}>
           <a onClick={() => navigate('/events')} className="nav-link">Explore Events</a>
-          
+
           {isAuthenticated ? (
             <>
               <a onClick={() => navigate('/my-tickets')} className="nav-link">My Tickets</a>
               <div className="nav-user-info">
-                 <span className="nav-user-name">Hi, {user?.name?.split(' ')[0] || 'User'}</span>
-                 <button className="nav-btn-logout" onClick={handleLogout}>Logout</button>
+                <span className="nav-user-name">Hi, {user?.name?.split(' ')[0] || 'User'}</span>
+                <button
+                  type="button"
+                  className="nav-btn-logout"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setAccountOpen(true);
+                  }}
+                >
+                  Account
+                </button>
+                <button type="button" className="nav-btn-logout" onClick={handleLogout}>
+                  Logout
+                </button>
               </div>
             </>
           ) : (
@@ -60,14 +74,16 @@ const Navbar = () => {
           )}
         </div>
 
-        <button 
-          className="mobile-menu-btn" 
+        <button
+          className="mobile-menu-btn"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
           <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}></span>
         </button>
       </div>
+
+      <ProfileModal isOpen={accountOpen} onClose={() => setAccountOpen(false)} />
     </nav>
   );
 };

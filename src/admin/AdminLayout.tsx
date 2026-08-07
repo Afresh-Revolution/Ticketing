@@ -3,12 +3,14 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import Logo from '../components/Logo';
 import { getPasswordChangeStatus } from '../api/auth';
 import ChangePasswordModal from './ChangePasswordModal';
+import AdminDeleteAccountModal from './AdminDeleteAccountModal';
 import './admin.css';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [canChangePassword, setCanChangePassword] = useState(true);
   const [nextPasswordChangeAt, setNextPasswordChangeAt] = useState<string | null>(null);
 
@@ -55,8 +57,8 @@ const AdminLayout = () => {
           <Logo variant="main" className="admin-logo-img" height={32} />
         </div>
         <div className="admin-header-actions">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className={`admin-btn admin-btn-role ${isSuperAdmin ? 'admin-btn-superadmin' : ''}`}
             aria-label={isSuperAdmin ? 'Super Admin' : 'Admin'}
           >
@@ -79,6 +81,16 @@ const AdminLayout = () => {
         >
           Change password
         </button>
+        {!isSuperAdmin ? (
+          <button
+            type="button"
+            className="admin-btn admin-btn-danger"
+            onClick={() => setDeleteModalOpen(true)}
+            aria-label="Delete account"
+          >
+            Delete account
+          </button>
+        ) : null}
       </div>
 
       <div
@@ -136,6 +148,10 @@ const AdminLayout = () => {
           setCanChangePassword(false);
           setNextPasswordChangeAt(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString());
         }}
+      />
+      <AdminDeleteAccountModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
       />
     </div>
   );
