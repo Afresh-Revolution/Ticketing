@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from './Logo';
-import ProfileModal from './ProfileModal';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -11,7 +10,6 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +21,6 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu when route changes (defer to avoid synchronous setState in effect)
   useEffect(() => {
     const id = setTimeout(() => setMobileMenuOpen(false), 0);
     return () => clearTimeout(id);
@@ -38,18 +35,25 @@ const Navbar = () => {
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''} ${!isHomePage ? 'scrolled' : ''}`}>
-      <div className={`nav-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}></div>
+      <div
+        className={`nav-overlay ${mobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
       <div className="navbar-container">
         <div className="logo" onClick={() => navigate('/')}>
           <Logo variant="main" className="logo-img" />
         </div>
 
         <div className={`nav-links ${mobileMenuOpen ? 'active' : ''}`}>
-          <a onClick={() => navigate('/events')} className="nav-link">Explore Events</a>
+          <a onClick={() => navigate('/events')} className="nav-link">
+            Explore Events
+          </a>
 
           {isAuthenticated ? (
             <>
-              <a onClick={() => navigate('/my-tickets')} className="nav-link">My Tickets</a>
+              <a onClick={() => navigate('/my-tickets')} className="nav-link">
+                My Tickets
+              </a>
               <div className="nav-user-info">
                 <span className="nav-user-name">Hi, {user?.name?.split(' ')[0] || 'User'}</span>
                 <button
@@ -57,7 +61,7 @@ const Navbar = () => {
                   className="nav-btn-logout"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    setAccountOpen(true);
+                    navigate('/account');
                   }}
                 >
                   Account
@@ -79,11 +83,9 @@ const Navbar = () => {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
-          <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`} />
         </button>
       </div>
-
-      <ProfileModal isOpen={accountOpen} onClose={() => setAccountOpen(false)} />
     </nav>
   );
 };
