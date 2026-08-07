@@ -38,6 +38,11 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, sectionId 
              <h4>Can I transfer my ticket?</h4>
              <p>Yes, you can transfer your ticket to another user via the "My Tickets" dashboard, provided the event organizer allows transfers.</p>
            </div>
+
+          <div className="faq-item">
+             <h4>How do I delete my account?</h4>
+             <p>Sign in, open Account in the navigation bar, then choose Delete my account. You will need your password and must type DELETE to confirm. You can also email info@gatewav.com from your registered address.</p>
+           </div>
         </section>
 
         <section id="contact" className="modal-section">

@@ -281,3 +281,27 @@ export async function organizerVerifyOtp(email: string, otp: string): Promise<{ 
     throw err;
   }
 }
+
+/**
+ * Permanently delete the signed-in attendee/organizer account.
+ * Requires password confirmation.
+ */
+export async function deleteAccount(
+  token: string,
+  password: string,
+): Promise<{ message: string }> {
+  const res = await fetch(apiUrl('/api/user/account'), {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ password }),
+  });
+  const data = await res.json().catch(() => ({} as { error?: string; message?: string }));
+  if (!res.ok) {
+    throw new Error(data.error ?? 'Failed to delete account');
+  }
+  return { message: data.message || 'Your account has been permanently deleted.' };
+}
+
