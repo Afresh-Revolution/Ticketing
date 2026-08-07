@@ -1,0 +1,219 @@
+.account-page {
+  min-height: 100vh;
+  background: #07060f;
+  color: #f4f0ff;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+.account-page-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 7rem 1.5rem 4rem;
+  box-sizing: border-box;
+}
+
+.account-page-header {
+  margin-bottom: 1.75rem;
+}
+
+.account-page-header h1 {
+  margin: 0 0 0.4rem;
+  font-family: "Syne", sans-serif;
+  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.account-page-lede {
+  margin: 0;
+  color: rgba(244, 240, 255, 0.65);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.account-card {
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(54, 25, 92, 0.55);
+  margin-bottom: 1.25rem;
+}
+
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.account-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #791a94;
+  color: #fff;
+  font-size: 1.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.account-email {
+  margin: 0.25rem 0 0;
+  color: rgba(244, 240, 255, 0.65);
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.account-chip-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.account-chip-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.account-danger {
+  padding: 1.35rem 1.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  background: rgba(251, 113, 133, 0.06);
+}
+
+.account-danger-title {
+  margin: 0 0 0.5rem;
+  color: #fb7185;
+  font-size: 1.05rem;
+}
+
+.account-danger-copy {
+  margin: 0 0 1.1rem;
+  color: rgba(244, 240, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.account-delete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.account-field label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.account-field input {
+  width: 100%;
+  padding: 0.7rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.account-field input:focus {
+  outline: none;
+  border-color: rgba(121, 26, 148, 0.65);
+}
+
+.account-form-error {
+  margin: 0;
+  color: #fb7185;
+  font-size: 0.9rem;
+}
+
+.account-form-info {
+  margin: 0;
+  color: #7dd3fc;
+  font-size: 0.9rem;
+}
+
+.account-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.account-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.account-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.account-btn-cancel {
+  background: #fff;
+  border: 1px solid #791a94;
+  color: #791a94;
+}
+
+.account-btn-danger {
+  background: rgba(251, 113, 133, 0.16);
+  border: 1px solid rgba(251, 113, 133, 0.4);
+  color: #fb7185;
+}
+
+.account-btn-danger:hover:not(:disabled) {
+  background: rgba(251, 113, 133, 0.28);
+}
+
+@media (max-width: 560px) {
+  .account-page-main {
+    padding-top: 6rem;
+  }
+
+  .account-form-actions {
+    flex-direction: column;
+  }
+
+  .account-btn {
+    width: 100%;
+  }
+}

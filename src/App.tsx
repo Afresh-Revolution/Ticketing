@@ -32,6 +32,7 @@ import AdminCoupons from './admin/AdminCoupons'
 import AdminOnline from './admin/AdminOnline'
 import EventWatchPage from './components/EventWatchPage'
 import LegalPage from './components/LegalPage'
+import AccountPage from './components/AccountPage'
 import './App.css'
 import { getRouteTransitionVariant, type RouteTransitionVariant } from './routeTransitions'
 
@@ -81,6 +82,7 @@ function AnimatedRoutes() {
         <Route path="/organizer-form" element={<OrganizerFormPage />} />
         <Route path="/legal" element={<LegalPage />} />
         <Route path="/legal/:doc" element={<LegalPage />} />
+        <Route path="/account" element={<AccountPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<ProtectedAdminRoute />}>
           <Route index element={<AdminDashboard />} />
