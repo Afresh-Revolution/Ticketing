@@ -4,14 +4,24 @@ import FeaturesPage from './FeaturesPage';
 import Navbar from './Navbar';
 import TopUsersCarousel from './TopUsersCarousel';
 import { apiUrl } from '../api/config';
+import { isEventPastWithRecurrence } from '../utils/eventDates';
+import { normalizeEventCategory } from '../utils/eventCategories';
+import { formatRecurrenceBadge } from '../utils/eventRecurrence';
 import '../LandingPage/css/LandingPage.css';
 
 interface LandingEventCard {
   id: string;
   title: string;
   date: string;
+  endDate?: string | null;
   location: string;
   imageUrl: string;
+  category: string;
+  isTrending?: boolean;
+  isRecurring?: boolean;
+  recurrenceFrequency?: string;
+  recurrenceWeekday?: string | null;
+  recurrenceUntil?: string | null;
 }
 
 const HERO_TYPEWRITER_PHRASES = ['before you arrive.', 'With GateWav'] as const;
@@ -26,25 +36,36 @@ function toLandingEventCard(raw: unknown): LandingEventCard | null {
     id,
     title: typeof e.title === 'string' ? e.title : 'Event',
     date: typeof e.date === 'string' ? e.date : new Date().toISOString(),
+    endDate: e.endDate != null ? String(e.endDate) : null,
     location: typeof e.location === 'string' ? e.location : typeof e.venue === 'string' ? e.venue : 'Venue TBA',
     imageUrl:
       typeof e.imageUrl === 'string' && e.imageUrl
         ? e.imageUrl
         : 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80',
+    category: normalizeEventCategory(e.category),
+    isTrending: Boolean(e.isTrending),
+    isRecurring: Boolean(e.isRecurring),
+    recurrenceFrequency: e.recurrenceFrequency != null ? String(e.recurrenceFrequency) : 'none',
+    recurrenceWeekday: e.recurrenceWeekday != null ? String(e.recurrenceWeekday) : null,
+    recurrenceUntil: e.recurrenceUntil != null ? String(e.recurrenceUntil) : null,
   };
 }
 
-function eventDayStart(isoDate: string): number {
-  const raw = String(isoDate || '');
-  const day = /^\d{4}-\d{2}-\d{2}/.test(raw) ? raw.slice(0, 10) : '';
-  if (day) return new Date(`${day}T00:00:00`).getTime();
-  const parsed = new Date(raw).getTime();
-  return Number.isFinite(parsed) ? parsed : 0;
+function eventIsPast(event: LandingEventCard): boolean {
+  return isEventPastWithRecurrence(
+    event.date,
+    event.endDate,
+    event.recurrenceUntil,
+    event.isRecurring,
+  );
 }
 
-function startOfToday(): number {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+function sortByDateAsc(a: LandingEventCard, b: LandingEventCard): number {
+  return new Date(a.date).getTime() - new Date(b.date).getTime();
+}
+
+function sortByDateDesc(a: LandingEventCard, b: LandingEventCard): number {
+  return new Date(b.date).getTime() - new Date(a.date).getTime();
 }
 
 const LandingPage = () => {
@@ -61,7 +82,7 @@ const LandingPage = () => {
     const loadEvents = async () => {
       try {
         const [trendingRes, allRes] = await Promise.all([
-          fetch(apiUrl('/api/events?trending=true&take=6')),
+          fetch(apiUrl('/api/events?trending=true&take=40')),
           fetch(apiUrl('/api/events?take=100')),
         ]);
 
@@ -80,15 +101,11 @@ const LandingPage = () => {
         const normalize = (rows: unknown[]) =>
           rows.map(toLandingEventCard).filter((x): x is LandingEventCard => x !== null);
 
-        let trending = normalize(trendingRows).slice(0, LIST_LIMIT);
+        const trending = normalize(trendingRows).map((e) => ({ ...e, isTrending: true }));
         const catalog = normalize(allRows);
 
-        if (trending.length === 0) {
-          trending = catalog.slice(0, LIST_LIMIT);
-        }
-
         if (!cancelled) {
-          setTrendingEvents(trending);
+          setTrendingEvents(trending.length ? trending : catalog.filter((e) => e.isTrending));
           setAllEvents(catalog);
         }
       } catch (err) {
@@ -179,24 +196,24 @@ const LandingPage = () => {
     };
   }, []);
 
-  const today = startOfToday();
+  const liveTrending = useMemo(
+    () => trendingEvents.filter((e) => !eventIsPast(e)).sort(sortByDateAsc).slice(0, LIST_LIMIT),
+    [trendingEvents],
+  );
+
+  const pastTrending = useMemo(
+    () => trendingEvents.filter((e) => eventIsPast(e)).sort(sortByDateDesc).slice(0, LIST_LIMIT),
+    [trendingEvents],
+  );
 
   const recentEvents = useMemo(
-    () =>
-      [...allEvents]
-        .filter((event) => eventDayStart(event.date) >= today)
-        .sort((a, b) => eventDayStart(a.date) - eventDayStart(b.date))
-        .slice(0, LIST_LIMIT),
-    [allEvents, today],
+    () => allEvents.filter((e) => !eventIsPast(e)).sort(sortByDateAsc).slice(0, LIST_LIMIT),
+    [allEvents],
   );
 
   const pastEvents = useMemo(
-    () =>
-      [...allEvents]
-        .filter((event) => eventDayStart(event.date) < today)
-        .sort((a, b) => eventDayStart(b.date) - eventDayStart(a.date))
-        .slice(0, LIST_LIMIT),
-    [allEvents, today],
+    () => allEvents.filter((e) => eventIsPast(e)).sort(sortByDateDesc).slice(0, LIST_LIMIT),
+    [allEvents],
   );
 
   const formatEventDate = (isoDate: string) =>
@@ -210,6 +227,7 @@ const LandingPage = () => {
     emptyText,
     kicker,
     viewAllPath = '/events',
+    pastStyle = false,
   }: {
     id: string;
     label: string;
@@ -218,6 +236,7 @@ const LandingPage = () => {
     emptyText: string;
     kicker: string;
     viewAllPath?: string;
+    pastStyle?: boolean;
   }) => (
     <section className="lp-events-section" aria-labelledby={id}>
       <div className="lp-events-section-header">
@@ -238,28 +257,57 @@ const LandingPage = () => {
 
       {events.length > 0 ? (
         <ul className="lp-events-list">
-          {events.map((eventItem) => (
-            <li key={eventItem.id}>
-              <button
-                type="button"
-                className="lp-trending-card"
-                onClick={() => navigate(`/event/${eventItem.id}`)}
-                aria-label={`Open ${eventItem.title}`}
-              >
-                <img src={eventItem.imageUrl} alt="" className="lp-trending-card-image" />
-                <div className="lp-trending-card-overlay" aria-hidden />
-                <div className="lp-trending-card-content">
-                  <span className="lp-trending-card-kicker">{kicker}</span>
-                  <h3 className="lp-trending-card-title">{eventItem.title}</h3>
-                  <p className="lp-trending-card-meta">
-                    <span>{formatEventDate(eventItem.date)}</span>
-                    <span aria-hidden>•</span>
-                    <span>{eventItem.location}</span>
-                  </p>
-                </div>
-              </button>
-            </li>
-          ))}
+          {events.map((eventItem) => {
+            const recurrenceLabel = formatRecurrenceBadge({
+              isRecurring: Boolean(eventItem.isRecurring),
+              recurrenceFrequency: (eventItem.recurrenceFrequency || 'none') as
+                | 'none'
+                | 'daily'
+                | 'weekly'
+                | 'biweekly'
+                | 'monthly',
+              recurrenceWeekday: (eventItem.recurrenceWeekday || '') as
+                | ''
+                | 'monday'
+                | 'tuesday'
+                | 'wednesday'
+                | 'thursday'
+                | 'friday'
+                | 'saturday'
+                | 'sunday',
+              recurrenceUntil: eventItem.recurrenceUntil ?? null,
+            });
+            return (
+              <li key={eventItem.id}>
+                <button
+                  type="button"
+                  className={`lp-trending-card${pastStyle ? ' lp-trending-card--past' : ''}`}
+                  onClick={() => navigate(`/event/${eventItem.id}`)}
+                  aria-label={`Open ${eventItem.title}`}
+                >
+                  <img src={eventItem.imageUrl} alt="" className="lp-trending-card-image" />
+                  <div className="lp-trending-card-overlay" aria-hidden />
+                  <div className="lp-trending-card-badges">
+                    <span className={`lp-trending-card-kicker${pastStyle ? ' is-past' : ''}`}>
+                      {kicker}
+                    </span>
+                    {recurrenceLabel && (
+                      <span className="lp-event-badge lp-event-badge--recurring">{recurrenceLabel}</span>
+                    )}
+                    <span className="lp-event-badge lp-event-badge--category">{eventItem.category}</span>
+                  </div>
+                  <div className="lp-trending-card-content">
+                    <h3 className="lp-trending-card-title">{eventItem.title}</h3>
+                    <p className="lp-trending-card-meta">
+                      <span>{formatEventDate(eventItem.date)}</span>
+                      <span aria-hidden>•</span>
+                      <span>{eventItem.location}</span>
+                    </p>
+                  </div>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <p className="lp-trending-list-empty">{emptyText}</p>
@@ -331,7 +379,7 @@ const LandingPage = () => {
         id: 'lp-trending-list-heading',
         label: 'Trending',
         title: 'Events selling now',
-        events: trendingEvents,
+        events: liveTrending,
         emptyText: 'Trending events will appear here.',
         kicker: 'Selling now',
       })}
@@ -346,13 +394,25 @@ const LandingPage = () => {
       })}
 
       {renderEventSection({
+        id: 'lp-past-trending-list-heading',
+        label: 'Past trending',
+        title: 'Trending events from the past',
+        events: pastTrending,
+        emptyText: 'No past trending events yet.',
+        kicker: 'Ended',
+        viewAllPath: '/events/past',
+        pastStyle: true,
+      })}
+
+      {renderEventSection({
         id: 'lp-past-list-heading',
-        label: 'Archive',
-        title: 'Past events',
+        label: 'Past events',
+        title: 'Events from the past',
         events: pastEvents,
         emptyText: 'No past events yet.',
         kicker: 'Past event',
         viewAllPath: '/events/past',
+        pastStyle: true,
       })}
 
       <FeaturesPage />

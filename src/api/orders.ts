@@ -114,3 +114,26 @@ export async function fetchMyOrders(token: string): Promise<Order[]> {
     normalizeOrder(order as unknown as Record<string, unknown>),
   );
 }
+
+/** DELETE /api/user/orders/:orderId — permanently remove a ticket the user owns. */
+export async function deleteMyOrder(token: string, orderId: string): Promise<{ message: string; id: string }> {
+  const id = String(orderId || '').trim();
+  if (!id) throw new Error('Order id is required');
+
+  const res = await fetch(apiUrl(`/api/user/orders/${encodeURIComponent(id)}`), {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = (await res.json().catch(() => ({}))) as { error?: string; message?: string; id?: string };
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Please sign in to delete this ticket.');
+    if (res.status === 404) throw new Error(data.error || 'Ticket not found');
+    throw new Error(data.error || 'Failed to delete ticket');
+  }
+
+  return {
+    message: data.message || 'Ticket deleted',
+    id: String(data.id ?? id),
+  };
+}

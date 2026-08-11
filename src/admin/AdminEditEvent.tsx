@@ -11,6 +11,15 @@ import {
 } from '../types/merch';
 import { MAX_EVENT_IMAGES, parseStoredEventImages } from '../utils/eventImages';
 import { STREAM_PROVIDERS, type DeliveryMode, type EventFormat, normalizeDeliveryMode } from '../utils/eventStream';
+import { EVENT_CATEGORIES, normalizeEventCategory } from '../utils/eventCategories';
+import {
+  RECURRENCE_FREQUENCIES,
+  WEEKDAYS,
+  normalizeRecurrenceFrequency,
+  normalizeRecurrenceWeekday,
+  type RecurrenceFrequency,
+  type Weekday,
+} from '../utils/eventRecurrence';
 import {
   normalizeDiscountTiers,
   validateDiscountTiers,
@@ -68,6 +77,10 @@ type EventApiResponse = {
   streamUrl?: string;
   streamProvider?: string;
   location?: string;
+  isRecurring?: boolean;
+  recurrenceFrequency?: string;
+  recurrenceWeekday?: string | null;
+  recurrenceUntil?: string | null;
   tickets?: EventTicket[];
   ticketTypes?: EventTicket[];
 };
@@ -171,6 +184,10 @@ const AdminEditEvent = () => {
     imageUrls: [] as string[],
     streamUrl: '',
     streamProvider: 'youtube',
+    isRecurring: false,
+    recurrenceFrequency: 'none' as RecurrenceFrequency,
+    recurrenceWeekday: '' as Weekday | '',
+    recurrenceUntil: '',
   });
 
   const eventFormat = (formData.eventType || 'in-person') as EventFormat;
@@ -230,8 +247,15 @@ const AdminEditEvent = () => {
       const startTime = (mergedEvent.startTime || (isValidDate ? rawDate.toTimeString().slice(0, 5) : '') || '12:00').slice(0, 5);
       const rawEndDate = mergedEvent.endDate ? new Date(mergedEvent.endDate) : null;
       const isValidEndDate = rawEndDate instanceof Date && !Number.isNaN(rawEndDate.getTime());
-      const endDate = isValidEndDate ? rawEndDate.toLocaleDateString('en-CA') : startDate;
-      const endTime = (mergedEvent.endTime || startTime).slice(0, 5);
+      const endDate = isValidEndDate ? rawEndDate.toLocaleDateString('en-CA') : '';
+      const endTime = mergedEvent.endTime ? String(mergedEvent.endTime).slice(0, 5) : '';
+      const recurrenceFrequency = normalizeRecurrenceFrequency(mergedEvent.recurrenceFrequency);
+      const isRecurring = Boolean(mergedEvent.isRecurring) && recurrenceFrequency !== 'none';
+      const rawUntil = mergedEvent.recurrenceUntil ? new Date(mergedEvent.recurrenceUntil) : null;
+      const recurrenceUntil =
+        rawUntil instanceof Date && !Number.isNaN(rawUntil.getTime())
+          ? rawUntil.toLocaleDateString('en-CA')
+          : '';
 
       const locationText = String(mergedEvent.location ?? '').trim();
       const locationParts = locationText ? locationText.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
@@ -239,7 +263,7 @@ const AdminEditEvent = () => {
       setFormData({
         title: mergedEvent.title ?? '',
         description: mergedEvent.description ?? '',
-        category: mergedEvent.category ?? '',
+        category: normalizeEventCategory(mergedEvent.category),
         eventType: mergedEvent.eventType || 'in-person',
         startDate,
         startTime,
@@ -256,6 +280,10 @@ const AdminEditEvent = () => {
         imageUrls: parseStoredEventImages(mergedEvent.imageUrls, mergedEvent.imageUrl),
         streamUrl: mergedEvent.streamUrl ?? '',
         streamProvider: mergedEvent.streamProvider ?? 'youtube',
+        isRecurring,
+        recurrenceFrequency: isRecurring ? recurrenceFrequency : 'none',
+        recurrenceWeekday: normalizeRecurrenceWeekday(mergedEvent.recurrenceWeekday),
+        recurrenceUntil,
       });
       const loadedEventType = mergedEvent.eventType || 'in-person';
       const tickets: EventTicket[] = mergedEvent.tickets ?? mergedEvent.ticketTypes ?? [];
@@ -291,8 +319,29 @@ const AdminEditEvent = () => {
   }, [fetchEvent]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev) => {
+      const next = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+      if (name === 'recurrenceFrequency') {
+        const freq = value as RecurrenceFrequency;
+        next.isRecurring = freq !== 'none';
+        if (freq !== 'weekly' && freq !== 'biweekly') next.recurrenceWeekday = '';
+      }
+      if (name === 'isRecurring') {
+        if (checked) {
+          if (next.recurrenceFrequency === 'none') next.recurrenceFrequency = 'weekly';
+        } else {
+          next.recurrenceFrequency = 'none';
+          next.recurrenceWeekday = '';
+          next.recurrenceUntil = '';
+        }
+      }
+      return next;
+    });
     if (name === 'eventType') {
       const next = value as EventFormat;
       if (next === 'online') {
@@ -383,6 +432,15 @@ const AdminEditEvent = () => {
         return;
       }
 
+      if (
+        formData.isRecurring &&
+        (formData.recurrenceFrequency === 'weekly' || formData.recurrenceFrequency === 'biweekly') &&
+        !formData.recurrenceWeekday
+      ) {
+        setSubmitError('Select a weekday for this recurring event.');
+        return;
+      }
+
       const merchError = getMerchFormError(merchItems);
       if (merchError) {
         setSubmitError(merchError);
@@ -400,8 +458,8 @@ const AdminEditEvent = () => {
         title: formData.title,
         description: formData.description,
         date: dateTimeString,
-        endDate: formData.endDate || formData.startDate,
-        endTime: formData.endTime || formData.startTime,
+        endDate: formData.endDate || null,
+        endTime: formData.endTime || null,
         venue: formData.venue,
         location: locationString,
         city: formData.city || undefined,
@@ -414,6 +472,15 @@ const AdminEditEvent = () => {
         imageUrl: formData.imageUrls[0] || undefined,
         streamUrl: showStreamFields ? formData.streamUrl.trim() || undefined : undefined,
         streamProvider: showStreamFields ? formData.streamProvider : undefined,
+        isRecurring: formData.isRecurring && formData.recurrenceFrequency !== 'none',
+        recurrenceFrequency: formData.isRecurring ? formData.recurrenceFrequency : 'none',
+        recurrenceWeekday:
+          formData.isRecurring &&
+          (formData.recurrenceFrequency === 'weekly' || formData.recurrenceFrequency === 'biweekly')
+            ? formData.recurrenceWeekday || null
+            : null,
+        recurrenceUntil:
+          formData.isRecurring && formData.recurrenceUntil ? formData.recurrenceUntil : null,
         ticketTypes,
       };
       const headers: HeadersInit = {
@@ -609,12 +676,11 @@ const AdminEditEvent = () => {
                 onChange={handleChange}
               >
                 <option value="">Select category</option>
-                <option value="Music">Music</option>
-                <option value="Tech">Tech</option>
-                <option value="Art">Art</option>
-                <option value="Food">Food</option>
-                <option value="Wellness">Wellness</option>
-                <option value="Nightlife">Nightlife</option>
+                {EVENT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -659,6 +725,100 @@ const AdminEditEvent = () => {
                 onChange={handleChange}
               />
             </div>
+          </div>
+          <div className="admin-form-row">
+            <div>
+              <label className="admin-label">
+                End Date <span className="admin-optional">(optional)</span>
+              </label>
+              <input
+                type="date"
+                name="endDate"
+                className="admin-input"
+                value={formData.endDate}
+                onChange={handleChange}
+                min={formData.startDate || undefined}
+              />
+            </div>
+            <div>
+              <label className="admin-label">
+                End Time <span className="admin-optional">(optional)</span>
+              </label>
+              <input
+                type="time"
+                name="endTime"
+                className="admin-input"
+                value={formData.endTime}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="admin-recurrence-box">
+            <label className="admin-checkbox-label">
+              <input
+                type="checkbox"
+                name="isRecurring"
+                checked={formData.isRecurring}
+                onChange={handleChange}
+              />
+              Recurring event
+            </label>
+            <p className="admin-input-hint">
+              Use for events that repeat (e.g. every Monday). Sales stay open until the series end date if set.
+            </p>
+            {formData.isRecurring && (
+              <div className="admin-form-row admin-recurrence-fields">
+                <div>
+                  <label className="admin-label">Repeats</label>
+                  <select
+                    name="recurrenceFrequency"
+                    className="admin-select"
+                    value={formData.recurrenceFrequency}
+                    onChange={handleChange}
+                  >
+                    {RECURRENCE_FREQUENCIES.filter((f) => f.value !== 'none').map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {(formData.recurrenceFrequency === 'weekly' ||
+                  formData.recurrenceFrequency === 'biweekly') && (
+                  <div>
+                    <label className="admin-label">On weekday *</label>
+                    <select
+                      name="recurrenceWeekday"
+                      className="admin-select"
+                      required
+                      value={formData.recurrenceWeekday}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select day</option>
+                      {WEEKDAYS.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div>
+                  <label className="admin-label">
+                    Series ends <span className="admin-optional">(optional)</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="recurrenceUntil"
+                    className="admin-input"
+                    value={formData.recurrenceUntil}
+                    onChange={handleChange}
+                    min={formData.startDate || undefined}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

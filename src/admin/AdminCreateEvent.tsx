@@ -5,6 +5,13 @@ import AdminMerchForm from './AdminMerchForm';
 import { merchFormToPayload, getMerchFormError, type MerchFormItem } from '../types/merch';
 import { DEFAULT_EVENT_IMAGE, MAX_EVENT_IMAGES } from '../utils/eventImages';
 import { STREAM_PROVIDERS, type DeliveryMode, type EventFormat } from '../utils/eventStream';
+import { EVENT_CATEGORIES } from '../utils/eventCategories';
+import {
+  RECURRENCE_FREQUENCIES,
+  WEEKDAYS,
+  type RecurrenceFrequency,
+  type Weekday,
+} from '../utils/eventRecurrence';
 import {
   normalizeDiscountTiers,
   validateDiscountTiers,
@@ -118,6 +125,10 @@ const AdminCreateEvent = () => {
     imageUrls: [] as string[],
     streamUrl: '',
     streamProvider: 'youtube',
+    isRecurring: false,
+    recurrenceFrequency: 'none' as RecurrenceFrequency,
+    recurrenceWeekday: '' as Weekday | '',
+    recurrenceUntil: '',
   });
 
   const eventFormat = (formData.eventType || 'in-person') as EventFormat;
@@ -127,8 +138,29 @@ const AdminCreateEvent = () => {
   const locationRequired = !isOnlineOnly;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev) => {
+      const next = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+      if (name === 'recurrenceFrequency') {
+        const freq = value as RecurrenceFrequency;
+        next.isRecurring = freq !== 'none';
+        if (freq !== 'weekly' && freq !== 'biweekly') next.recurrenceWeekday = '';
+      }
+      if (name === 'isRecurring') {
+        if (checked) {
+          if (next.recurrenceFrequency === 'none') next.recurrenceFrequency = 'weekly';
+        } else {
+          next.recurrenceFrequency = 'none';
+          next.recurrenceWeekday = '';
+          next.recurrenceUntil = '';
+        }
+      }
+      return next;
+    });
     if (name === 'eventType') {
       const next = value as EventFormat;
       if (next === 'online') {
@@ -236,6 +268,15 @@ const AdminCreateEvent = () => {
         return;
       }
 
+      if (
+        formData.isRecurring &&
+        (formData.recurrenceFrequency === 'weekly' || formData.recurrenceFrequency === 'biweekly') &&
+        !formData.recurrenceWeekday
+      ) {
+        setError('Select a weekday for this recurring event.');
+        return;
+      }
+
       const merchError = getMerchFormError(merchItems);
       if (merchError) {
         setError(merchError);
@@ -255,8 +296,8 @@ const AdminCreateEvent = () => {
         title: formData.title,
         description: formData.description,
         date: dateTimeString,
-        endDate: formData.endDate || formData.startDate,
-        endTime: formData.endTime || formData.startTime,
+        endDate: formData.endDate || null,
+        endTime: formData.endTime || null,
         venue: formData.venue || (isOnlineOnly ? 'Online' : ''),
         location: locationString || (isOnlineOnly ? 'Online' : locationString),
         city: formData.city || undefined,
@@ -270,6 +311,15 @@ const AdminCreateEvent = () => {
         imageUrl: formData.imageUrls[0] || DEFAULT_EVENT_IMAGE,
         streamUrl: showStreamFields ? formData.streamUrl.trim() || undefined : undefined,
         streamProvider: showStreamFields ? formData.streamProvider : undefined,
+        isRecurring: formData.isRecurring && formData.recurrenceFrequency !== 'none',
+        recurrenceFrequency: formData.isRecurring ? formData.recurrenceFrequency : 'none',
+        recurrenceWeekday:
+          formData.isRecurring &&
+          (formData.recurrenceFrequency === 'weekly' || formData.recurrenceFrequency === 'biweekly')
+            ? formData.recurrenceWeekday || null
+            : null,
+        recurrenceUntil:
+          formData.isRecurring && formData.recurrenceUntil ? formData.recurrenceUntil : null,
         ticketTypes,
       };
       if (merchPayload.length > 0) {
@@ -372,12 +422,11 @@ const AdminCreateEvent = () => {
                 onChange={handleChange}
               >
                 <option value="">Select category</option>
-                <option value="Music">Music</option>
-                <option value="Tech">Tech</option>
-                <option value="Art">Art</option>
-                <option value="Food">Food</option>
-                <option value="Wellness">Wellness</option>
-                <option value="Nightlife">Nightlife</option>
+                {EVENT_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -430,23 +479,22 @@ const AdminCreateEvent = () => {
           </div>
           <div className="admin-form-row">
             <div>
-              <label className="admin-label">End Date *</label>
+              <label className="admin-label">End Date <span className="admin-optional">(optional)</span></label>
               <input 
                 type="date" 
                 name="endDate"
                 className="admin-input" 
-                required 
                 value={formData.endDate}
                 onChange={handleChange}
+                min={formData.startDate || undefined}
               />
             </div>
             <div>
-              <label className="admin-label">End Time *</label>
+              <label className="admin-label">End Time <span className="admin-optional">(optional)</span></label>
               <input 
                 type="time" 
                 name="endTime"
                 className="admin-input" 
-                required 
                 value={formData.endTime}
                 onChange={handleChange}
               />
@@ -465,6 +513,71 @@ const AdminCreateEvent = () => {
               <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
               <option value="UTC">UTC</option>
             </select>
+          </div>
+
+          <div className="admin-recurrence-box">
+            <label className="admin-checkbox-label">
+              <input
+                type="checkbox"
+                name="isRecurring"
+                checked={formData.isRecurring}
+                onChange={handleChange}
+              />
+              Recurring event
+            </label>
+            <p className="admin-input-hint">
+              Use for events that repeat (e.g. every Monday). Sales stay open until the series end date if set.
+            </p>
+            {formData.isRecurring && (
+              <div className="admin-form-row admin-recurrence-fields">
+                <div>
+                  <label className="admin-label">Repeats</label>
+                  <select
+                    name="recurrenceFrequency"
+                    className="admin-select"
+                    value={formData.recurrenceFrequency}
+                    onChange={handleChange}
+                  >
+                    {RECURRENCE_FREQUENCIES.filter((f) => f.value !== 'none').map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {(formData.recurrenceFrequency === 'weekly' ||
+                  formData.recurrenceFrequency === 'biweekly') && (
+                  <div>
+                    <label className="admin-label">On weekday *</label>
+                    <select
+                      name="recurrenceWeekday"
+                      className="admin-select"
+                      required
+                      value={formData.recurrenceWeekday}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select day</option>
+                      {WEEKDAYS.map((d) => (
+                        <option key={d.value} value={d.value}>
+                          {d.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <div>
+                  <label className="admin-label">Series ends <span className="admin-optional">(optional)</span></label>
+                  <input
+                    type="date"
+                    name="recurrenceUntil"
+                    className="admin-input"
+                    value={formData.recurrenceUntil}
+                    onChange={handleChange}
+                    min={formData.startDate || undefined}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

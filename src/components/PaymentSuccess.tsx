@@ -22,7 +22,10 @@ const PaymentSuccess = () => {
   const queryEventId = params.get("eventId") || "";
   const orderType = params.get("type") || "";
   const isMerchOrder = orderType === "merch";
-  const paymentCancelled = !!queryOrderId && !queryReference;
+  // Cancelled return: orderId present, no Paystack reference, and no explicit success status.
+  // Backend can verify with orderId alone (falls back to stored reference / webhook fulfill).
+  const paymentCancelled =
+    !!queryOrderId && !queryReference && queryStatus !== "success" && queryStatus !== "successful";
   const paymentFailedStatus = queryStatus === "failed";
 
   const amountToShow =
@@ -38,20 +41,21 @@ const PaymentSuccess = () => {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!queryOrderId || !queryReference) return;
+      if (!queryOrderId || paymentCancelled || paymentFailedStatus) return;
+      // Merch verify still requires a Paystack reference.
+      if (isMerchOrder && !queryReference) return;
       setVerifying(true);
       setVerifyError("");
       try {
         if (isMerchOrder) {
           await verifyMerchPayment(queryOrderId, queryReference);
         } else {
+          const body: { orderId: string; reference?: string } = { orderId: queryOrderId };
+          if (queryReference) body.reference = queryReference;
           const res = await fetch(apiUrl("/api/orders/verify"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              orderId: queryOrderId,
-              reference: queryReference,
-            }),
+            body: JSON.stringify(body),
           });
           if (!res.ok) {
             const data = await res.json().catch(() => ({} as { error?: string }));
@@ -71,7 +75,7 @@ const PaymentSuccess = () => {
     return () => {
       cancelled = true;
     };
-  }, [queryOrderId, queryReference, isMerchOrder]);
+  }, [queryOrderId, queryReference, isMerchOrder, paymentCancelled, paymentFailedStatus]);
 
   useEffect(() => {
     if (!verifiedSuccessfully) return;

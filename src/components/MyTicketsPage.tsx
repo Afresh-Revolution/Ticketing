@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
-import { fetchMyOrders, filterOrdersByEmail, type Order } from '../api/orders';
+import { deleteMyOrder, fetchMyOrders, filterOrdersByEmail, type Order } from '../api/orders';
 import { isOnlineTicket, normalizeEventFormat } from '../utils/eventStream';
 import { OnlineTicketAccessPanel } from './OnlineTicketAccessPanel';
 import Navbar from './Navbar';
@@ -64,6 +64,9 @@ const MyTicketsPage = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
   const [now, setNow] = useState(() => new Date());
+  const [deleteConfirm, setDeleteConfirm] = useState<Order | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState('');
   const orderCardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const highlightOrderId = (location.state as { highlightOrderId?: string } | null)?.highlightOrderId;
 
@@ -133,6 +136,33 @@ const MyTicketsPage = () => {
 
   const formatAmount = (amount: number) => {
     return `₦${amount.toLocaleString()}`;
+  };
+
+  const openDeleteConfirm = (order: Order) => {
+    setDeleteError('');
+    setDeleteConfirm(order);
+  };
+
+  const closeDeleteConfirm = () => {
+    if (deletingId) return;
+    setDeleteConfirm(null);
+    setDeleteError('');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!token || !deleteConfirm) return;
+    const orderId = deleteConfirm.id;
+    setDeletingId(orderId);
+    setDeleteError('');
+    try {
+      await deleteMyOrder(token, orderId);
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setDeleteConfirm(null);
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Failed to delete ticket.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   // When opened via share link, switch to tab that contains the order and scroll to it
@@ -262,7 +292,20 @@ const MyTicketsPage = () => {
                     )}
                     <div className="my-tickets-card-footer">
                       <strong>Total: {formatAmount(order.totalAmount)}</strong>
-                      <Link to={`/event/${order.eventId}`} className="my-tickets-card-link">View event</Link>
+                      <div className="my-tickets-card-actions">
+                        <Link to={`/event/${order.eventId}`} className="my-tickets-card-link">
+                          View event
+                        </Link>
+                        <button
+                          type="button"
+                          className="my-tickets-delete-btn"
+                          onClick={() => openDeleteConfirm(order)}
+                          disabled={deletingId === order.id}
+                          aria-label={`Delete ticket for ${order.event?.title ?? 'event'}`}
+                        >
+                          {deletingId === order.id ? 'Deleting…' : 'Delete ticket'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -270,9 +313,52 @@ const MyTicketsPage = () => {
             )}
           </>
         )}
-
-        
       </main>
+
+      {deleteConfirm && (
+        <div
+          className="my-tickets-modal-overlay"
+          role="presentation"
+          onClick={closeDeleteConfirm}
+        >
+          <div
+            className="my-tickets-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="my-tickets-delete-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="my-tickets-delete-title" className="my-tickets-modal-title">
+              Delete ticket?
+            </h2>
+            <p className="my-tickets-modal-text">
+              Permanently remove your ticket for{' '}
+              <strong>{deleteConfirm.event?.title ?? 'this event'}</strong>? This cannot be undone
+              and the QR code will stop working.
+            </p>
+            {deleteError && <p className="my-tickets-modal-error">{deleteError}</p>}
+            <div className="my-tickets-modal-actions">
+              <button
+                type="button"
+                className="my-tickets-modal-cancel"
+                onClick={closeDeleteConfirm}
+                disabled={!!deletingId}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="my-tickets-modal-danger"
+                onClick={() => void handleConfirmDelete()}
+                disabled={!!deletingId}
+              >
+                {deletingId ? 'Deleting…' : 'Delete ticket'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );

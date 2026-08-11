@@ -3,7 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { shareEvent } from "../utils/shareEvent";
 import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
-import { formatEventDateTag, isEventPast } from "../utils/eventDates";
+import { formatEventDateTag, isEventPastWithRecurrence } from "../utils/eventDates";
+import { EVENT_CATEGORY_FILTERS, normalizeEventCategory } from "../utils/eventCategories";
+import { formatRecurrenceBadge } from "../utils/eventRecurrence";
 import { primaryEventImage, resolveEventImages } from "../utils/eventImages";
 import { isReservationEvent } from "../utils/eventTickets";
 import { EventCardImageCarousel } from "./EventCardImageCarousel";
@@ -11,16 +13,6 @@ import Navbar from "./Navbar";
 import Logo from "./Logo";
 import { EventsGridSkeleton } from "./Skeleton";
 import "./EventsPage.css";
-
-const CATEGORIES = [
-  "All",
-  "Music",
-  "Tech",
-  "Food",
-  "Art",
-  "Nightlife",
-  "Wellness",
-] as const;
 
 interface Event {
   id: string;
@@ -35,9 +27,14 @@ interface Event {
   price: string;
   images: string[];
   isReservation: boolean;
+  isRecurring?: boolean;
+  recurrenceFrequency?: string;
+  recurrenceWeekday?: string | null;
+  recurrenceUntil?: string | null;
 }
 
 type EventsPageMode = "all" | "past";
+type Scope = "upcoming" | "past";
 
 type EventsPageProps = {
   mode?: EventsPageMode;
@@ -49,9 +46,14 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedState, setSelectedState] = useState<string>("All");
+  const [scope, setScope] = useState<Scope>(pastOnly ? "past" : "upcoming");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [shareCopiedId, setShareCopiedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setScope(pastOnly ? "past" : "upcoming");
+  }, [pastOnly]);
 
   const getEventShareUrl = useCallback((eventId: string) => {
     const base = `${window.location.origin}${window.location.pathname || "/"}`.replace(/\/*$/, "/");
@@ -94,6 +96,10 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
             imageUrl?: string;
             imageUrls?: string[];
             tickets?: { type?: string; price?: number }[];
+            isRecurring?: boolean;
+            recurrenceFrequency?: string;
+            recurrenceWeekday?: string | null;
+            recurrenceUntil?: string | null;
           }
           const formattedEvents = data.map((e: ApiEvent) => {
             const tickets = Array.isArray(e.tickets) ? e.tickets : [];
@@ -105,13 +111,17 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
               date: formatEventDateTag(e.date, e.endDate),
               rawDate: e.date ? String(e.date) : '',
               rawEndDate: e.endDate != null ? String(e.endDate) : null,
-              category: e.category || 'General',
+              category: normalizeEventCategory(e.category),
               location: e.location || e.venue || 'TBD',
               state: resolveEventState(e),
               time: e.startTime || 'TBD',
               price: reservation ? 'Reservation' : e.price ? e.price.toLocaleString() : 'Free',
               images: resolveEventImages(e.imageUrls, e.imageUrl),
               isReservation: reservation,
+              isRecurring: Boolean(e.isRecurring),
+              recurrenceFrequency: e.recurrenceFrequency || 'none',
+              recurrenceWeekday: e.recurrenceWeekday ?? null,
+              recurrenceUntil: e.recurrenceUntil != null ? String(e.recurrenceUntil) : null,
             };
           });
           setEvents(formattedEvents);
@@ -125,15 +135,26 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
     fetchEvents();
   }, []);
 
+  const eventIsPast = useCallback((event: Event) => {
+    return isEventPastWithRecurrence(
+      event.rawDate,
+      event.rawEndDate,
+      event.recurrenceUntil,
+      event.isRecurring,
+    );
+  }, []);
+
   const filteredEvents = useMemo(() => {
-    const scoped = pastOnly
-      ? events
-          .filter((event) => isEventPast(event.rawDate, event.rawEndDate))
-          .sort(
-            (a, b) =>
-              new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime(),
-          )
-      : events;
+    const effectiveScope: Scope = pastOnly ? "past" : scope;
+    const scoped = events
+      .filter((event) => {
+        const past = eventIsPast(event);
+        return effectiveScope === "past" ? past : !past;
+      })
+      .sort((a, b) => {
+        const diff = new Date(a.rawDate).getTime() - new Date(b.rawDate).getTime();
+        return effectiveScope === "past" ? -diff : diff;
+      });
 
     return scoped.filter((event) => {
       const matchesCategory =
@@ -148,7 +169,9 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
         event.state.toLowerCase().includes(q);
       return matchesCategory && matchesState && matchesSearch;
     });
-  }, [searchQuery, selectedCategory, selectedState, events, pastOnly]);
+  }, [searchQuery, selectedCategory, selectedState, events, pastOnly, scope, eventIsPast]);
+
+  const showingPast = pastOnly || scope === "past";
 
   return (
     <div className="events-page">
@@ -180,14 +203,14 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
               <input
                 type="search"
                 placeholder={
-                  pastOnly
+                  showingPast
                     ? "Search past events, venues, artists..."
                     : "Search events, venues, artists..."
                 }
                 className="events-search-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label={pastOnly ? "Search past events" : "Search events"}
+                aria-label={showingPast ? "Search past events" : "Search events"}
               />
               <button
                 type="button"
@@ -226,8 +249,32 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
               </select>
             </div>
           </div>
+
+          {!pastOnly && (
+            <div className="events-scope-row" role="tablist" aria-label="Upcoming or past events">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={scope === "upcoming"}
+                className={`events-scope-btn${scope === "upcoming" ? " active" : ""}`}
+                onClick={() => setScope("upcoming")}
+              >
+                Upcoming
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={scope === "past"}
+                className={`events-scope-btn${scope === "past" ? " active" : ""}`}
+                onClick={() => setScope("past")}
+              >
+                Past
+              </button>
+            </div>
+          )}
+
           <div className="events-categories">
-            {CATEGORIES.map((cat) => (
+            {EVENT_CATEGORY_FILTERS.map((cat) => (
               <button
                 key={cat}
                 type="button"
@@ -246,15 +293,36 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
           <>
             <h2 className="events-count">
               {filteredEvents.length}{" "}
-              {pastOnly ? "Past Event" : "Event"}
+              {showingPast ? "Past Event" : "Event"}
               {filteredEvents.length !== 1 ? "s" : ""} Found
             </h2>
 
             <div className="events-grid">
-              {filteredEvents.map((event) => (
+              {filteredEvents.map((event) => {
+                const past = eventIsPast(event);
+                const recurrenceLabel = formatRecurrenceBadge({
+                  isRecurring: Boolean(event.isRecurring),
+                  recurrenceFrequency: (event.recurrenceFrequency || "none") as
+                    | "none"
+                    | "daily"
+                    | "weekly"
+                    | "biweekly"
+                    | "monthly",
+                  recurrenceWeekday: (event.recurrenceWeekday || "") as
+                    | ""
+                    | "monday"
+                    | "tuesday"
+                    | "wednesday"
+                    | "thursday"
+                    | "friday"
+                    | "saturday"
+                    | "sunday",
+                  recurrenceUntil: event.recurrenceUntil ?? null,
+                });
+                return (
                 <article
                   key={event.id}
-                  className="event-card"
+                  className={`event-card${past ? " event-card--past" : ""}`}
                   role="link"
                   tabIndex={0}
                   onClick={() => navigate(`/event/${event.id}`)}
@@ -273,7 +341,15 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
                       imageClassName="event-card-image"
                     />
                     <span className="event-date-tag">{event.date}</span>
-                    <span className="event-category-tag">{event.category}</span>
+                    <div className="event-card-badges">
+                      {past && <span className="event-status-badge event-status-badge--past">Ended</span>}
+                      {recurrenceLabel && (
+                        <span className="event-status-badge event-status-badge--recurring">
+                          {recurrenceLabel}
+                        </span>
+                      )}
+                      <span className="event-category-tag">{event.category}</span>
+                    </div>
                   </div>
                   <div className="event-card-body">
                     <h3 className="event-card-title">{event.title}</h3>
@@ -315,7 +391,7 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
                       </p>
                       <div className="event-card-cta-row">
                         <Link to={`/event/${event.id}`} className="event-card-cta">
-                          {pastOnly || isEventPast(event.rawDate, event.rawEndDate)
+                          {past
                             ? "View Event"
                             : event.isReservation
                               ? "Reserve"
@@ -346,7 +422,8 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
                     </div>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </>
         )}

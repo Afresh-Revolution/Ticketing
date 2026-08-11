@@ -132,7 +132,11 @@ export function formatEventDateTag(
   return `${formatShortTag(start)} – ${formatShortTag(end)}`;
 }
 
-/** True when the event's end day (or start day if no end) is before today. */
+/**
+ * True when the event's effective end day is before today.
+ * Uses endDate when set, otherwise startDate (aligned with mobile + sales-closed logic).
+ * Optional third arg accepts a recurrenceUntil override via effectiveEndDate.
+ */
 export function isEventPast(
   startDate?: string | null,
   endDate?: string | null,
@@ -144,6 +148,19 @@ export function isEventPast(
   const endDay = new Date(`${endKey}T00:00:00`);
   if (Number.isNaN(endDay.getTime())) return false;
   return endDay.getTime() < today.getTime();
+}
+
+/** Past check that also respects recurring series end (`recurrenceUntil`). */
+export function isEventPastWithRecurrence(
+  startDate?: string | null,
+  endDate?: string | null,
+  recurrenceUntil?: string | null,
+  isRecurring?: boolean,
+  now = new Date(),
+): boolean {
+  const effective =
+    isRecurring && recurrenceUntil ? recurrenceUntil : endDate || startDate;
+  return isEventPast(startDate, effective, now);
 }
 
 /** Long form for detail pages. */

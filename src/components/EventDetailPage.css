@@ -51,10 +51,19 @@
   );
 }
 
-.event-detail-hero-tag {
+.event-detail-hero-tags {
   position: absolute;
   top: 1rem;
   left: 1.5rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: calc(100% - 3rem);
+}
+
+.event-detail-hero-tag {
+  position: static;
   background: #5a2c8f;
   color: #fff;
   padding: 0.35rem 0.75rem;
@@ -62,7 +71,14 @@
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  z-index: 2;
+}
+
+.event-detail-hero-tag--recurring {
+  background: rgba(14, 165, 233, 0.85);
+}
+
+.event-detail-hero-tag--past {
+  background: rgba(75, 85, 99, 0.92);
 }
 
 /* Main content */
