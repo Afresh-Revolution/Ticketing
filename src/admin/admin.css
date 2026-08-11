@@ -3308,10 +3308,44 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 /* Image URL helper hint */
 .admin-input-hint {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
   margin: 0.35rem 0 0.75rem;
-  line-height: 1.5;
+}
+
+.admin-optional {
+  font-weight: 500;
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.admin-recurrence-box {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+.admin-checkbox-label input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #791a94;
+}
+
+.admin-recurrence-fields {
+  margin-top: 0.75rem;
 }
 
 /* Coupons */
@@ -3961,4 +3995,39 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 .admin-discount-tiers .admin-pool-remove {
   margin-bottom: 0.15rem;
+}
+
+.admin-optional {
+  font-weight: 500;
+  font-size: 0.8em;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.admin-recurrence-box {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+.admin-checkbox-label input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #791a94;
+}
+
+.admin-recurrence-fields {
+  margin-top: 0.75rem;
 }

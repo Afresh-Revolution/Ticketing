@@ -40,6 +40,11 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, sectionId 
            </div>
 
           <div className="faq-item">
+             <h4>How do I delete a ticket?</h4>
+             <p>Sign in, open My Tickets, then choose Delete ticket on the ticket you want to remove. Confirm in the dialog — this permanently deletes that ticket and cannot be undone.</p>
+           </div>
+
+          <div className="faq-item">
              <h4>How do I delete my account?</h4>
              <p>Sign in, open Account in the navigation bar, then choose Delete my account. You will need your password and must type DELETE to confirm. You can also email info@gatewav.com from your registered address.</p>
            </div>

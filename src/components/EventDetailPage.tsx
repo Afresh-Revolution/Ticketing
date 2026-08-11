@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { resolveEventState } from "../utils/eventLocation";
-import { formatEventDateLong, isEventPast } from "../utils/eventDates";
+import { formatEventDateLong, isEventPastWithRecurrence } from "../utils/eventDates";
+import { normalizeEventCategory } from "../utils/eventCategories";
+import { formatRecurrenceBadge } from "../utils/eventRecurrence";
 import { fetchLiveStatus } from "../api/stream";
 import { isOnlineTicket, normalizeEventFormat } from "../utils/eventStream";
 import { isReservationEvent, normalizeTicketType } from "../utils/eventTickets";
@@ -48,6 +50,10 @@ interface EventDetail {
   heroImage: string;
   about: string;
   organizer: string;
+  isRecurring?: boolean;
+  recurrenceFrequency?: string;
+  recurrenceWeekday?: string | null;
+  recurrenceUntil?: string | null;
   tickets: TicketType[];
   eventType: string;
   isLive: boolean;
@@ -144,7 +150,7 @@ const EventDetailPage = () => {
         const formattedEvent: EventDetail = {
           id: data.id,
           title: data.title,
-          category: data.category || "General",
+          category: normalizeEventCategory(data.category),
           date: formatEventDateLong(data.date, data.endDate),
           rawDate: data.date ? String(data.date) : "",
           rawEndDate: data.endDate != null ? String(data.endDate) : null,
@@ -166,6 +172,10 @@ const EventDetailPage = () => {
           tickets,
           eventType,
           isLive: Boolean(data.isLive),
+          isRecurring: Boolean(data.isRecurring),
+          recurrenceFrequency: data.recurrenceFrequency || "none",
+          recurrenceWeekday: data.recurrenceWeekday ?? null,
+          recurrenceUntil: data.recurrenceUntil != null ? String(data.recurrenceUntil) : null,
         };
 
         setEvent(formattedEvent);
@@ -269,12 +279,41 @@ const EventDetailPage = () => {
     );
 
   const renderMerchSection = () =>
-    !isEventPast(event.rawDate, event.rawEndDate) && merch.length > 0 && id ? (
+    !isEventPastWithRecurrence(
+      event.rawDate,
+      event.rawEndDate,
+      event.recurrenceUntil,
+      event.isRecurring,
+    ) && merch.length > 0 && id ? (
       <EventMerchSection eventId={id} eventTitle={event.title} merch={merch} />
     ) : null;
 
   const reservationOnly = isReservationEvent(event.tickets);
-  const eventIsPast = isEventPast(event.rawDate, event.rawEndDate);
+  const eventIsPast = isEventPastWithRecurrence(
+    event.rawDate,
+    event.rawEndDate,
+    event.recurrenceUntil,
+    event.isRecurring,
+  );
+  const recurrenceLabel = formatRecurrenceBadge({
+    isRecurring: Boolean(event.isRecurring),
+    recurrenceFrequency: (event.recurrenceFrequency || "none") as
+      | "none"
+      | "daily"
+      | "weekly"
+      | "biweekly"
+      | "monthly",
+    recurrenceWeekday: (event.recurrenceWeekday || "") as
+      | ""
+      | "monday"
+      | "tuesday"
+      | "wednesday"
+      | "thursday"
+      | "friday"
+      | "saturday"
+      | "sunday",
+    recurrenceUntil: event.recurrenceUntil ?? null,
+  });
 
   return (
     <div className="event-detail-page">
@@ -290,9 +329,19 @@ const EventDetailPage = () => {
           }
           aria-label="Open full event image"
         />
-        <span className="event-detail-hero-tag">
-          {event.category.toUpperCase()}
-        </span>
+        <div className="event-detail-hero-tags">
+          <span className="event-detail-hero-tag">
+            {event.category.toUpperCase()}
+          </span>
+          {recurrenceLabel && (
+            <span className="event-detail-hero-tag event-detail-hero-tag--recurring">
+              {recurrenceLabel}
+            </span>
+          )}
+          {eventIsPast && (
+            <span className="event-detail-hero-tag event-detail-hero-tag--past">Ended</span>
+          )}
+        </div>
       </div>
 
       <main className="event-detail-main">
