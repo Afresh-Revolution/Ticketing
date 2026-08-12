@@ -229,6 +229,9 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
                 </svg>
               </button>
             </div>
+          </div>
+
+          <div className="events-filters-row">
             <div className="events-state-filter">
               <label className="events-state-filter-label" htmlFor="events-state-select">
                 State
@@ -244,6 +247,24 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
                 {NIGERIAN_STATES.map((state) => (
                   <option key={state} value={state}>
                     {state}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="events-state-filter">
+              <label className="events-state-filter-label" htmlFor="events-category-select">
+                Category
+              </label>
+              <select
+                id="events-category-select"
+                className="events-state-select"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                aria-label="Filter events by category"
+              >
+                {EVENT_CATEGORY_FILTERS.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat === "All" ? "All Categories" : cat}
                   </option>
                 ))}
               </select>
@@ -272,19 +293,6 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
               </button>
             </div>
           )}
-
-          <div className="events-categories">
-            {EVENT_CATEGORY_FILTERS.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                className={`events-cat-pill${selectedCategory === cat ? " active" : ""}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
         </section>
 
         {loading ? (
