@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../api/config";
-import { shareEvent } from "../utils/shareEvent";
+import { getEventShareUrl, shareEvent } from "../utils/shareEvent";
 import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
 import { formatEventDateTag, isEventPastWithRecurrence } from "../utils/eventDates";
 import { EVENT_CATEGORY_FILTERS, normalizeEventCategory } from "../utils/eventCategories";
@@ -55,25 +55,19 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
     setScope(pastOnly ? "past" : "upcoming");
   }, [pastOnly]);
 
-  const getEventShareUrl = useCallback((eventId: string) => {
-    const base = `${window.location.origin}${window.location.pathname || "/"}`.replace(/\/*$/, "/");
-    return `${base}#/event/${eventId}`;
-  }, []);
-
   const handleShareEvent = useCallback(async (e: React.MouseEvent, eventId: string, title: string, imageUrl: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = getEventShareUrl(eventId);
     await shareEvent({
       title,
-      url,
+      url: getEventShareUrl(eventId),
       imageUrl,
       onCopySuccess: () => {
         setShareCopiedId(eventId);
         setTimeout(() => setShareCopiedId(null), 2000);
       },
     });
-  }, [getEventShareUrl]);
+  }, []);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -202,11 +196,7 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
               </svg>
               <input
                 type="search"
-                placeholder={
-                  showingPast
-                    ? "Search past events, venues, artists..."
-                    : "Search events, venues, artists..."
-                }
+                placeholder={showingPast ? "Search past events..." : "Search events, venues..."}
                 className="events-search-input"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

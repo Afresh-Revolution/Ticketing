@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { apiUrl } from '../api/config';
-import { shareEvent } from '../utils/shareEvent';
+import { getEventShareUrl, shareEvent } from '../utils/shareEvent';
 import { formatEventDateTag, isEventPast } from '../utils/eventDates';
 import { primaryEventImage, resolveEventImages } from '../utils/eventImages';
 import { isReservationEvent } from '../utils/eventTickets';
@@ -83,25 +83,19 @@ const GetTickets = () => {
   const [loading, setLoading] = useState(true);
   const [shareCopiedId, setShareCopiedId] = useState<string | null>(null);
 
-  const getEventShareUrl = useCallback((eventId: string) => {
-    const base = `${window.location.origin}${window.location.pathname || '/'}`.replace(/\/*$/, '/');
-    return `${base}#/event/${eventId}`;
-  }, []);
-
   const handleShareEvent = useCallback(async (e: React.MouseEvent, eventId: string, title: string, imageUrl: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = getEventShareUrl(eventId);
     await shareEvent({
       title,
-      url,
+      url: getEventShareUrl(eventId),
       imageUrl,
       onCopySuccess: () => {
         setShareCopiedId(eventId);
         setTimeout(() => setShareCopiedId(null), 2000);
       },
     });
-  }, [getEventShareUrl]);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
