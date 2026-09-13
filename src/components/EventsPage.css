@@ -32,7 +32,7 @@
   font-family: inherit;
   font-size: 0.88rem;
   cursor: pointer;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
   transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
 
@@ -43,10 +43,13 @@
 }
 
 .events-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   background: var(--wc-bg-card);
   border: 1px solid var(--wc-border);
   box-shadow: var(--wc-shadow-card);
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   margin-bottom: 1.5rem;
   border-radius: var(--wc-radius-lg);
   padding: 1.15rem;
@@ -56,19 +59,18 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.85rem;
 }
 
 .events-filters-row {
   display: flex;
-  align-items: stretch;
+  align-items: flex-end;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 0.85rem;
 }
 
 .events-filters-row .events-state-filter {
   flex: 1 1 160px;
+  min-width: 0;
 }
 
 .events-search-bar {
@@ -160,8 +162,10 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 0.9rem;
-  height: 100%;
-  min-height: 48px;
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  -webkit-appearance: none;
   padding: 0.65rem 2.25rem 0.65rem 0.85rem;
   transition: border-color 0.2s, background 0.2s;
 }
@@ -526,7 +530,18 @@
 @media (max-width: 768px) {
   .events-main {
     padding: 1rem;
-    padding-top: calc(var(--navbar-total-height, 56px) + 1.25rem);
+    padding-top: calc(var(--navbar-total-height, 56px) + 1.5rem);
+  }
+
+  .events-back-btn {
+    margin-bottom: 0.85rem;
+  }
+
+  .events-search-section {
+    gap: 0.7rem;
+    padding: 0.85rem;
+    margin-top: 0;
+    margin-bottom: 1.15rem;
   }
 
   .events-search-row {
@@ -534,11 +549,23 @@
     align-items: stretch;
   }
 
-  .events-filters-row {
-    flex-direction: column;
+  .events-filter-btn {
+    display: none;
   }
 
+  .events-search-input {
+    font-size: 1rem;
+  }
+
+  .events-filters-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .events-filters-row .events-state-filter,
   .events-state-filter {
+    flex: 0 0 auto;
     min-width: 0;
     width: 100%;
   }
@@ -564,8 +591,9 @@
 
 .events-scope-row {
   display: inline-flex;
+  align-self: flex-start;
   gap: 0.4rem;
-  margin: 1rem 0 0.25rem;
+  margin: 0;
   padding: 0.25rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
