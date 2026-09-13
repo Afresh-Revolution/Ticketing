@@ -1,13 +1,9 @@
 import ScrollReveal from './ScrollReveal';
 import '../FeaturesPage/css/AppDownloadCard.css';
 
-const FRONTEND_BASE =
-  (import.meta.env.VITE_FRONTEND_URL as string | undefined)?.replace(/\/$/, '') ||
-  'https://gatewav.com';
-
 const APP_STORE_URL =
   (import.meta.env.VITE_APP_STORE_URL as string | undefined)?.trim() ||
-  `${FRONTEND_BASE}/download`;
+  'https://apps.apple.com/ng/app/gatewav/id6804691930';
 
 const PLAY_STORE_URL =
   (import.meta.env.VITE_PLAY_STORE_URL as string | undefined)?.trim() ||
