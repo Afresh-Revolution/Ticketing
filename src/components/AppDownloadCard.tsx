@@ -11,7 +11,7 @@ const PLAY_STORE_URL =
 
 const AppDownloadCard = () => {
   return (
-    <section className="app-download" aria-labelledby="app-download-heading">
+    <section id="app-download" className="app-download" aria-labelledby="app-download-heading">
       <ScrollReveal className="app-download-card" animation="fadeIn">
         <div className="app-download-copy">
           <span className="app-download-label">Mobile app</span>
