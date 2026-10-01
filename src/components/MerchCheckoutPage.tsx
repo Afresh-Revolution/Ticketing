@@ -11,6 +11,7 @@ import {
   type ManualPaymentDetails,
 } from '../api/manualPayment';
 import type { MerchCartLine } from '../types/merch';
+import { buildPaystackCallbackUrl } from '../utils/paystackReturn';
 import Navbar from './Navbar';
 import './MerchCheckoutPage.css';
 
@@ -121,7 +122,14 @@ const MerchCheckoutPage = () => {
       }
       savePending();
       const order = await createMerchOrder(buildPayload('paystack'), token);
-      const callbackUrl = `${window.location.origin}/#/payment-success?orderId=${order.id}&amount=${order.totalAmount}&email=${encodeURIComponent(email)}&eventTitle=${encodeURIComponent(eventTitle)}&eventId=${eventId}&type=merch`;
+      const callbackUrl = buildPaystackCallbackUrl({
+        orderId: order.id,
+        amount: order.totalAmount,
+        email,
+        eventTitle,
+        eventId,
+        type: 'merch',
+      });
       const url = await initMerchPayment(order.id, callbackUrl, email.trim(), token);
       window.location.assign(url);
     } catch (payErr) {
