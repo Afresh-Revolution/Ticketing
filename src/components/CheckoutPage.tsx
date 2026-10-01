@@ -5,6 +5,7 @@ import {
   fetchManualPaymentDetails,
   type ManualPaymentDetails,
 } from "../api/manualPayment";
+import { buildPaystackCallbackUrl } from "../utils/paystackReturn";
 import "./CheckoutPage.css";
 
 interface CheckoutState {
@@ -194,16 +195,14 @@ const CheckoutPage = () => {
     orderId: string,
     amount: number,
     trimmedEmail: string
-  ) => {
-    const params = new URLSearchParams({
+  ) =>
+    buildPaystackCallbackUrl({
       orderId,
-      amount: String(amount),
+      amount,
       email: trimmedEmail,
       eventTitle: state.eventTitle || "",
       eventId: state.eventId || "",
     });
-    return `${window.location.origin}/#/payment-success?${params.toString()}`;
-  };
 
   const openManualPayment = (fallbackMessage?: string) => {
     if (fallbackMessage) {

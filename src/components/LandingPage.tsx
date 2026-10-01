@@ -416,6 +416,20 @@ const LandingPage = () => {
       })}
 
       <FeaturesPage />
+      <button
+        type="button"
+        className="lp-mobile-app-button"
+        aria-controls="app-download"
+        onClick={() => {
+          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          document.getElementById('app-download')?.scrollIntoView({
+            behavior: reduceMotion ? 'instant' : 'smooth',
+            block: 'center',
+          });
+        }}
+      >
+        Mobile App
+      </button>
     </div>
   );
 };

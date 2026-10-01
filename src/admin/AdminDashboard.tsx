@@ -32,6 +32,11 @@ type DeleteConfirm = { sale: RecentSale } | null;
 
 const ONLINE_SALE_STATUS_OPTIONS = ['pending', 'paid'] as const;
 
+function isUnpaidSaleStatus(status: string | undefined) {
+  const value = String(status || '').trim().toLowerCase();
+  return value === 'pending' || value === 'awaiting_payment' || value === 'unpaid';
+}
+
 function groupSalesByEvent(sales: RecentSale[]): { eventId: string; eventTitle: string; sales: RecentSale[] }[] {
   const byEvent = new Map<string, RecentSale[]>();
   for (const sale of sales) {
@@ -309,7 +314,7 @@ const AdminDashboard = () => {
   const pendingSales = useMemo(
     () =>
       allSales
-        .filter((sale) => sale.status?.toLowerCase() === 'pending')
+        .filter((sale) => isUnpaidSaleStatus(sale.status))
         .filter((sale) => matchesSearch(sale, pendingSearch.trim())),
     [allSales, pendingSearch]
   );

@@ -67,11 +67,11 @@ export async function initMerchPayment(
   return data.authorizationUrl || data.authorization_url || '';
 }
 
-export async function verifyMerchPayment(orderId: string, reference: string) {
+export async function verifyMerchPayment(orderId: string, reference?: string) {
   const res = await fetch(apiUrl('/api/merch-orders/verify'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ orderId, reference }),
+    body: JSON.stringify({ orderId, ...(reference ? { reference } : {}) }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Verification failed');

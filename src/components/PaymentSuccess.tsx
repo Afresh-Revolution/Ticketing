@@ -4,15 +4,24 @@ import { apiUrl } from "../api/config";
 import { verifyMerchPayment } from "../api/merch";
 import "./PaymentSuccess.css";
 
+const CANCELLED_STATUSES = new Set(["cancelled", "canceled", "abandoned"]);
+
+function mergePaystackParams(locationSearch: string): URLSearchParams {
+  const merged = new URLSearchParams(locationSearch);
+  if (typeof window === "undefined") return merged;
+  const outer = new URLSearchParams(window.location.search);
+  outer.forEach((value, key) => {
+    if (!merged.get(key)) merged.set(key, value);
+  });
+  return merged;
+}
+
 const PaymentSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state as { amount?: number; eventTitle?: string; orderId?: string; email?: string } | null;
-  const [verifyError, setVerifyError] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [verifiedSuccessfully, setVerifiedSuccessfully] = useState(false);
 
-  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const params = useMemo(() => mergePaystackParams(location.search), [location.search]);
   const queryOrderId = params.get("orderId") || "";
   const queryReference = params.get("reference") || params.get("trxref") || "";
   const queryStatus = (params.get("status") || "").toLowerCase();
@@ -22,11 +31,14 @@ const PaymentSuccess = () => {
   const queryEventId = params.get("eventId") || "";
   const orderType = params.get("type") || "";
   const isMerchOrder = orderType === "merch";
-  // Cancelled return: orderId present, no Paystack reference, and no explicit success status.
-  // Backend can verify with orderId alone (falls back to stored reference / webhook fulfill).
-  const paymentCancelled =
-    !!queryOrderId && !queryReference && queryStatus !== "success" && queryStatus !== "successful";
+  const paymentCancelled = CANCELLED_STATUSES.has(queryStatus);
   const paymentFailedStatus = queryStatus === "failed";
+  const needsVerify =
+    Boolean(queryOrderId) && !paymentCancelled && !paymentFailedStatus;
+
+  const [verifyError, setVerifyError] = useState("");
+  const [verifying, setVerifying] = useState(needsVerify);
+  const [verifiedSuccessfully, setVerifiedSuccessfully] = useState(false);
 
   const amountToShow =
     state?.amount != null
@@ -37,18 +49,23 @@ const PaymentSuccess = () => {
   const eventTitleToShow = state?.eventTitle || queryEventTitle || "the event";
   const emailToShow = state?.email || queryEmail || undefined;
   const orderIdToShow = state?.orderId || queryOrderId || undefined;
+  const paymentIncomplete = paymentCancelled || paymentFailedStatus || Boolean(verifyError);
+  const showSuccess =
+    !paymentIncomplete &&
+    !verifying &&
+    (verifiedSuccessfully || (!queryOrderId && Boolean(state?.orderId)));
 
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      if (!queryOrderId || paymentCancelled || paymentFailedStatus) return;
-      // Merch verify still requires a Paystack reference.
-      if (isMerchOrder && !queryReference) return;
+      if (!needsVerify) {
+        return;
+      }
       setVerifying(true);
       setVerifyError("");
       try {
         if (isMerchOrder) {
-          await verifyMerchPayment(queryOrderId, queryReference);
+          await verifyMerchPayment(queryOrderId, queryReference || undefined);
         } else {
           const body: { orderId: string; reference?: string } = { orderId: queryOrderId };
           if (queryReference) body.reference = queryReference;
@@ -75,7 +92,7 @@ const PaymentSuccess = () => {
     return () => {
       cancelled = true;
     };
-  }, [queryOrderId, queryReference, isMerchOrder, paymentCancelled, paymentFailedStatus]);
+  }, [queryOrderId, queryReference, isMerchOrder, needsVerify, paymentCancelled, paymentFailedStatus]);
 
   useEffect(() => {
     if (!verifiedSuccessfully) return;
@@ -118,14 +135,20 @@ const PaymentSuccess = () => {
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
         </div>
-        {(paymentCancelled || paymentFailedStatus) && (
+        {verifying && <h1 className="payment-success-title">Confirming Payment</h1>}
+        {!verifying && paymentIncomplete && (
           <h1 className="payment-success-title">Payment Not Completed</h1>
         )}
-        {!paymentCancelled && !paymentFailedStatus && (
+        {!verifying && showSuccess && (
           <h1 className="payment-success-title">Payment Successful!</h1>
         )}
+        {!verifying && !showSuccess && !paymentIncomplete && (
+          <h1 className="payment-success-title">Payment Update</h1>
+        )}
         <p className="payment-success-msg">
-          {paymentCancelled || paymentFailedStatus ? (
+          {verifying ? (
+            <>Confirming your payment for <strong>{eventTitleToShow}</strong>.</>
+          ) : paymentIncomplete ? (
             <>
               Your payment for <strong>{eventTitleToShow}</strong> was not completed. You can retry checkout to finish your ticket purchase.
             </>
@@ -136,12 +159,12 @@ const PaymentSuccess = () => {
             </>
           )}
         </p>
-        {!paymentCancelled && !paymentFailedStatus && amountToShow != null && Number.isFinite(amountToShow) && (
+        {showSuccess && amountToShow != null && Number.isFinite(amountToShow) && (
           <p className="payment-success-amount">
             {amountToShow === 0 ? 'Free ticket' : `Amount Paid: ₦${amountToShow.toLocaleString()}`}
           </p>
         )}
-        {!paymentCancelled && !paymentFailedStatus && emailToShow && (
+        {showSuccess && emailToShow && (
           <p className="payment-success-email">
             Your ticket has been sent to <strong>{emailToShow}</strong>. Check your inbox (and spam folder).
           </p>
@@ -151,10 +174,10 @@ const PaymentSuccess = () => {
             Order ID: {orderIdToShow}
           </p>
         )}
-        {verifying && !paymentCancelled && !paymentFailedStatus && <p className="payment-success-email">Confirming payment...</p>}
+        {verifying && <p className="payment-success-email">Confirming payment...</p>}
         {verifyError && <p className="payment-success-email">{verifyError}</p>}
         <div className="payment-success-actions">
-          {(paymentCancelled || paymentFailedStatus || verifyError) ? (
+          {(paymentIncomplete) ? (
             <button type="button" className="payment-success-btn" onClick={handleRetryPayment}>
               Retry Payment
             </button>

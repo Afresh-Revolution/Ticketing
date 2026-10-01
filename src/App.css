@@ -12,7 +12,6 @@
   animation-duration: 520ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   animation-fill-mode: both;
-  will-change: transform, opacity;
 }
 
 /* ——— Left → right enter (exit old to the right) ——— */
@@ -30,14 +29,14 @@
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: none;
   }
 }
 
 @keyframes routeFadeOutLR {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: none;
   }
   to {
     opacity: 0;
@@ -60,14 +59,14 @@
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: none;
   }
 }
 
 @keyframes routeFadeOutRL {
   from {
     opacity: 1;
-    transform: translateX(0);
+    transform: none;
   }
   to {
     opacity: 0;
@@ -90,14 +89,14 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 @keyframes routeFadeOutTB {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
   to {
     opacity: 0;
@@ -120,14 +119,14 @@
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
 @keyframes routeFadeOutBT {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
   to {
     opacity: 0;

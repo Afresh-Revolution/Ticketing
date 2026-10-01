@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { apiUrl } from '../api/config';
 import { AdminTableRowsSkeleton } from '../components/Skeleton';
 import './admin.css';
@@ -24,6 +25,7 @@ const AdminAdmins = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirm>(null);
   const [deleting, setDeleting] = useState(false);
   const [suspendingId, setSuspendingId] = useState<string | null>(null);
+  const modalHost = typeof document !== 'undefined' ? document.body : null;
 
   useEffect(() => {
     fetchAdmins();
@@ -226,47 +228,61 @@ const AdminAdmins = () => {
         </div>
       </div>
 
-      {deleteConfirm && (
-        <div className="admin-modal-overlay" onClick={() => !deleting && setDeleteConfirm(null)}>
-          <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-modal-header">
-              <h2 className="admin-modal-title">Delete admin account</h2>
-              <button
-                type="button"
-                className="admin-modal-close"
-                onClick={() => !deleting && setDeleteConfirm(null)}
-                disabled={deleting}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="admin-modal-form">
-              <p className="admin-delete-confirm-message">
-                Permanently delete the admin account for <strong>{deleteConfirm.admin.name || deleteConfirm.admin.email}</strong> ({deleteConfirm.admin.email})? They will no longer be able to sign in. Events they created will remain but will no longer be linked to them.
-              </p>
-              <div className="admin-modal-actions">
+      {deleteConfirm &&
+        modalHost &&
+        createPortal(
+          <div
+            className="admin-modal-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-admin-modal-title"
+            onClick={() => !deleting && setDeleteConfirm(null)}
+          >
+            <div className="admin-modal-container" onClick={(e) => e.stopPropagation()}>
+              <div className="admin-modal-header">
+                <h2 id="delete-admin-modal-title" className="admin-modal-title">
+                  Delete admin account
+                </h2>
                 <button
                   type="button"
-                  className="admin-btn-cancel"
+                  className="admin-modal-close"
                   onClick={() => !deleting && setDeleteConfirm(null)}
                   disabled={deleting}
+                  aria-label="Close"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="admin-btn-danger"
-                  onClick={handleDeleteAdmin}
-                  disabled={deleting}
-                >
-                  {deleting ? 'Deleting…' : 'Delete account'}
+                  ✕
                 </button>
               </div>
+              <div className="admin-modal-form">
+                <p className="admin-delete-confirm-message">
+                  Permanently delete the admin account for{' '}
+                  <strong>{deleteConfirm.admin.name || deleteConfirm.admin.email}</strong> (
+                  {deleteConfirm.admin.email})? They will no longer be able to sign in. Events they
+                  created will remain but will no longer be linked to them.
+                </p>
+                <div className="admin-modal-actions">
+                  <button
+                    type="button"
+                    className="admin-btn-cancel"
+                    onClick={() => !deleting && setDeleteConfirm(null)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn-danger"
+                    onClick={handleDeleteAdmin}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Deleting…' : 'Delete account'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          modalHost
+        )}
     </div>
   );
 };
