@@ -40,10 +40,10 @@
 }
 
 .lp-mobile-app-button {
-  position: fixed;
-  left: max(1rem, env(safe-area-inset-left));
-  bottom: max(1rem, env(safe-area-inset-bottom));
-  z-index: 50;
+  position: absolute;
+  left: max(1rem, env(safe-area-inset-left, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  z-index: 6;
   min-height: 44px;
   padding: 0.65rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.3);

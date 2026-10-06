@@ -325,6 +325,21 @@ const LandingPage = () => {
         <div className="lp-hero-orb lp-hero-orb-b" aria-hidden />
         <div className="lp-hero-noise" aria-hidden />
 
+        <button
+          type="button"
+          className="lp-mobile-app-button"
+          aria-controls="app-download"
+          onClick={() => {
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            document.getElementById('app-download')?.scrollIntoView({
+              behavior: reduceMotion ? 'instant' : 'smooth',
+              block: 'center',
+            });
+          }}
+        >
+          Mobile App
+        </button>
+
         <section className="lp-hero">
           <div className="lp-hero-grid">
             <div className="lp-hero-inner">
@@ -416,20 +431,6 @@ const LandingPage = () => {
       })}
 
       <FeaturesPage />
-      <button
-        type="button"
-        className="lp-mobile-app-button"
-        aria-controls="app-download"
-        onClick={() => {
-          const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          document.getElementById('app-download')?.scrollIntoView({
-            behavior: reduceMotion ? 'instant' : 'smooth',
-            block: 'center',
-          });
-        }}
-      >
-        Mobile App
-      </button>
     </div>
   );
 };
