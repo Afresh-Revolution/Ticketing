@@ -10,7 +10,7 @@ Use this document in the **JOSCITY (joscity.com) codebase** to call the Ticketin
 |--------|--------|-----|
 | **Get events for JOSCITY** (ready-shaped list) | **GET** | `https://ticketing-back.onrender.com/api/events/feed/joscity` |
 
-- Replace the host with your Ticketing backend URL if different (e.g. your own Render/DigitalOcean URL).
+- Replace the host with your Ticketing backend URL if different (e.g. your own Render URL).
 - No query params required. Returns all events in JOSCITY-friendly shape.
 
 ---

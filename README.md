@@ -53,7 +53,7 @@ The system is split into two main parts:
 ┌─────────────────────────────────────────────────────────────────┐
 │  Browser / PWA (this repo)                                       │
 │  React + Vite + HashRouter                                       │
-│  Deployed: DigitalOcean App Platform + Cloudflare CDN            │
+│  Static frontend (Vite production build)                         │
 └────────────────────────────┬────────────────────────────────────┘
                              │ HTTPS (REST JSON)
                              ▼
@@ -407,8 +407,6 @@ Admins update status from the dashboard or sales screens and can resend ticket e
 | **JOSCITY** | Consumes events feed; links back to GateWav event pages for ticket purchase |
 | **Paystack** | Withdrawals / optional payment verification (see payments section) |
 | **WhatsApp** | Manual payment support link; share fallbacks |
-| **Cloudflare** | CDN; cache purge after deploy (GitHub Action) |
-| **DigitalOcean App Platform** | Frontend hosting (per workflow comments) |
 | **Render** | Backend API hosting URL referenced in config |
 
 ---
@@ -423,12 +421,6 @@ npm run build
 ```
 
 Build runs icon generation, TypeScript project build, and Vite production bundle to `dist/`.
-
-### CI/CD
-
-- Push to **`main`** triggers GitHub workflow **“Purge Cloudflare after deploy”**
-- Waits ~3 minutes for DigitalOcean deploy, then purges Cloudflare cache (requires `CLOUDFLARE_ZONE_ID` and `CLOUDFLARE_API_TOKEN` secrets)
-- Manual workflow dispatch supported for cache purge only
 
 ### Caching
 
@@ -466,7 +458,6 @@ Point `VITE_API_URL` at a running local backend on port 3000, or omit it to use 
 
 - `PAYSTACK_SETUP.md` — Paystack key setup
 - `JOSCITY_EVENTS_API_INTEGRATION.md` — Partner API for JOSCITY
-- `.github/README.md` — Cloudflare purge workflow setup
 
 ---
 
