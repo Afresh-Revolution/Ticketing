@@ -1,11 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import { registerSW } from 'virtual:pwa-register';
 
-type BeforeInstallPromptEvent = Event & { prompt: () => Promise<{ outcome: string }> };
-
 type PWAContextValue = {
-  installable: boolean;
-  onInstallClick: () => Promise<void>;
   updateReady: boolean;
   onRefreshClick: () => void;
 };
@@ -13,16 +9,12 @@ type PWAContextValue = {
 const PWAContext = createContext<PWAContextValue | null>(null);
 
 export function PWAProvider({ children }: { children: ReactNode }) {
-  const [installable, setInstallable] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [updateReady, setUpdateReady] = useState(false);
   const updateSWRef = useRef<((reload?: boolean) => void) | null>(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-      setInstallable(true);
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -83,15 +75,6 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const onInstallClick = async () => {
-    if (!installPrompt) return;
-    const { outcome } = await installPrompt.prompt();
-    if (outcome === 'accepted') {
-      setInstallable(false);
-      setInstallPrompt(null);
-    }
-  };
-
   const onRefreshClick = () => {
     // Avoid lingering UI if reload is suppressed for any reason (edge cases/offline transitions).
     setUpdateReady(false);
@@ -99,8 +82,6 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   };
 
   const value: PWAContextValue = {
-    installable,
-    onInstallClick,
     updateReady,
     onRefreshClick,
   };
