@@ -54,18 +54,6 @@
   background: radial-gradient(circle at 10% -20%, rgba(121, 26, 148, 0.55), rgba(24, 21, 67, 0.78) 45%, rgba(10, 8, 30, 0.85) 105%);
 }
 
-.pwa-badge-install {
-  bottom: calc(7.65rem + env(safe-area-inset-bottom, 0px));
-
-  border: 1px solid rgba(102, 126, 234, 0.32);
-  background: radial-gradient(circle at 10% -20%, rgba(102, 126, 234, 0.35), rgba(27, 20, 60, 0.78) 45%, rgba(10, 8, 30, 0.85) 105%);
-}
-
-.pwa-badge-update:only-child,
-.pwa-badge-install:only-child {
-  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-}
-
 .pwa-badge-btn {
   appearance: none;
   display: flex;
@@ -209,17 +197,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* When both badges are visible, keep them neatly stacked near the thumb */
-  .pwa-badge-install {
-    bottom: calc(calc(var(--keyboard-inset-height, 0px) + env(safe-area-inset-bottom, 0px)) + 9.95rem);
-  }
-
   .pwa-badge-update {
-    bottom: calc(calc(var(--keyboard-inset-height, 0px) + env(safe-area-inset-bottom, 0px)) + 0.95rem);
-  }
-
-  .pwa-badge-update:only-child,
-  .pwa-badge-install:only-child {
     bottom: calc(calc(var(--keyboard-inset-height, 0px) + env(safe-area-inset-bottom, 0px)) + 0.95rem);
   }
 }
