@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,14 +24,19 @@ jobs:
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
           key: ${{ secrets.VPS_SECRET }}
+          envs: GITHUB_TOKEN
           script: |
             set -e
             cd /root/afresh/Ticketing
-            git fetch --all
+            # The VPS GitHub SSH key is rejected. Fetch this commit over HTTPS
+            # with the short-lived Actions token instead of `git fetch origin`.
+            git fetch "https://x-access-token:${GITHUB_TOKEN}@github.com/Afresh-Revolution/Ticketing.git" "+refs/heads/main:refs/remotes/origin/main"
             git checkout -f -B main origin/main
             npm install
             npm run build
