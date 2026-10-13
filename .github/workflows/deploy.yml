@@ -1,0 +1,37 @@
+name: Deploy Ticketing
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SECRET }}
+          script: |
+            set -e
+            cd /root/afresh/Ticketing
+            git fetch --all
+            git checkout -f -B main origin/main
+            npm install
+            npm run build
+            systemctl reload nginx
+            pm2 restart wav || pm2 start serve --name wav -- -s dist -l 5107
+            pm2 save || true
