@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiUrl } from "../api/config";
+import { fetchPublicEvents } from "../api/events";
 import { getEventShareUrl, shareEvent } from "../utils/shareEvent";
 import { NIGERIAN_STATES, eventMatchesState, resolveEventState } from "../utils/eventLocation";
 import { formatEventDateTag, isEventPastWithRecurrence } from "../utils/eventDates";
@@ -72,9 +72,8 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch(apiUrl('/api/events'));
-        if (res.ok) {
-          const data = await res.json();
+        const data = await fetchPublicEvents();
+        if (data.length > 0) {
           interface ApiEvent {
             id: string;
             title: string;
@@ -95,7 +94,7 @@ const EventsPage = ({ mode = "all" }: EventsPageProps) => {
             recurrenceWeekday?: string | null;
             recurrenceUntil?: string | null;
           }
-          const formattedEvents = data.map((e: ApiEvent) => {
+          const formattedEvents = (data as ApiEvent[]).map((e) => {
             const tickets = Array.isArray(e.tickets) ? e.tickets : [];
             const reservation = isReservationEvent(tickets);
 

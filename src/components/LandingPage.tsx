@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import FeaturesPage from './FeaturesPage';
 import Navbar from './Navbar';
 import TopUsersCarousel from './TopUsersCarousel';
-import { apiUrl } from '../api/config';
+import { fetchPublicEvents } from '../api/events';
 import { isEventPastWithRecurrence } from '../utils/eventDates';
 import { normalizeEventCategory } from '../utils/eventCategories';
 import { formatRecurrenceBadge } from '../utils/eventRecurrence';
@@ -81,22 +81,10 @@ const LandingPage = () => {
 
     const loadEvents = async () => {
       try {
-        const [trendingRes, allRes] = await Promise.all([
-          fetch(apiUrl('/api/events?trending=true&take=40')),
-          fetch(apiUrl('/api/events?take=100')),
+        const [trendingRows, allRows] = await Promise.all([
+          fetchPublicEvents({ trending: true, take: 40 }),
+          fetchPublicEvents(),
         ]);
-
-        let trendingRows: unknown[] = [];
-        if (trendingRes.ok) {
-          const data = await trendingRes.json();
-          trendingRows = Array.isArray(data) ? data : [];
-        }
-
-        let allRows: unknown[] = [];
-        if (allRes.ok) {
-          const data = await allRes.json();
-          allRows = Array.isArray(data) ? data : [];
-        }
 
         const normalize = (rows: unknown[]) =>
           rows.map(toLandingEventCard).filter((x): x is LandingEventCard => x !== null);

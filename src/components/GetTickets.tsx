@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { Share2, Check } from 'lucide-react';
+import { fetchPublicEvents } from '../api/events';
 import { apiUrl } from '../api/config';
 import { getEventShareUrl, shareEvent } from '../utils/shareEvent';
 import { formatEventDateTag, isEventPast } from '../utils/eventDates';
@@ -109,11 +110,8 @@ const GetTickets = () => {
         }
 
         if (list.length === 0 && !cancelled) {
-          const allRes = await fetch(apiUrl('/api/events'));
-          if (allRes.ok) {
-            const all = normalizeEvents(await allRes.json());
-            list = pickUpcomingFirst(all, 3);
-          }
+          const all = normalizeEvents(await fetchPublicEvents());
+          list = pickUpcomingFirst(all, 3);
         }
 
         if (!cancelled) setEvents(list);
