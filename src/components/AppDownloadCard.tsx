@@ -16,7 +16,7 @@ const AppDownloadCard = () => {
         <div className="app-download-copy">
           <span className="app-download-label">Mobile app</span>
           <h2 id="app-download-heading" className="app-download-title">
-            Take GateWav with you
+            Take GateWav with you 
           </h2>
           <p className="app-download-description">
             Browse events, buy tickets, and show your QR at the door — download the GateWav app for
