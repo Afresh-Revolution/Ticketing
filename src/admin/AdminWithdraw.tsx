@@ -734,7 +734,7 @@ const AdminWithdraw = () => {
       {/* KPI cards */}
       <div className="admin-kpi-grid">
         <div className="admin-kpi-card">
-          <div className="admin-kpi-icon" style={{ background: '#1e3a5f', color: '#93c5fd' }}>₦</div>
+          <div className="admin-kpi-icon" style={{ background: '#12584b', color: '#93c5fd' }}>₦</div>
           <div className="admin-kpi-content">
             <span className="admin-kpi-label">Total Ticket Revenue</span>
             <span className="admin-kpi-value">{fmt(kpi.totalGross)}</span>
@@ -764,7 +764,7 @@ const AdminWithdraw = () => {
         {isSuperAdmin && (
           <>
             <div className="admin-kpi-card">
-              <div className="admin-kpi-icon" style={{ background: '#4c1d95', color: '#c4b5fd' }}>%</div>
+              <div className="admin-kpi-icon" style={{ background: '#12584B', color: '#9ED9C8' }}>%</div>
               <div className="admin-kpi-content">
                 <span className="admin-kpi-label">Platform Fees Collected</span>
                 <span className="admin-kpi-value">{fmt(kpi.totalFees)}</span>

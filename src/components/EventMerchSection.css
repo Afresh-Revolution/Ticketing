@@ -43,7 +43,7 @@
   font-size: 1rem;
   font-weight: 600;
   margin: 0;
-  color: var(--accent, #c4b5fd);
+  color: var(--accent, #9ED9C8);
 }
 
 .event-merch-static-images {
@@ -65,11 +65,11 @@
 
 .event-merch-image-open:hover {
   transform: scale(1.03);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 16px rgba(18, 88, 75, 0.35);
 }
 
 .event-merch-image-open:focus-visible {
-  outline: 2px solid var(--accent, #a855f7);
+  outline: 2px solid var(--accent, #9ED9C8);
   outline-offset: 2px;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .event-merch-carousel-dots button.active {
-  background: var(--accent, #a855f7);
+  background: var(--accent, #9ED9C8);
 }
 
 .event-merch-cta {
@@ -157,7 +157,7 @@
   padding: 0.65rem 1rem;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
   color: #fff;
   font-weight: 600;
   cursor: pointer;

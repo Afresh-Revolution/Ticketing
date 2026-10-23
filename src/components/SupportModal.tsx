@@ -54,12 +54,12 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, sectionId 
           <h3>Contact Us</h3>
           <p>Need help? Reach out to our support team:</p>
           <p style={{ marginTop: '0.5rem' }}>
-            <a href="mailto:info@gatewav.com" style={{ color: '#791A94' }}>info@gatewav.com</a>
+            <a href="mailto:info@gatewav.com" style={{ color: '#12584b' }}>info@gatewav.com</a>
           </p>
           <p style={{ marginTop: '0.5rem' }}>
-            <a href="tel:+2349061255824" style={{ color: '#791A94', marginRight: '0.75rem' }}>09061255824</a>
+            <a href="tel:+2349061255824" style={{ color: '#12584b', marginRight: '0.75rem' }}>09061255824</a>
             <span style={{ marginRight: '0.5rem' }}>·</span>
-            <a href="https://wa.me/2349061255824" target="_blank" rel="noopener noreferrer" style={{ color: '#791A94' }}>Chat on WhatsApp</a>
+            <a href="https://wa.me/2349061255824" target="_blank" rel="noopener noreferrer" style={{ color: '#12584b' }}>Chat on WhatsApp</a>
           </p>
           <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)' }}>We typically respond within 24 hours.</p>
         </section>

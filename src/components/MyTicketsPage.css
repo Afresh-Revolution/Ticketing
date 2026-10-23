@@ -1,6 +1,6 @@
 .my-tickets-page {
   min-height: 100vh;
-  background: #181543;
+  background: #162629;
   color: #fff;
   font-family: 'Arimo', sans-serif;
   display: flex;
@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: linear-gradient(135deg, #791A94 0%, #5c1580 100%);
+  background: linear-gradient(135deg, #12584B 0%, #0e463c 100%);
   padding: 1.5rem 2rem;
   border-radius: 16px;
   margin-bottom: 2rem;
@@ -113,7 +113,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: #791A94;
+  background: #12584B;
   border-radius: 3px 3px 0 0;
 }
 
@@ -300,7 +300,7 @@
   position: fixed;
   inset: 0;
   z-index: 1200;
-  background: rgba(8, 6, 28, 0.72);
+  background: rgba(18,33,31, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,7 +309,7 @@
 
 .my-tickets-modal {
   width: min(420px, 100%);
-  background: #221c52;
+  background: #1c3330;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   padding: 1.35rem 1.4rem 1.25rem;
@@ -384,13 +384,13 @@
 }
 
 @keyframes my-tickets-card-highlight-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(121, 26, 148, 0.5); }
-  70% { box-shadow: 0 0 0 12px rgba(121, 26, 148, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(121, 26, 148, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(18, 88, 75, 0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(18, 88, 75, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(18, 88, 75, 0); }
 }
 
 .my-tickets-card-link {
-  color: #b794f6;
+  color: #9ed9c8;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
@@ -404,7 +404,7 @@
 .my-tickets-cta {
   display: inline-block;
   padding: 0.6rem 1.25rem;
-  background: #791A94;
+  background: #12584B;
   color: #fff;
   text-decoration: none;
   border-radius: 8px;
@@ -412,7 +412,7 @@
 }
 
 .my-tickets-cta:hover {
-  background: #8f22ad;
+  background: #12584b;
   color: #fff;
 }
 

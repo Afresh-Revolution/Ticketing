@@ -45,8 +45,14 @@ const Navbar = () => {
         </div>
 
         <div className={`nav-links ${mobileMenuOpen ? 'active' : ''}`}>
+          <a onClick={() => navigate('/city/jos')} className="nav-link">
+            Discover
+          </a>
           <a onClick={() => navigate('/events')} className="nav-link">
             Explore Events
+          </a>
+          <a onClick={() => navigate('/experiences')} className="nav-link">
+            Experiences
           </a>
 
           {isAuthenticated ? (

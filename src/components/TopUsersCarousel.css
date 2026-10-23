@@ -3,7 +3,7 @@
   width: 100%;
   overflow: hidden;
   padding: clamp(2.5rem, 6vw, 3.5rem) 0 clamp(1.5rem, 4vw, 2rem);
-  background: linear-gradient(180deg, var(--lp-bg-deep, #030014) 0%, var(--lp-bg-mid, #0a0520) 100%);
+  background: linear-gradient(180deg, var(--lp-bg-deep, #162629) 0%, var(--lp-bg-mid, #1C3330) 100%);
   font-family: var(--lp-font-body, "DM Sans", ui-sans-serif, system-ui, sans-serif);
 }
 
@@ -26,7 +26,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--lp-faint, rgba(244, 240, 255, 0.48));
+  color: var(--lp-faint, rgba(247,248,245, 0.48));
 }
 
 .top-users-carousel-title {
@@ -35,7 +35,7 @@
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
 }
 
 .top-users-carousel-marquee {
@@ -54,13 +54,13 @@
 
 .top-users-carousel-fade-left {
   left: 0;
-  background: linear-gradient(90deg, var(--lp-bg-mid, #0a0520) 0%, transparent 100%);
+  background: linear-gradient(90deg, var(--lp-bg-mid, #1C3330) 0%, transparent 100%);
 }
 
 .top-users-carousel-fade-right {
   right: 0;
   left: auto;
-  background: linear-gradient(270deg, var(--lp-bg-mid, #0a0520) 0%, transparent 100%);
+  background: linear-gradient(270deg, var(--lp-bg-mid, #1C3330) 0%, transparent 100%);
 }
 
 .top-users-carousel-track {
@@ -106,7 +106,7 @@
 
 .top-users-carousel-card:hover {
   transform: scale(1.02);
-  border-color: rgba(168, 85, 247, 0.35);
+  border-color: rgba(18, 88, 75, 0.35);
 }
 
 .top-users-carousel-card-avatar {
@@ -131,7 +131,7 @@
 .top-users-carousel-card-initial {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
   font-family: var(--lp-font-display, "Syne", sans-serif);
 }
 
@@ -145,7 +145,7 @@
 .top-users-carousel-card-name {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -153,7 +153,7 @@
 
 .top-users-carousel-card-title {
   font-size: 0.75rem;
-  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
+  color: var(--lp-muted, rgba(247,248,245, 0.72));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

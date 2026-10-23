@@ -68,7 +68,7 @@
 .payment-success-title {
   font-size: 2rem;
   margin-bottom: 1rem;
-  background: linear-gradient(45deg, #a78bfa, #f472b6);
+  background: linear-gradient(45deg, #9ED9C8, #D7A45B);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -111,7 +111,7 @@
 }
 
 .payment-success-btn {
-  background: #8b5cf6;
+  background: #12584B;
   color: #fff;
   padding: 1rem;
   border-radius: 12px;
@@ -121,7 +121,7 @@
 }
 
 .payment-success-btn:hover {
-  background: #7c3aed;
+  background: #12584B;
   transform: translateY(-2px);
 }
 

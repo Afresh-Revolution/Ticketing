@@ -50,8 +50,8 @@
 .pwa-badge-update {
   bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 
-  border: 1px solid rgba(139, 92, 246, 0.35);
-  background: radial-gradient(circle at 10% -20%, rgba(121, 26, 148, 0.55), rgba(24, 21, 67, 0.78) 45%, rgba(10, 8, 30, 0.85) 105%);
+  border: 1px solid rgba(18,88,75, 0.35);
+  background: radial-gradient(circle at 10% -20%, rgba(18, 88, 75, 0.55), rgba(18, 33, 31, 0.78) 45%, rgba(18,33,31, 0.85) 105%);
 }
 
 .pwa-badge-btn {
@@ -80,7 +80,7 @@
   box-shadow:
     var(--shadow-button-soft),
     0 0 0 1px var(--color-white-15),
-    0 0 0 3px rgba(121, 26, 148, 0.35),
+    0 0 0 3px rgba(18, 88, 75, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 

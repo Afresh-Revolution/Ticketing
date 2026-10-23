@@ -342,7 +342,7 @@ const AdminDashboard = () => {
           label: 'Tickets Sold',
           value: stats.ticketsSold.toLocaleString(),
           icon: '🎫',
-          iconBg: '#1e3a5f',
+          iconBg: '#12584b',
           iconColor: '#93c5fd',
         },
         {
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
           value: stats.totalEvents.toLocaleString(),
           icon: '📅',
           iconBg: '#1f2937',
-          iconColor: '#a78bfa',
+          iconColor: '#9ED9C8',
         },
         {
           label: 'Active Events',
@@ -362,8 +362,8 @@ const AdminDashboard = () => {
       ]
     : [
         { label: 'Total Revenue', value: '—', icon: '₦', iconBg: '#166534', iconColor: '#ffffff' },
-        { label: 'Tickets Sold', value: '—', icon: '🎫', iconBg: '#1e3a5f', iconColor: '#93c5fd' },
-        { label: 'Total Events', value: '—', icon: '📅', iconBg: '#1f2937', iconColor: '#a78bfa' },
+        { label: 'Tickets Sold', value: '—', icon: '🎫', iconBg: '#12584b', iconColor: '#93c5fd' },
+        { label: 'Total Events', value: '—', icon: '📅', iconBg: '#1f2937', iconColor: '#9ED9C8' },
         { label: 'Active Events', value: '—', icon: '📈', iconBg: '#9a3412', iconColor: '#f97316' },
       ];
 
@@ -648,6 +648,9 @@ const AdminDashboard = () => {
                               <td>
                                 <div>{sale.buyer_name}</div>
                                 <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_email}</div>
+                                {sale.buyer_phone && (
+                                  <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.buyer_phone}</div>
+                                )}
                                 {sale.ticket_breakdown && (
                                   <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>{sale.ticket_breakdown}</div>
                                 )}

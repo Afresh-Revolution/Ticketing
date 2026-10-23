@@ -1,11 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap");
 
-/* Pixel-perfect checkout – #1A122E bg, #3A1F5B inputs, #8A2BE2 button */
+/* Pixel-perfect checkout – #162629 bg, #1E3632 inputs, #12584B button */
 .checkout-page {
   min-height: 100vh;
   min-height: 100dvh;
   min-height: -webkit-fill-available;
-  background: #1a122e;
+  background: #162629;
   color: #fff;
   font-family: "Arimo", sans-serif;
   box-sizing: border-box;
@@ -26,7 +26,7 @@
 .checkout-header {
   padding: 14px 0;
   padding-top: max(14px, env(safe-area-inset-top));
-  background: #1a122e;
+  background: #162629;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -57,7 +57,7 @@
 
 .checkout-back:hover {
   opacity: 1;
-  border-color: #9e7bee;
+  border-color: #9ED9C8;
   color: #d9c8ff;
 }
 
@@ -87,7 +87,7 @@
 .checkout-cancel-modal {
   width: 100%;
   max-width: 420px;
-  background: #2a1845;
+  background: #1e3632;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 1rem;
@@ -137,13 +137,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #5d2a88;
+  background: #12584b;
   color: #fff;
   cursor: pointer;
 }
 
 .checkout-manual-copy-btn:hover {
-  background: #6b31a0;
+  background: #0E463C;
 }
 
 .checkout-manual-copy-icon {
@@ -171,7 +171,7 @@
 }
 
 .checkout-manual-hold-text {
-  color: #c4b5fd;
+  color: #9ED9C8;
 }
 
 .checkout-manual-paid-hint {
@@ -216,19 +216,19 @@
 }
 
 .checkout-cancel-btn-add {
-  background: #8a2be2;
+  background: #12584B;
 }
 
 .checkout-cancel-btn-add:hover {
-  background: #9538f0;
+  background: #12584B;
 }
 
 .checkout-cancel-btn-cancel {
-  background: #5d2a88;
+  background: #12584b;
 }
 
 .checkout-cancel-btn-cancel:hover {
-  background: #6b31a0;
+  background: #0E463C;
 }
 
 /* Main content: constrained width, consistent horizontal padding */
@@ -243,7 +243,7 @@
 }
 
 .checkout-form {
-  background: rgba(42, 24, 69, 0.55);
+  background: rgba(30,54,50, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   padding: 24px;
@@ -293,7 +293,7 @@
   margin-top: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  background: rgba(26, 18, 46, 0.55);
+  background: rgba(22,38,41, 0.55);
   padding: 1rem 1.1rem 1.05rem;
 }
 
@@ -338,7 +338,7 @@
   border-radius: 10px;
   height: 48px;
   padding: 0 0.95rem;
-  background: #8a2be2;
+  background: #12584B;
   color: #fff;
   font-family: "Arimo", sans-serif;
   font-size: 0.9rem;
@@ -347,7 +347,7 @@
 }
 
 .checkout-coupon-btn:hover {
-  background: #9538f0;
+  background: #12584B;
 }
 
 .checkout-coupon-btn:disabled {
@@ -367,12 +367,12 @@
   font-size: 0.82rem;
 }
 
-/* Inputs: #3A1F5B, rounded, consistent padding, white text, muted placeholders */
+/* Inputs: #1E3632, rounded, consistent padding, white text, muted placeholders */
 .checkout-input {
   width: 100%;
   height: 48px;
   padding: 12px 16px;
-  background: #3a1f5b;
+  background: #1E3632;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   color: #ffffff;
@@ -394,10 +394,10 @@
 
 .checkout-input:focus {
   outline: none;
-  border-color: rgba(138, 43, 226, 0.7);
+  border-color: rgba(18,88,75, 0.7);
 }
 
-/* Pay button: full width, #8A2BE2, lock + "Pay ₦25,000", rounded, bold */
+/* Pay button: full width, #12584B, lock + "Pay ₦25,000", rounded, bold */
 .checkout-pay-btn {
   display: flex;
   align-items: center;
@@ -406,7 +406,7 @@
   width: 100%;
   height: 52px;
   padding: 0 24px;
-  background: #8a2be2;
+  background: #12584B;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -418,7 +418,7 @@
 }
 
 .checkout-pay-btn:hover {
-  background: #9538f0;
+  background: #12584B;
 }
 
 .checkout-transfer-hint {
@@ -445,7 +445,7 @@
 }
 
 .checkout-manual-link-btn:hover:not(:disabled) {
-  border-color: #9e7bee;
+  border-color: #9ED9C8;
   color: #d9c8ff;
 }
 

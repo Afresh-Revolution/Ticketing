@@ -1,8 +1,8 @@
 .built-for-everyone {
   width: 100%;
   padding: clamp(3.5rem, 9vw, 5.5rem) 0 clamp(2rem, 5vw, 3rem);
-  background: var(--lp-bg-deep, #030014);
-  color: var(--lp-ink, #f4f0ff);
+  background: var(--lp-bg-deep, #162629);
+  color: var(--lp-ink, #f7f8f5);
   font-family: var(--lp-font-body, "DM Sans", ui-sans-serif, system-ui, sans-serif);
   margin: 0;
 }
@@ -22,7 +22,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--lp-faint, rgba(244, 240, 255, 0.48));
+  color: var(--lp-faint, rgba(247,248,245, 0.48));
 }
 
 .bf-heading {
@@ -34,7 +34,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.12;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
 }
 
 .bf-lede {
@@ -43,7 +43,7 @@
   text-align: center;
   font-size: 1.05rem;
   line-height: 1.65;
-  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
+  color: var(--lp-muted, rgba(247,248,245, 0.72));
 }
 
 .bf-reveal-grid {
@@ -77,7 +77,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), transparent 40%, rgba(34, 211, 238, 0.12));
+  background: linear-gradient(135deg, rgba(18, 88, 75, 0.25), transparent 40%, rgba(215, 164, 91, 0.12));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -89,7 +89,7 @@
 
 .bf-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(168, 85, 247, 0.28);
+  border-color: rgba(18, 88, 75, 0.28);
   box-shadow: 0 22px 56px rgba(0, 0, 0, 0.42);
 }
 
@@ -106,7 +106,7 @@
   align-items: center;
   justify-content: center;
   color: var(--lp-cyan, #22d3ee);
-  background: linear-gradient(145deg, rgba(168, 85, 247, 0.2), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(145deg, rgba(18, 88, 75, 0.2), rgba(255, 255, 255, 0.04));
   border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
 }
 
@@ -115,14 +115,14 @@
   font-family: var(--lp-font-display, "Syne", sans-serif);
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
 }
 
 .bf-card-desc {
   margin: 0;
   font-size: 0.94rem;
   line-height: 1.6;
-  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
+  color: var(--lp-muted, rgba(247,248,245, 0.72));
 }
 
 @media (max-width: 968px) {

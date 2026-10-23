@@ -1,7 +1,7 @@
 .event-watch-page {
   min-height: 100vh;
-  background: var(--wc-bg-deep, #080418);
-  color: var(--wc-ink, #f4f0ff);
+  background: var(--wc-bg-deep, #12211F);
+  color: var(--wc-ink, #f7f8f5);
 }
 
 .event-watch-main {
@@ -75,5 +75,5 @@
 .event-watch-link {
   display: inline-block;
   margin-top: 1rem;
-  color: #c4b5fd;
+  color: #9ED9C8;
 }

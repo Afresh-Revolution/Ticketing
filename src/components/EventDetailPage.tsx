@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { apiUrl } from "../api/config";
 import { resolveEventState } from "../utils/eventLocation";
 import { formatEventDateLong, isEventPastWithRecurrence } from "../utils/eventDates";
@@ -86,6 +86,7 @@ const EventDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -95,6 +96,20 @@ const EventDetailPage = () => {
   >(null);
   const [merch, setMerch] = useState<EventMerchDto[]>([]);
   const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) {
+      sessionStorage.setItem("gatewav.promoterCode", ref);
+      const anon = localStorage.getItem("gatewav.anonId") || `a_${Date.now().toString(36)}`;
+      localStorage.setItem("gatewav.anonId", anon);
+      void fetch(apiUrl("/api/gatewav2/promoters/click"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shareCode: ref, anonId: anon }),
+      }).catch(() => undefined);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const msg = (location.state as { manualCheckoutSuccess?: string } | null)

@@ -4,26 +4,26 @@
 
 :root {
   /* Primary brand */
-  --color-primary: #791a94;
-  --color-primary-hover: #8f22ad;
-  --color-primary-light: #8a2ba5;
-  --color-primary-dark: #6428a0;
-  --color-primary-glow: rgba(121, 26, 148, 0.6);
-  --color-primary-glow-soft: rgba(121, 26, 148, 0.4);
-  --color-primary-overlay: rgba(121, 26, 148, 0.2);
-  --color-primary-overlay-strong: rgba(121, 26, 148, 0.3);
+  --color-primary: #12584b;
+  --color-primary-hover: #1c3330;
+  --color-primary-light: #9ed9c8;
+  --color-primary-dark: #12211f;
+  --color-primary-glow: rgba(18, 88, 75, 0.6);
+  --color-primary-glow-soft: rgba(158, 217, 200, 0.4);
+  --color-primary-overlay: rgba(18, 88, 75, 0.2);
+  --color-primary-overlay-strong: rgba(18, 88, 75, 0.3);
 
-  /* Backgrounds */
-  --color-bg-base: #181543;
-  --color-bg-dark: #15103a;
-  --color-bg-header: #1e1647;
-  --color-bg-card: #2a2150;
-  --color-bg-search: #36195c;
-  --color-bg-success-page: #2d1e4b;
-  --color-bg-success-alt: #171442;
-  --color-bg-purple-deep: #281851;
-  --color-bg-purple-overlay: rgba(24, 21, 67, 0.3);
-  --color-bg-purple-overlay-strong: rgba(40, 24, 81, 0.8);
+  /* Backgrounds — Gatewav 2.0, same shell as the mobile app */
+  --color-bg-base: #162629;
+  --color-bg-dark: #12211f;
+  --color-bg-header: #12211f;
+  --color-bg-card: #1e3632;
+  --color-bg-search: #1a2e2b;
+  --color-bg-success-page: #1c3330;
+  --color-bg-success-alt: #162629;
+  --color-bg-purple-deep: #12584b;
+  --color-bg-purple-overlay: rgba(22, 38, 41, 0.3);
+  --color-bg-purple-overlay-strong: rgba(18, 33, 31, 0.8);
 
   /* Neutrals / UI */
   --color-white: #ffffff;
@@ -44,7 +44,7 @@
   /* Text */
   --color-text-primary: #ffffff;
   --color-text-muted: #94a3b8;
-  --color-text-dark: #181543;
+  --color-text-dark: #162629;
   --color-text-body: #1a1a1a;
   --color-text-muted-dark: #333333;
   --color-text-muted-medium: #666666;
@@ -56,8 +56,8 @@
   --color-border-faint-06: rgba(255, 255, 255, 0.06);
 
   /* Accents (signup/login, cards) */
-  --color-accent-blue: #667eea;
-  --color-accent-purple: #764ba2;
+  --color-accent-blue: #12584B;
+  --color-accent-purple: #1C3330;
   --color-card-tag-bg: #f1f5f91a;
   --color-visa-blue: #1a1f71;
   --color-mastercard-red: #eb001b;
@@ -66,7 +66,7 @@
 
   /* Shadows */
   --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-button: 0 6px 20px rgba(121, 26, 148, 0.6);
+  --shadow-button: 0 6px 20px rgba(18, 88, 75, 0.45);
   --shadow-button-soft: 0 4px 20px rgba(0, 0, 0, 0.2);
 
   /* Responsive breakpoints (use in media queries) */

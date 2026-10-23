@@ -63,7 +63,7 @@
 .logo-icon {
   width: 22px;
   height: 22px;
-  background: linear-gradient(135deg, #791A94 0%, #3B28CC 100%);
+  background: linear-gradient(135deg, #12584B 0%, #1C3330 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -231,7 +231,7 @@
     height: 100vh;
     height: 100dvh;
     padding-top: calc(var(--navbar-total-height, 56px) + 1rem);
-    background: rgba(24, 21, 67, 0.98);
+    background: rgba(18, 33, 31, 0.98);
     backdrop-filter: blur(15px);
     flex-direction: column;
     justify-content: flex-start;

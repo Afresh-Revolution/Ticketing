@@ -3,7 +3,7 @@
 
 :root {
   --admin-bg: var(--wc-bg-deep);
-  --admin-sidebar: #0c0526;
+  --admin-sidebar: #12211F;
   --admin-card: rgba(255, 255, 255, 0.04);
   --admin-container: rgba(255, 255, 255, 0.03);
   --admin-input: rgba(255, 255, 255, 0.045);
@@ -21,8 +21,8 @@
 .admin-layout {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 60% 45% at 100% 0%, rgba(168, 85, 247, 0.2), transparent 55%),
-    radial-gradient(ellipse 50% 35% at 0% 100%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 100% 0%, rgba(18, 88, 75, 0.2), transparent 55%),
+    radial-gradient(ellipse 50% 35% at 0% 100%, rgba(215, 164, 91, 0.12), transparent 60%),
     var(--admin-bg);
   font-family: var(--wc-font-body);
   color: var(--admin-text);
@@ -37,7 +37,7 @@
   align-items: center;
   justify-content: space-between;
   padding: calc(0.35rem + env(safe-area-inset-top, 0px)) 1.5rem 0.5rem;
-  background: rgba(8, 4, 24, 0.85);
+  background: rgba(18, 33, 31, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--admin-border);
@@ -59,7 +59,7 @@
 .admin-logo-icon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #791a94, #281851);
+  background: linear-gradient(135deg, #12584B, #12584B);
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -89,7 +89,7 @@
   gap: 0.75rem;
   flex-wrap: wrap;
   padding: 0.5rem 1.5rem;
-  background: rgba(8, 4, 24, 0.72);
+  background: rgba(18, 33, 31, 0.72);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--admin-border);
   -webkit-backdrop-filter: blur(12px);
@@ -114,19 +114,19 @@
 }
 
 .admin-btn-role {
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #e9d5ff;
+  background: rgba(18, 88, 75, 0.15);
+  border: 1px solid rgba(18, 88, 75, 0.35);
+  color: #EAF4F0;
 }
 
 .admin-btn-logout {
   background: rgba(255, 255, 255, 0.02);
-  color: #f9a8d4;
-  border: 1px solid rgba(249, 168, 212, 0.55);
+  color: #d7a45b;
+  border: 1px solid rgba(215,164,91, 0.55);
 }
 
 .admin-btn-logout:hover {
-  background: rgba(244, 114, 182, 0.12);
+  background: rgba(215,164,91, 0.12);
 }
 
 .admin-btn-icon {
@@ -189,7 +189,7 @@
 .admin-sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: rgba(8, 4, 24, 0.78);
+  background: rgba(18, 33, 31, 0.78);
   backdrop-filter: blur(8px);
   border-right: 1px solid var(--admin-border);
   padding: 1.5rem 0 0.5rem 0;
@@ -218,7 +218,7 @@
 
 .admin-nav-link.active {
   color: var(--admin-accent-bright);
-  background: rgba(139, 92, 246, 0.12);
+  background: rgba(18,88,75, 0.12);
   border-left-color: var(--admin-accent);
 }
 
@@ -267,9 +267,9 @@
   align-items: center;
   gap: 0.3rem;
   font-size: 0.72rem;
-  color: #c4b5fd;
-  background: rgba(124, 58, 237, 0.14);
-  border: 1px solid rgba(124, 58, 237, 0.35);
+  color: #9ED9C8;
+  background: rgba(18, 88, 75, 0.14);
+  border: 1px solid rgba(18, 88, 75, 0.35);
   border-radius: 999px;
   padding: 0.2rem 0.55rem;
   white-space: nowrap;
@@ -315,7 +315,7 @@
   z-index: 20;
   min-width: 10.5rem;
   padding: 0.35rem;
-  background: var(--admin-surface, #1a1a2e);
+  background: var(--admin-surface, #162629);
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -337,7 +337,7 @@
 
 .admin-add-ticket-dropdown-item:hover,
 .admin-add-ticket-dropdown-item:focus-visible {
-  background: rgba(124, 58, 237, 0.18);
+  background: rgba(18, 88, 75, 0.18);
   color: #fff;
   outline: none;
 }
@@ -447,19 +447,19 @@
 select.admin-input,
 select.admin-select {
   color: #f8fafc;
-  background-color: rgba(27, 22, 51, 0.96);
+  background-color: rgba(28,51,48, 0.96);
 }
 
 select.admin-input option,
 select.admin-select option {
   color: #f8fafc;
-  background-color: #1a1633;
+  background-color: #12211f;
 }
 
 select.admin-input option:checked,
 select.admin-select option:checked {
   color: #ffffff;
-  background-color: #4c1d95;
+  background-color: #12584B;
 }
 
 .admin-input::placeholder,
@@ -473,7 +473,7 @@ select.admin-select option:checked {
 .admin-textarea:focus {
   outline: none;
   border-color: var(--admin-accent);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(18,88,75, 0.2);
 }
 
 .admin-textarea {
@@ -596,7 +596,7 @@ select.admin-select option:checked {
 
 .admin-upload-zone:hover {
   border-color: var(--admin-accent);
-  background: rgba(139, 92, 246, 0.08);
+  background: rgba(18,88,75, 0.08);
 }
 
 .admin-upload-zone p {
@@ -707,9 +707,9 @@ select.admin-select option:checked {
   gap: 0.35rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: #c4b5fd;
-  background: rgba(124, 58, 237, 0.14);
-  border: 1px solid rgba(124, 58, 237, 0.35);
+  color: #9ED9C8;
+  background: rgba(18, 88, 75, 0.14);
+  border: 1px solid rgba(18, 88, 75, 0.35);
   border-radius: 999px;
   padding: 0.28rem 0.65rem;
   white-space: nowrap;
@@ -718,13 +718,13 @@ select.admin-select option:checked {
 }
 
 .admin-guide-badge:hover {
-  background: rgba(124, 58, 237, 0.24);
-  border-color: rgba(167, 139, 250, 0.55);
-  color: #ddd6fe;
+  background: rgba(18, 88, 75, 0.24);
+  border-color: rgba(158,217,200, 0.55);
+  color: #EAF4F0;
 }
 
 .admin-guide-badge:focus-visible {
-  outline: 2px solid rgba(167, 139, 250, 0.8);
+  outline: 2px solid rgba(158,217,200, 0.8);
   outline-offset: 2px;
 }
 
@@ -740,8 +740,8 @@ select.admin-select option:checked {
   margin: 0 0 1.25rem;
   padding: 0.85rem 1rem;
   border-radius: 10px;
-  background: rgba(124, 58, 237, 0.12);
-  border: 1px solid rgba(124, 58, 237, 0.35);
+  background: rgba(18, 88, 75, 0.12);
+  border: 1px solid rgba(18, 88, 75, 0.35);
   color: rgba(255, 255, 255, 0.88);
   font-size: 0.9rem;
   line-height: 1.55;
@@ -761,7 +761,7 @@ select.admin-select option:checked {
 
 .admin-stream-guide-steps code {
   font-size: 0.82rem;
-  color: #ddd6fe;
+  color: #EAF4F0;
 }
 
 .admin-stream-guide-note {
@@ -793,7 +793,7 @@ select.admin-select option:checked {
 
 .admin-upload-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(90deg, #12584B, #9ED9C8);
   transition: width 0.15s ease;
 }
 
@@ -814,9 +814,9 @@ select.admin-select option:checked {
 }
 
 .admin-kpi-card {
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
-  border: 1px solid rgba(147, 165, 255, 0.35);
+  border: 1px solid rgba(158,217,200, 0.35);
   padding: 1.25rem;
   display: flex;
   align-items: flex-start;
@@ -870,7 +870,7 @@ select.admin-select option:checked {
 
 /* Event Management: single container (Event Management, Create Event, Neon Nights / Future Tech / Creative Arts etc.) */
 .admin-events-container {
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   padding: 1.25rem 1.5rem;
@@ -892,7 +892,7 @@ select.admin-select option:checked {
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   overflow: hidden;
@@ -970,7 +970,7 @@ select.admin-select option:checked {
 }
 
 .admin-btn-create {
-  background: #9c37ab;
+  background: #12584b;
   color: white;
   padding: 0.6rem 1.25rem;
   border-radius: 8px;
@@ -986,14 +986,14 @@ select.admin-select option:checked {
 }
 
 .admin-btn-create:hover {
-  background: #b04bc0;
+  background: #0e463c;
 }
 
 /* Sales table */
 /* Sales Reports: single container for title, Export CSV, and table */
 /* Single container: Sales Reports title, Export CSV, and table (Transaction ID, Event, Buyer, Date, Amount) */
 .admin-sales-container {
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   padding: 1.25rem 1.5rem;
@@ -1014,7 +1014,7 @@ select.admin-select option:checked {
 }
 
 .admin-table-wrap {
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   overflow: hidden;
@@ -1123,8 +1123,8 @@ select.admin-select option:checked {
 }
 
 .admin-sales-search-wrap-active .admin-input {
-  border-color: rgba(139, 92, 246, 0.75);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.18);
+  border-color: rgba(18,88,75, 0.75);
+  box-shadow: 0 0 0 2px rgba(18,88,75, 0.18);
 }
 
 .admin-sales-search-clear {
@@ -1133,7 +1133,7 @@ select.admin-select option:checked {
   right: 0.45rem;
   border: 0;
   background: transparent;
-  color: #c4b5fd;
+  color: #9ED9C8;
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1;
@@ -1141,7 +1141,7 @@ select.admin-select option:checked {
 }
 
 .admin-sales-search-clear:hover {
-  color: #ede9fe;
+  color: #eaf4f0;
 }
 
 .admin-sales-search-meta {
@@ -1150,7 +1150,7 @@ select.admin-select option:checked {
 }
 
 .admin-sales-event-card {
-  background: rgba(30, 26, 56, 0.5);
+  background: rgba(30,54,50, 0.5);
   border: 1px solid var(--admin-border);
   border-radius: 12px;
   overflow: hidden;
@@ -1246,20 +1246,20 @@ select.admin-select option:checked {
   font-size: 0.78rem;
   font-weight: 700;
   border: 1px solid transparent;
-  background-color: rgba(27, 22, 51, 0.96);
+  background-color: rgba(28,51,48, 0.96);
   color: #f8fafc;
   min-width: 92px;
   outline: none;
 }
 
 .admin-sales-status-select option {
-  color: #1a1633;
+  color: #12211f;
   background-color: #f8fafc;
 }
 
 .admin-sales-status-select option:checked {
   color: #ffffff;
-  background-color: #4c1d95;
+  background-color: #12584B;
 }
 
 .admin-sales-status-select:disabled {
@@ -1280,9 +1280,9 @@ select.admin-select option:checked {
 }
 
 .admin-sales-resend-btn {
-  border: 1px solid rgba(124, 58, 237, 0.5);
-  background: rgba(124, 58, 237, 0.2);
-  color: #ddd6fe;
+  border: 1px solid rgba(18, 88, 75, 0.5);
+  background: rgba(18, 88, 75, 0.2);
+  color: #EAF4F0;
   border-radius: 8px;
   padding: 0.38rem 0.7rem;
   font-size: 0.78rem;
@@ -1291,7 +1291,7 @@ select.admin-select option:checked {
 }
 
 .admin-sales-resend-btn:hover:not(:disabled) {
-  background: rgba(124, 58, 237, 0.35);
+  background: rgba(18, 88, 75, 0.35);
 }
 
 .admin-sales-resend-btn:disabled {
@@ -1321,7 +1321,7 @@ select.admin-select option:checked {
 
 /* Scanner page */
 .admin-scanner-container {
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   padding: 1.5rem 2rem;
@@ -1340,8 +1340,8 @@ select.admin-select option:checked {
   min-height: 80px;
   margin-bottom: 1.5rem;
   padding: 1.25rem 1.5rem;
-  background: rgba(124, 58, 237, 0.25);
-  border: 1px solid rgba(139, 92, 246, 0.5);
+  background: rgba(18, 88, 75, 0.25);
+  border: 1px solid rgba(18,88,75, 0.5);
   border-radius: 10px;
 }
 
@@ -1375,7 +1375,7 @@ select.admin-select option:checked {
   padding: 0.85rem 1.25rem;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
   color: white;
   font-family: inherit;
   font-size: 0.95rem;
@@ -1402,7 +1402,7 @@ select.admin-select option:checked {
   padding: 0;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.4);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(167, 139, 250, 0.3));
+  background: linear-gradient(135deg, rgba(18,88,75, 0.4), rgba(158,217,200, 0.3));
   color: #fff;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
@@ -1416,22 +1416,22 @@ select.admin-select option:checked {
   padding: 1rem 1.5rem;
   border-radius: 12px;
   gap: 0.75rem;
-  background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+  background: linear-gradient(135deg, #12584B, #12584B);
   border: 2px solid rgba(255, 255, 255, 0.4);
   color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 4px 14px rgba(18, 88, 75, 0.5);
 }
 
 .admin-scanner-camera-btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
   border-color: rgba(255, 255, 255, 0.5);
   color: #ffffff;
   transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 6px 20px rgba(18,88,75, 0.5);
 }
 
 .admin-scanner-camera-btn-primary:disabled {
@@ -1455,9 +1455,9 @@ select.admin-select option:checked {
 }
 
 .admin-scanner-camera-btn:hover {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(167, 139, 250, 0.5));
+  background: linear-gradient(135deg, rgba(18,88,75, 0.6), rgba(158,217,200, 0.5));
   transform: scale(1.05);
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 16px rgba(18,88,75, 0.4);
 }
 
 .admin-scanner-camera-btn svg {
@@ -1576,7 +1576,7 @@ select.admin-select option:checked {
 
 /* All Admins page */
 .admin-admins-container {
-  background: #36195c;
+  background: #1A2E2B;
   border-radius: 12px;
   border: 1px solid var(--admin-border);
   padding: 1.25rem 1.5rem;
@@ -1597,7 +1597,7 @@ select.admin-select option:checked {
 }
 
 .admin-role-superadmin {
-  background: rgba(139, 92, 246, 0.25);
+  background: rgba(18,88,75, 0.25);
   color: var(--admin-accent-bright);
 }
 
@@ -1934,8 +1934,8 @@ select.admin-select option:checked {
 .admin-login-container {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 65% 45% at 10% 10%, rgba(168, 85, 247, 0.22), transparent 58%),
-    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(ellipse 65% 45% at 10% 10%, rgba(18, 88, 75, 0.22), transparent 58%),
+    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(215, 164, 91, 0.16), transparent 60%),
     linear-gradient(180deg, var(--wc-bg-mid) 0%, var(--wc-bg-deep) 100%);
   display: flex;
   align-items: center;
@@ -1952,7 +1952,7 @@ select.admin-select option:checked {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(18,88,75, 0.1) 0%, transparent 70%);
   animation: rotateGradient 20s linear infinite;
 }
 
@@ -1962,7 +1962,7 @@ select.admin-select option:checked {
 }
 
 .admin-login-card {
-  background: rgba(8, 4, 24, 0.72);
+  background: rgba(18, 33, 31, 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--admin-border);
@@ -2010,7 +2010,7 @@ select.admin-select option:checked {
 .admin-login-logo-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -2018,13 +2018,13 @@ select.admin-select option:checked {
   font-size: 1.5rem;
   font-weight: 700;
   color: white;
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 24px rgba(18,88,75, 0.4);
 }
 
 .admin-login-logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #ffffff, #a78bfa);
+  background: linear-gradient(135deg, #ffffff, #9ED9C8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -2121,17 +2121,17 @@ select.admin-select option:checked {
 .admin-login-input:focus {
   outline: none;
   border-color: var(--admin-accent);
-  background: rgba(30, 26, 56, 0.8);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  background: rgba(30,54,50, 0.8);
+  box-shadow: 0 0 0 3px rgba(18,88,75, 0.15);
 }
 
 .admin-login-button {
   width: 100%;
   padding: 0.95rem;
-  background: linear-gradient(135deg, #e9d5ff, var(--admin-accent));
+  background: #12584b;
   border: none;
   border-radius: 10px;
-  color: #12072f;
+  color: #f7f8f5;
   font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
@@ -2141,13 +2141,13 @@ select.admin-select option:checked {
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 26px rgba(168, 85, 247, 0.35);
+  box-shadow: 0 10px 26px rgba(18, 88, 75, 0.35);
   margin-top: 0.5rem;
 }
 
 .admin-login-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(168, 85, 247, 0.4);
+  box-shadow: 0 16px 36px rgba(18, 88, 75, 0.4);
 }
 
 .admin-login-button:active:not(:disabled) {
@@ -2162,8 +2162,8 @@ select.admin-select option:checked {
 .admin-login-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(18, 7, 47, 0.25);
-  border-top-color: #12072f;
+  border: 2px solid rgba(18,33,31, 0.25);
+  border-top-color: #f7f8f5;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -2276,7 +2276,7 @@ select.admin-select option:checked {
 }
 
 .admin-modal-container {
-  background: #12082e;
+  background: #12211f;
   border: 1px solid var(--admin-border);
   border-radius: 16px;
   width: 100%;
@@ -2478,7 +2478,7 @@ select.admin-select option:checked {
 
 /* Add Admin Button */
 .admin-btn-add-admin {
-  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
   color: white;
   padding: 0.65rem 1.25rem;
   border-radius: 8px;
@@ -2491,12 +2491,12 @@ select.admin-select option:checked {
   align-items: center;
   gap: 0.4rem;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 2px 8px rgba(18,88,75, 0.3);
 }
 
 .admin-btn-add-admin:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 4px 12px rgba(18,88,75, 0.5);
 }
 
 /* Success Message */
@@ -2532,10 +2532,10 @@ select.admin-select option:checked {
 
 /* Super Admin Badge */
 .admin-btn-superadmin {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  background: linear-gradient(135deg, #12584B, #12584B) !important;
   color: white !important;
-  border: 1px solid rgba(139, 92, 246, 0.5);
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  border: 1px solid rgba(18,88,75, 0.5);
+  box-shadow: 0 2px 8px rgba(18,88,75, 0.3);
 }
 
 /* Change password modal – input with eye toggle */
@@ -2773,7 +2773,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 .bank-select-trigger-open {
   border-color: var(--admin-accent);
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(18,88,75, 0.2);
 }
 
 .bank-select-trigger-label {
@@ -2794,7 +2794,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
   margin-top: 0.5rem;
   border: 1px solid var(--admin-border);
   border-radius: 10px;
-  background: rgba(12, 8, 28, 0.98);
+  background: rgba(18,33,31, 0.98);
   overflow: hidden;
 }
 
@@ -2829,7 +2829,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 .bank-select-option:hover,
 .bank-select-option.is-selected {
-  background: rgba(139, 92, 246, 0.18);
+  background: rgba(18,88,75, 0.18);
   color: var(--admin-accent-bright);
 }
 
@@ -2847,7 +2847,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .withdraw-pending-card {
-  background: #36195c;
+  background: #1A2E2B;
   border: 1px solid var(--admin-border);
   border-radius: 12px;
   padding: 1.25rem;
@@ -2989,7 +2989,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .withdraw-event-card {
-  background: #36195c;
+  background: #1A2E2B;
   border: 1px solid var(--admin-border);
   border-radius: 12px;
   overflow: hidden;
@@ -2999,7 +2999,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .withdraw-event-card:hover {
-  border-color: rgba(139, 92, 246, 0.5);
+  border-color: rgba(18,88,75, 0.5);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -3087,9 +3087,9 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .chip-eligible {
-  background: rgba(139, 92, 246, 0.15);
-  color: #a78bfa;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(18,88,75, 0.15);
+  color: #9ED9C8;
+  border: 1px solid rgba(18,88,75, 0.3);
 }
 
 .chip-pending {
@@ -3136,9 +3136,9 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 /* Bank button saved state */
 .withdraw-bank-btn-saved {
-  background: rgba(139, 92, 246, 0.15) !important;
-  border: 1px solid rgba(139, 92, 246, 0.4) !important;
-  color: #c4b5fd !important;
+  background: rgba(18,88,75, 0.15) !important;
+  border: 1px solid rgba(18,88,75, 0.4) !important;
+  color: #9ED9C8 !important;
   font-size: 0.85rem;
 }
 
@@ -3195,8 +3195,8 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1.5rem;
-  background: linear-gradient(135deg, #2d1b69 0%, #36195c 100%);
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: linear-gradient(135deg, #12584b 0%, #1A2E2B 100%);
+  border: 1px solid rgba(18,88,75, 0.35);
   border-radius: 14px;
   padding: 1.5rem 1.75rem;
   flex-wrap: wrap;
@@ -3245,7 +3245,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 .sub-days-left {
   font-size: 0.82rem;
-  color: #a78bfa;
+  color: #9ED9C8;
   font-weight: 500;
 }
 
@@ -3341,7 +3341,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 .admin-checkbox-label input {
   width: 1rem;
   height: 1rem;
-  accent-color: #791a94;
+  accent-color: #12584B;
 }
 
 .admin-recurrence-fields {
@@ -3399,14 +3399,14 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .admin-hint-link {
-  color: #a78bfa;
+  color: #9ED9C8;
   text-decoration: underline;
   text-underline-offset: 2px;
   transition: color 0.2s;
 }
 
 .admin-hint-link:hover {
-  color: #c4b5fd;
+  color: #9ED9C8;
 }
 
 /* ========== Walk-In Sales ========== */
@@ -3419,21 +3419,21 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
   padding: 0.6rem 1.25rem;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
   color: white;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 14px rgba(18, 88, 75, 0.35);
   transition: all 0.25s ease;
   white-space: nowrap;
 }
 
 .admin-btn-walkin:hover {
-  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  background: linear-gradient(135deg, #12584B, #12584B);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+  box-shadow: 0 6px 20px rgba(18, 88, 75, 0.45);
 }
 
 .admin-btn-walkin:active {
@@ -3448,7 +3448,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 .admin-walkin-revenue-badge {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #a78bfa;
+  color: #9ED9C8;
   margin-left: 0.5rem;
 }
 
@@ -3457,7 +3457,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  background: rgba(30, 26, 56, 0.6);
+  background: rgba(30,54,50, 0.6);
   border: 1px solid var(--admin-border);
   border-radius: 12px;
   padding: 1rem 1.5rem;
@@ -3487,7 +3487,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .admin-sales-kpi-walkin {
-  color: #a78bfa;
+  color: #9ED9C8;
 }
 
 .admin-sales-kpi-total {
@@ -3503,8 +3503,8 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 /* Walk-in sales section */
 .admin-walkin-section {
-  background: rgba(30, 26, 56, 0.5);
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: rgba(30,54,50, 0.5);
+  border: 1px solid rgba(158,217,200, 0.3);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 1.25rem;
@@ -3537,8 +3537,8 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
   height: 24px;
   padding: 0 0.5rem;
   border-radius: 12px;
-  background: rgba(139, 92, 246, 0.3);
-  color: #c4b5fd;
+  background: rgba(18,88,75, 0.3);
+  color: #9ED9C8;
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -3766,13 +3766,13 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 
 /* Submit button accent */
 .admin-btn-walkin-submit {
-  background: linear-gradient(135deg, #7c3aed, #a855f7);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  background: linear-gradient(135deg, #12584B, #9ED9C8);
+  box-shadow: 0 4px 12px rgba(18, 88, 75, 0.3);
 }
 
 .admin-btn-walkin-submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #6d28d9, #9333ea);
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4);
+  background: linear-gradient(135deg, #12584B, #12584B);
+  box-shadow: 0 6px 18px rgba(18, 88, 75, 0.4);
 }
 
 /* Responsive: walk-in on mobile */
@@ -3861,7 +3861,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 }
 
 .admin-merch-type-chip input {
-  accent-color: #a855f7;
+  accent-color: #9ED9C8;
 }
 
 .admin-merch-color-row {
@@ -3979,9 +3979,9 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 .admin-discount-tiers {
   margin-top: 1rem;
   padding: 1rem;
-  border: 1px solid rgba(168, 85, 247, 0.25);
+  border: 1px solid rgba(18, 88, 75, 0.25);
   border-radius: 12px;
-  background: rgba(168, 85, 247, 0.06);
+  background: rgba(18, 88, 75, 0.06);
 }
 
 .admin-discount-tiers .admin-pool-card-header {
@@ -4025,7 +4025,7 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 .admin-checkbox-label input {
   width: 1rem;
   height: 1rem;
-  accent-color: #791a94;
+  accent-color: #12584B;
 }
 
 .admin-recurrence-fields {

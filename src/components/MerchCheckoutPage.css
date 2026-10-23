@@ -5,8 +5,8 @@
   min-height: 100vh;
   min-height: 100dvh;
   background:
-    radial-gradient(ellipse 85% 60% at 0% 0%, rgba(168, 85, 247, 0.16), transparent 55%),
-    radial-gradient(ellipse 65% 50% at 100% 100%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(ellipse 85% 60% at 0% 0%, rgba(18, 88, 75, 0.16), transparent 55%),
+    radial-gradient(ellipse 65% 50% at 100% 100%, rgba(215, 164, 91, 0.12), transparent 55%),
     linear-gradient(180deg, var(--wc-bg-mid) 0%, var(--wc-bg-deep) 100%);
   color: var(--wc-ink);
   font-family: var(--wc-font-body);
@@ -37,7 +37,7 @@
 }
 
 .merch-checkout-back:hover {
-  border-color: rgba(168, 85, 247, 0.45);
+  border-color: rgba(18, 88, 75, 0.45);
   color: var(--wc-ink);
   background: rgba(255, 255, 255, 0.06);
 }
@@ -103,7 +103,7 @@
   border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
-  background: rgba(3, 0, 20, 0.5);
+  background: rgba(22,38,41, 0.5);
 }
 
 .merch-checkout-line-body {
@@ -206,8 +206,8 @@
 
 .merch-checkout-input:focus {
   outline: none;
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.15);
+  border-color: rgba(18, 88, 75, 0.5);
+  box-shadow: 0 0 0 2px rgba(18, 88, 75, 0.15);
 }
 
 .merch-checkout-error {
@@ -226,7 +226,7 @@
   padding: 0.85rem 1.25rem;
   border: none;
   border-radius: var(--wc-radius-pill);
-  background: linear-gradient(135deg, #e9d5ff, var(--wc-accent));
+  background: #12584b;
   color: #121212;
   font-family: inherit;
   font-size: 1rem;
@@ -293,7 +293,7 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: rgba(3, 0, 20, 0.72);
+  background: rgba(22,38,41, 0.72);
   backdrop-filter: blur(6px);
 }
 
@@ -365,7 +365,7 @@
   margin-top: 0;
   color: #fff;
   border: none;
-  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  background: linear-gradient(135deg, #9ED9C8, #12584B);
 }
 
 .merch-checkout-modal-actions .merch-checkout-pay-btn:hover:not(:disabled) {

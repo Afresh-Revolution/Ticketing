@@ -77,6 +77,15 @@ const AccountPage = () => {
             >
               My tickets
             </button>
+            <button type="button" className="account-chip-btn" onClick={() => navigate('/account/plans')}>
+              Saved and plans
+            </button>
+            <button type="button" className="account-chip-btn" onClick={() => navigate('/account/passport')}>
+              Passport
+            </button>
+            <button type="button" className="account-chip-btn" onClick={() => navigate('/organizer/promoters')}>
+              Promoter
+            </button>
             <button
               type="button"
               className="account-chip-btn"

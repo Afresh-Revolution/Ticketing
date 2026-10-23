@@ -12,8 +12,8 @@
   position: relative;
   overflow: auto;
   background:
-    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(168, 85, 247, 0.22), transparent 55%),
-    radial-gradient(ellipse 65% 45% at 85% 85%, rgba(34, 211, 238, 0.18), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(18, 88, 75, 0.22), transparent 55%),
+    radial-gradient(ellipse 65% 45% at 85% 85%, rgba(215, 164, 91, 0.18), transparent 60%),
     linear-gradient(180deg, var(--wc-bg-mid) 0%, var(--wc-bg-deep) 70%, var(--wc-bg-deep) 100%);
   color: var(--wc-ink);
 }
@@ -27,7 +27,7 @@
   overflow: hidden;
   box-shadow: var(--wc-shadow-soft);
   border: 1px solid var(--wc-border);
-  background: rgba(8, 4, 24, 0.75);
+  background: rgba(18, 33, 31, 0.75);
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
@@ -37,7 +37,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 120% 85% at 100% 50%, rgba(168, 85, 247, 0.2), transparent 55%);
+  background: radial-gradient(ellipse 120% 85% at 100% 50%, rgba(18, 88, 75, 0.2), transparent 55%);
   pointer-events: none;
 }
 
@@ -108,7 +108,7 @@
   outline: none;
   border-color: var(--wc-accent);
   background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 0 3px rgba(18, 88, 75, 0.2);
 }
 
 .input-icon {
@@ -153,14 +153,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #e9d5ff 0%, var(--wc-accent-strong) 55%, #7c3aed 100%);
-  color: #0b041e;
-  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.35);
+  background: #12584b;
+  color: #f7f8f5;
+  box-shadow: 0 10px 30px rgba(18, 88, 75, 0.35);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(168, 85, 247, 0.45);
+  box-shadow: 0 14px 36px rgba(18, 88, 75, 0.45);
 }
 
 .auth-link {
@@ -174,7 +174,7 @@
 .auth-link button {
   background: none;
   border: none;
-  color: #d8b4fe;
+  color: #D7A45B;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.92rem;

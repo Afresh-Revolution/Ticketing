@@ -288,8 +288,11 @@ const AdminCreateEvent = () => {
       if (formData.city) locationString += `, ${formData.city}`;
 
       const dateTimeString = `${formData.startDate}T${formData.startTime}:00`;
-      const firstPaid = pools.find((p) => p.ticketType === 'paid');
-      const displayPrice = firstPaid ? firstPaid.price : '0';
+      const paidPrices = pools
+        .filter((p) => p.ticketType === 'paid')
+        .map((p) => parseInt(p.price, 10))
+        .filter((amount) => Number.isFinite(amount) && amount >= 0);
+      const displayPrice = paidPrices.length ? String(Math.min(...paidPrices)) : '0';
       const ticketTypes = poolsToTicketTypes(pools, eventFormat);
 
       const payload: Record<string, unknown> = {

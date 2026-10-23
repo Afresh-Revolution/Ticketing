@@ -1,8 +1,8 @@
 .why-choose-us {
   width: 100%;
   padding: clamp(3.5rem, 9vw, 5.5rem) 0;
-  background: linear-gradient(180deg, var(--lp-bg-mid, #0a0520) 0%, rgba(12, 4, 40, 0.98) 100%);
-  color: var(--lp-ink, #f4f0ff);
+  background: linear-gradient(180deg, var(--lp-bg-mid, #1C3330) 0%, rgba(18,33,31, 0.98) 100%);
+  color: var(--lp-ink, #f7f8f5);
   font-family: var(--lp-font-body, "DM Sans", ui-sans-serif, system-ui, sans-serif);
   margin: 0;
   position: relative;
@@ -12,7 +12,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(168, 85, 247, 0.12), transparent 55%);
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(18, 88, 75, 0.12), transparent 55%);
   pointer-events: none;
 }
 
@@ -33,7 +33,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--lp-faint, rgba(244, 240, 255, 0.48));
+  color: var(--lp-faint, rgba(247,248,245, 0.48));
 }
 
 .wc-heading {
@@ -43,7 +43,7 @@
   font-size: clamp(1.85rem, 3.5vw, 2.45rem);
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
 }
 
 .wc-sub {
@@ -52,7 +52,7 @@
   text-align: center;
   font-size: 1rem;
   line-height: 1.55;
-  color: var(--lp-muted, rgba(244, 240, 255, 0.72));
+  color: var(--lp-muted, rgba(247,248,245, 0.72));
 }
 
 .wc-reveal-grid {
@@ -86,12 +86,12 @@
   border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
   background: rgba(255, 255, 255, 0.03);
   font-size: 0.95rem;
-  color: var(--lp-ink, #f4f0ff);
+  color: var(--lp-ink, #f7f8f5);
   transition: border-color 0.2s, background 0.2s;
 }
 
 .wc-item:hover {
-  border-color: rgba(34, 211, 238, 0.25);
+  border-color: rgba(215, 164, 91, 0.25);
   background: rgba(255, 255, 255, 0.05);
 }
 

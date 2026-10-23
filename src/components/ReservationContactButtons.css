@@ -12,7 +12,7 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   background: transparent;
-  color: #f4f0ff;
+  color: #f7f8f5;
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
@@ -22,6 +22,6 @@
 }
 
 .reservation-contact-btn:hover {
-  border-color: rgba(168, 85, 247, 0.65);
+  border-color: rgba(18, 88, 75, 0.65);
   color: #fff;
 }

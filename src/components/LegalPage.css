@@ -1,7 +1,7 @@
 .legal-page {
   min-height: 100vh;
   background: #07060f;
-  color: #f4f0ff;
+  color: #f7f8f5;
   font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -21,7 +21,7 @@
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(244, 240, 255, 0.45);
+  color: rgba(247,248,245, 0.45);
 }
 
 .legal-page-nav ul {
@@ -37,7 +37,7 @@
   display: block;
   padding: 0.55rem 0.75rem;
   border-radius: 10px;
-  color: rgba(244, 240, 255, 0.72);
+  color: rgba(247,248,245, 0.72);
   text-decoration: none;
   font-size: 0.95rem;
   transition: background 0.2s ease, color 0.2s ease;
@@ -50,7 +50,7 @@
 
 .legal-page-nav a.active {
   color: #fff;
-  background: rgba(121, 26, 148, 0.35);
+  background: rgba(18, 88, 75, 0.35);
 }
 
 .legal-page-article h1 {
@@ -65,14 +65,14 @@
 .legal-page-updated {
   margin: 0 0 1.75rem;
   font-size: 0.9rem;
-  color: rgba(244, 240, 255, 0.5);
+  color: rgba(247,248,245, 0.5);
 }
 
 .legal-page-article p {
   margin: 0 0 1.15rem;
   font-size: 1.02rem;
   line-height: 1.7;
-  color: rgba(244, 240, 255, 0.78);
+  color: rgba(247,248,245, 0.78);
 }
 
 @media (max-width: 760px) {

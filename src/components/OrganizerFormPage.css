@@ -7,8 +7,8 @@
   justify-content: center;
   padding: clamp(1rem, 3vw, 2rem);
   background:
-    radial-gradient(ellipse 75% 60% at 10% 5%, rgba(168, 85, 247, 0.2), transparent 58%),
-    radial-gradient(ellipse 70% 58% at 100% 100%, rgba(34, 211, 238, 0.12), transparent 62%),
+    radial-gradient(ellipse 75% 60% at 10% 5%, rgba(18, 88, 75, 0.2), transparent 58%),
+    radial-gradient(ellipse 70% 58% at 100% 100%, rgba(215, 164, 91, 0.12), transparent 62%),
     linear-gradient(180deg, var(--wc-bg-mid) 0%, var(--wc-bg-deep) 100%);
 }
 
@@ -20,13 +20,13 @@
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid var(--wc-border);
-  background: rgba(3, 0, 20, 0.65);
+  background: #12211f;
   box-shadow: var(--wc-shadow-card);
 }
 
 .organizer-form-card {
   padding: clamp(1.25rem, 2.5vw, 2rem);
-  background: linear-gradient(165deg, rgba(29, 15, 62, 0.95), rgba(12, 5, 34, 0.95));
+  background: linear-gradient(165deg, #1e3632, #12211f);
 }
 
 .organizer-form-header {
@@ -99,9 +99,9 @@
 
 .organizer-form-field input:focus {
   outline: none;
-  border-color: rgba(168, 85, 247, 0.56);
+  border-color: rgba(18, 88, 75, 0.56);
   background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.18);
+  box-shadow: 0 0 0 3px rgba(18, 88, 75, 0.18);
 }
 
 .organizer-form-hint {
@@ -115,8 +115,8 @@
   border: 0;
   border-radius: var(--wc-radius-pill);
   padding: 0.78rem 1rem;
-  background: linear-gradient(135deg, #e9d5ff, var(--wc-accent));
-  color: #12072f;
+  background: #12584b;
+  color: #f7f8f5;
   font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
@@ -127,7 +127,7 @@
 
 .organizer-form-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 10px 26px rgba(168, 85, 247, 0.28);
+  box-shadow: 0 10px 26px rgba(18, 88, 75, 0.28);
 }
 
 .organizer-form-btn:disabled {
@@ -189,13 +189,13 @@
 }
 
 .organizer-form-signin a {
-  color: #d8b4fe;
+  color: #D7A45B;
   text-decoration: none;
   font-weight: 600;
 }
 
 .organizer-form-signin a:hover {
-  color: #ede9fe;
+  color: #f7f8f5;
   text-decoration: underline;
 }
 
@@ -212,8 +212,8 @@
 .organizer-form-spotlight {
   position: relative;
   background:
-    linear-gradient(125deg, rgba(8, 4, 20, 0.98), rgba(2, 2, 8, 1)),
-    radial-gradient(circle at 24% 18%, rgba(124, 58, 237, 0.14), transparent 40%);
+    linear-gradient(125deg, #12211f, #162629),
+    radial-gradient(circle at 24% 18%, rgba(18, 88, 75, 0.14), transparent 40%);
   border-left: 1px solid var(--wc-border);
   display: flex;
   align-items: center;

@@ -33,6 +33,7 @@ import AdminOnline from './admin/AdminOnline'
 import EventWatchPage from './components/EventWatchPage'
 import LegalPage from './components/LegalPage'
 import AccountPage from './components/AccountPage'
+import { AccountPlansPage, AdminModerationPage, CircleChatWebPage, CircleInvitePage, CityPage, CollectionPage, ExperiencesPage, OrganizerGrowthPage, PassportWebPage, PlanDetailWebPage, PlanInvitePage } from './gatewav2/pages'
 import './App.css'
 import { getRouteTransitionVariant, type RouteTransitionVariant } from './routeTransitions'
 
@@ -70,6 +71,17 @@ function AnimatedRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/events" element={<EventsPage />} />
+        <Route path="/city/:slug" element={<CityPage />} />
+        <Route path="/collections/:slug" element={<CollectionPage />} />
+        <Route path="/experiences" element={<ExperiencesPage />} />
+        <Route path="/plans/invite/:token" element={<PlanInvitePage />} />
+        <Route path="/circles/invite/:token" element={<CircleInvitePage />} />
+        <Route path="/account/plans" element={<AccountPlansPage />} />
+        <Route path="/account/plans/:planId" element={<PlanDetailWebPage />} />
+        <Route path="/circles/:circleId" element={<CircleChatWebPage />} />
+        <Route path="/account/saved" element={<AccountPlansPage />} />
+        <Route path="/account/passport" element={<PassportWebPage />} />
+        <Route path="/organizer/promoters" element={<OrganizerGrowthPage />} />
         <Route path="/events/past" element={<PastEventsPage />} />
         <Route path="/event/:id" element={<EventDetailPage />} />
         <Route path="/event/:id/watch" element={<EventWatchPage />} />
@@ -95,6 +107,7 @@ function AnimatedRoutes() {
           <Route path="withdraw" element={<AdminWithdraw />} />
           <Route path="admins" element={<AdminAdmins />} />
           <Route path="scanner" element={<AdminScanner />} />
+          <Route path="moderation" element={<AdminModerationPage />} />
           <Route path="top-users" element={<AdminTopUsers />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Route>

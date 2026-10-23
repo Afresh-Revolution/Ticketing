@@ -148,7 +148,7 @@
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em #12584baa);
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
@@ -182,7 +182,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #181543;
+  background: #162629;
   color: rgba(255, 255, 255, 0.9);
   font-family: 'Arimo', sans-serif;
 }

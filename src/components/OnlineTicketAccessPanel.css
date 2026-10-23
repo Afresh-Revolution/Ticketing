@@ -2,7 +2,7 @@
   padding: 1.25rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
-  background: linear-gradient(180deg, rgba(121, 26, 148, 0.14) 0%, rgba(0, 0, 0, 0.12) 100%);
+  background: linear-gradient(180deg, rgba(18, 88, 75, 0.14) 0%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 .online-ticket-access-label {
@@ -18,7 +18,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #c084fc;
+  color: #9ED9C8;
   margin: 0 0 0.35rem;
 }
 
@@ -54,7 +54,7 @@
   min-width: 3.5rem;
   padding: 0.5rem 0.4rem;
   border-radius: 8px;
-  background: rgba(121, 26, 148, 0.35);
+  background: rgba(18, 88, 75, 0.35);
   border: 1px solid rgba(196, 181, 253, 0.25);
 }
 
@@ -81,7 +81,7 @@
   margin: 0 0 1rem;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
-  background: #791a94;
+  background: #12584B;
   color: #fff;
   font-size: 0.85rem;
   font-weight: 700;
@@ -113,7 +113,7 @@
 .online-ticket-access-link {
   display: inline-block;
   margin-top: 0.85rem;
-  color: #c4b5fd;
+  color: #9ED9C8;
   font-size: 0.85rem;
   font-weight: 600;
   text-decoration: none;

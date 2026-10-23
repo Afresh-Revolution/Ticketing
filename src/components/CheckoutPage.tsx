@@ -165,6 +165,7 @@ const CheckoutPage = () => {
       address: (address || "").trim(),
       couponCode: couponPreview?.coupon?.code || undefined,
       paymentMethod,
+      promoterShareCode: sessionStorage.getItem("gatewav.promoterCode") || undefined,
     };
   };
 

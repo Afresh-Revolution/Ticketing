@@ -4,8 +4,8 @@
 .events-page {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 85% 60% at 0% 0%, rgba(168, 85, 247, 0.16), transparent 55%),
-    radial-gradient(ellipse 65% 50% at 100% 100%, rgba(34, 211, 238, 0.12), transparent 55%),
+    radial-gradient(ellipse 85% 60% at 0% 0%, rgba(18, 88, 75, 0.16), transparent 55%),
+    radial-gradient(ellipse 65% 50% at 100% 100%, rgba(215, 164, 91, 0.12), transparent 55%),
     linear-gradient(180deg, var(--wc-bg-mid) 0%, var(--wc-bg-deep) 100%);
   color: var(--wc-ink);
   font-family: var(--wc-font-body);
@@ -37,7 +37,7 @@
 }
 
 .events-back-btn:hover {
-  border-color: rgba(168, 85, 247, 0.45);
+  border-color: rgba(18, 88, 75, 0.45);
   color: var(--wc-ink);
   background: rgba(255, 255, 255, 0.06);
 }
@@ -173,12 +173,12 @@
 .events-state-select:hover,
 .events-state-select:focus {
   background-color: rgba(255, 255, 255, 0.06);
-  border-color: rgba(168, 85, 247, 0.45);
+  border-color: rgba(18, 88, 75, 0.45);
   outline: none;
 }
 
 .events-state-select option {
-  background: #1a122e;
+  background: #162629;
   color: #fff;
 }
 
@@ -206,9 +206,9 @@
 }
 
 .events-cat-pill.active {
-  background: linear-gradient(135deg, #e9d5ff, var(--wc-accent));
+  background: #12584b;
   border-color: transparent;
-  color: #12072f;
+  color: #f7f8f5;
 }
 
 .events-count {
@@ -238,7 +238,7 @@
 .event-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.36);
-  border-color: rgba(168, 85, 247, 0.35);
+  border-color: rgba(18, 88, 75, 0.35);
 }
 
 .event-card-image-wrap {
@@ -271,7 +271,7 @@
   position: absolute;
   bottom: 10px;
   left: 10px;
-  background: rgba(3, 0, 20, 0.72);
+  background: rgba(22,38,41, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: var(--wc-ink);
   font-size: 0.67rem;
@@ -350,8 +350,8 @@
 
 .event-card-cta {
   display: inline-block;
-  background: linear-gradient(135deg, #e9d5ff, var(--wc-accent));
-  color: #12072f;
+  background: #12584b;
+  color: #f7f8f5;
   border: none;
   border-radius: var(--wc-radius-pill);
   padding: 0.5rem 0.95rem;
@@ -369,9 +369,9 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  border: 1px solid rgba(233, 213, 255, 0.45);
-  background: rgba(233, 213, 255, 0.12);
-  color: #f4f0ff;
+  border: 1px solid rgba(158,217,200, 0.45);
+  background: rgba(158,217,200, 0.12);
+  color: #f7f8f5;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
@@ -396,13 +396,13 @@
 
 .event-card-share-btn:hover {
   color: #ffffff;
-  border-color: rgba(233, 213, 255, 0.8);
-  background: rgba(233, 213, 255, 0.22);
+  border-color: rgba(158,217,200, 0.8);
+  background: rgba(158,217,200, 0.22);
   transform: translateY(-1px);
 }
 
 .events-footer {
-  background: rgba(3, 0, 20, 0.9);
+  background: rgba(22,38,41, 0.9);
   margin-top: auto;
   padding: 2.25rem 2rem 1rem;
   border-top: 1px solid var(--wc-border);
@@ -613,7 +613,7 @@
 }
 
 .events-scope-btn.active {
-  background: #791a94;
+  background: #12584B;
   color: #fff;
 }
 
@@ -642,7 +642,7 @@
   text-transform: uppercase;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  background: rgba(3, 0, 20, 0.72);
+  background: rgba(22,38,41, 0.72);
 }
 
 .event-status-badge--past {

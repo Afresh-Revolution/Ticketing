@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(8, 6, 18, var(--merch-lightbox-backdrop, 0.92));
+  background: rgba(18,33,31, var(--merch-lightbox-backdrop, 0.92));
   backdrop-filter: blur(8px);
   animation: merch-lightbox-fade-in 0.2s ease;
 }
@@ -29,7 +29,7 @@
   height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 50%;
-  background: rgba(20, 16, 40, 0.85);
+  background: rgba(28,51,48, 0.85);
   color: #fff;
   font-size: 1.25rem;
   line-height: 1;
@@ -41,7 +41,7 @@
 }
 
 .merch-lightbox-close:hover {
-  background: rgba(124, 58, 237, 0.55);
+  background: rgba(18, 88, 75, 0.55);
   transform: scale(1.05);
 }
 
