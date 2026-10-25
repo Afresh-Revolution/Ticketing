@@ -37,6 +37,11 @@ interface TicketType {
   discountTiers: TicketDiscountTier[];
 }
 
+interface EventSponsor {
+  name: string;
+  imageUrl: string | null;
+}
+
 interface EventDetail {
   id: string;
   title: string;
@@ -50,6 +55,7 @@ interface EventDetail {
   heroImage: string;
   about: string;
   organizer: string;
+  sponsors: EventSponsor[];
   isRecurring?: boolean;
   recurrenceFrequency?: string;
   recurrenceWeekday?: string | null;
@@ -57,6 +63,33 @@ interface EventDetail {
   tickets: TicketType[];
   eventType: string;
   isLive: boolean;
+}
+
+function mapSponsors(raw: unknown): EventSponsor[] {
+  let list: unknown = raw;
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      list = JSON.parse(raw) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((item) => {
+      const row =
+        item && typeof item === "object"
+          ? (item as Record<string, unknown>)
+          : {};
+      const name = String(row.name ?? "").trim();
+      const image = String(row.imageUrl ?? row.image_url ?? "").trim();
+      return {
+        name,
+        imageUrl: /^https?:\/\//i.test(image) ? image : null,
+      };
+    })
+    .filter((sponsor) => sponsor.name)
+    .slice(0, 12);
 }
 
 function resolveOrganizerName(data: {
@@ -184,6 +217,7 @@ const EventDetailPage = () => {
             "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80",
           about: data.description || "No description available.",
           organizer: resolveOrganizerName(data),
+          sponsors: mapSponsors(data.sponsors),
           tickets,
           eventType,
           isLive: Boolean(data.isLive),
@@ -493,6 +527,32 @@ const EventDetailPage = () => {
                 <p className="event-detail-card-text">{event.about}</p>
               </div>
             </div>
+            {event.sponsors.length > 0 && (
+              <div className="event-detail-card event-detail-sponsors-card">
+                <div className="event-detail-card-content">
+                  <h3 className="event-detail-card-title">Sponsors</h3>
+                  <div className="event-detail-sponsors">
+                    {event.sponsors.map((sponsor, index) => (
+                      <div
+                        key={`${sponsor.name}-${index}`}
+                        className="event-detail-sponsor"
+                      >
+                        {sponsor.imageUrl ? (
+                          <img
+                            src={sponsor.imageUrl}
+                            alt=""
+                            className="event-detail-sponsor-logo"
+                          />
+                        ) : null}
+                        <span className="event-detail-sponsor-name">
+                          {sponsor.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="event-detail-card event-detail-card-organizer">
               <span
                 className="event-detail-card-icon event-detail-card-icon-lg"

@@ -316,6 +316,43 @@
   margin: 0;
 }
 
+.event-detail-sponsors-card {
+  flex-direction: column;
+}
+
+.event-detail-sponsors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.event-detail-sponsor {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.event-detail-sponsor-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #12211f;
+  flex-shrink: 0;
+}
+
+.event-detail-sponsor-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
 .event-detail-card-organizer {
   align-items: center;
 }
