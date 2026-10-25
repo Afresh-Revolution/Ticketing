@@ -5,6 +5,7 @@ import { PWAProvider } from './contexts/PWAContext'
 import PWABadges from './components/PWABadges'
 import PullToRefresh from './components/PullToRefresh'
 import LandingPage from './components/LandingPage'
+import DownloadPage from './components/DownloadPage'
 import LoginPage from './components/LoginPage'
 import SignupPage from './components/SignupPage'
 import PaymentSuccess from './components/PaymentSuccess'
@@ -68,6 +69,7 @@ function AnimatedRoutes() {
     >
       <Routes location={displayLocation}>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/download" element={<DownloadPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/events" element={<EventsPage />} />
@@ -117,6 +119,11 @@ function AnimatedRoutes() {
 }
 
 function App() {
+  // Handle clean URLs served by an SPA fallback or an existing service worker.
+  if (window.location.pathname.replace(/\/+$/, '') === '/download') {
+    return <DownloadPage />
+  }
+
   return (
     <AuthProvider>
     <PWAProvider>
