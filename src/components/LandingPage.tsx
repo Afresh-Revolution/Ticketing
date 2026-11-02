@@ -77,6 +77,14 @@ const LandingPage = () => {
   const typewriterTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
+    if (window.location.hash !== '#platform') return undefined;
+    const id = window.setTimeout(() => {
+      document.getElementById('platform')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     const loadEvents = async () => {
@@ -333,7 +341,7 @@ const LandingPage = () => {
             <div className="lp-hero-inner">
               <p className="lp-hero-eyebrow lp-reveal lp-reveal--lr lp-d0">
                 <span className="lp-hero-eyebrow-dot lp-reveal lp-reveal--tb lp-d1" aria-hidden />
-                Live events · Secure tickets · Instant QR
+                Guests and hosts · one app
               </p>
 
               <h1 className="lp-hero-title">
@@ -347,8 +355,8 @@ const LandingPage = () => {
               </h1>
 
               <p className="lp-hero-lede lp-reveal lp-reveal--bu lp-d2">
-                Discover concerts, festivals, conferences, and nightlife in one refined flow — browse curated events,
-                reserve your seats in seconds, and walk in with confidence.
+                Find what is on, line it up with your people, and walk in with a ticket on your phone. Hosts list the
+                event, sell it, check people in, and get paid from the same place.
               </p>
 
               <div className="lp-hero-cta-row">
@@ -358,6 +366,19 @@ const LandingPage = () => {
                   onClick={() => navigate('/organizer-form')}
                 >
                   Host with GateWav
+                </button>
+                <button
+                  type="button"
+                  className="lp-btn lp-btn-ghost lp-reveal lp-reveal--lr lp-d3"
+                  onClick={() => {
+                    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    document.getElementById('platform')?.scrollIntoView({
+                      behavior: reduceMotion ? 'instant' : 'smooth',
+                      block: 'start',
+                    });
+                  }}
+                >
+                  See what you get
                 </button>
                 <button
                   type="button"

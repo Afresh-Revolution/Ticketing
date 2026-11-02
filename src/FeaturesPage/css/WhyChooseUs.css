@@ -19,7 +19,7 @@
 .wc-inner {
   position: relative;
   z-index: 1;
-  max-width: 880px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: 0 clamp(1.25rem, 4vw, 2.5rem);
   box-sizing: border-box;
@@ -48,7 +48,7 @@
 
 .wc-sub {
   margin: 0 auto 2.5rem;
-  max-width: 480px;
+  max-width: 640px;
   text-align: center;
   font-size: 1rem;
   line-height: 1.55;
@@ -57,12 +57,44 @@
 
 .wc-reveal-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: clamp(1.25rem, 3vw, 2rem);
-  max-width: 720px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(1rem, 2.5vw, 1.35rem);
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+.wc-feature {
+  padding: 1.35rem 1.2rem;
+  border-radius: var(--lp-radius-lg, 20px);
+  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.wc-feature-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lp-accent, #9ed9c8);
+}
+
+.wc-feature h3 {
+  margin: 0 0 0.45rem;
+  font-family: var(--lp-font-display, "Syne", sans-serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--lp-ink, #f7f8f5);
+}
+
+.wc-feature p {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--lp-muted, rgba(247, 248, 245, 0.72));
 }
 
 .wc-reveal-grid > .wc-label,
@@ -105,7 +137,7 @@
   line-height: 1.45;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .wc-reveal-grid {
     grid-template-columns: 1fr;
   }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import BuiltForEveryone from './BuiltForEveryone';
 import WhyChooseUs from './WhyChooseUs';
+import MoreAhead from './MoreAhead';
 import ReadyToJoin from './ReadyToJoin';
 import AppDownloadCard from './AppDownloadCard';
 import Footer from './Footer';
@@ -79,6 +80,7 @@ const FeaturesPage = () => {
     <div className="features-page">
       <BuiltForEveryone />
       <WhyChooseUs />
+      <MoreAhead />
       <ScrollReveal stagger className="scroll-reveal-mix lp-video-section lp-video-reveal-stack" animation="fadeIn">
         <>
           <span className="lp-section-label">Atmosphere</span>
@@ -86,8 +88,7 @@ const FeaturesPage = () => {
             Every scene, one platform
           </h2>
           <p className="lp-video-section-sub">
-            From intimate rooms to stadium-scale energy, browse, book, and step in with tickets that feel as good as
-            the show.
+            Intimate rooms and big nights, listed, planned, and checked in on the same app.
           </p>
           {hasVideos
             ? videos.map((video) => <LandingVideoCard key={video.id} video={video} />)

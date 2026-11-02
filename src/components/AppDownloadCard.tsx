@@ -19,8 +19,8 @@ const AppDownloadCard = () => {
             Take GateWav with you 
           </h2>
           <p className="app-download-description">
-            Browse events, buy tickets, and show your QR at the door — download the GateWav app for
-            iPhone or Android.
+            Discover by city, plan with friends, keep QR tickets, and run sales, check-in, and payouts from the same
+            app on iPhone or Android.
           </p>
         </div>
 

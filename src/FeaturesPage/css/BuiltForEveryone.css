@@ -1,3 +1,9 @@
+#platform,
+#features-heading,
+#more-ahead-heading {
+  scroll-margin-top: calc(var(--navbar-total-height, 72px) + 12px);
+}
+
 .built-for-everyone {
   width: 100%;
   padding: clamp(3.5rem, 9vw, 5.5rem) 0 clamp(2rem, 5vw, 3rem);
@@ -48,7 +54,7 @@
 
 .bf-reveal-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: clamp(1rem, 2.5vw, 1.5rem);
   width: 100%;
   box-sizing: border-box;
@@ -60,83 +66,68 @@
   grid-column: 1 / -1;
 }
 
-.bf-card {
-  position: relative;
-  padding: 1.75rem 1.5rem;
-  text-align: center;
+.bf-audience {
+  padding: 1.5rem 1.35rem 0.5rem;
+  text-align: left;
   border-radius: var(--lp-radius-lg, 20px);
   border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
   background: var(--lp-bg-card, rgba(255, 255, 255, 0.035));
   box-shadow: var(--lp-shadow-card, 0 12px 40px rgba(0, 0, 0, 0.35));
-  transition: transform 0.35s var(--lp-ease-out, cubic-bezier(0.22, 1, 0.36, 1)), border-color 0.25s, box-shadow 0.35s;
 }
 
-.bf-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(18, 88, 75, 0.25), transparent 40%, rgba(215, 164, 91, 0.12));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.35s;
-  pointer-events: none;
+.bf-audience-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lp-magenta, #d7a45b);
 }
 
-.bf-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(18, 88, 75, 0.28);
-  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.42);
-}
-
-.bf-card:hover::before {
-  opacity: 1;
-}
-
-.bf-icon-wrap {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1.25rem;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--lp-cyan, #22d3ee);
-  background: linear-gradient(145deg, rgba(18, 88, 75, 0.2), rgba(255, 255, 255, 0.04));
-  border: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
-}
-
-.bf-card-title {
-  margin: 0 0 0.65rem;
+.bf-audience-title {
+  margin: 0 0 1.1rem;
   font-family: var(--lp-font-display, "Syne", sans-serif);
-  font-size: 1.15rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--lp-ink, #f7f8f5);
+}
+
+.bf-benefit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bf-benefit-list li {
+  margin: 0;
+  padding: 0.95rem 0;
+  border-top: 1px solid var(--lp-border, rgba(255, 255, 255, 0.09));
+}
+
+.bf-benefit-list h4 {
+  margin: 0 0 0.35rem;
+  font-family: var(--lp-font-display, "Syne", sans-serif);
+  font-size: 1rem;
   font-weight: 700;
   color: var(--lp-ink, #f7f8f5);
 }
 
-.bf-card-desc {
+.bf-benefit-list p {
   margin: 0;
   font-size: 0.94rem;
   line-height: 1.6;
-  color: var(--lp-muted, rgba(247,248,245, 0.72));
+  color: var(--lp-muted, rgba(247, 248, 245, 0.72));
 }
 
-@media (max-width: 968px) {
+@media (max-width: 860px) {
   .bf-reveal-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .bf-reveal-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .bf-card {
-    padding: 1.5rem 1.25rem;
+  .bf-audience {
+    padding: 1.25rem 1.1rem 0.35rem;
   }
 }

@@ -45,6 +45,18 @@ const Navbar = () => {
         </div>
 
         <div className={`nav-links ${mobileMenuOpen ? 'active' : ''}`}>
+          <a
+            onClick={() => {
+              if (location.pathname === '/') {
+                document.getElementById('platform')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return;
+              }
+              navigate('/#platform');
+            }}
+            className="nav-link"
+          >
+            Features
+          </a>
           <a onClick={() => navigate('/city/jos')} className="nav-link">
             Discover
           </a>
