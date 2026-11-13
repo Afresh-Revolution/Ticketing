@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import FeaturesPage from './FeaturesPage';
 import Navbar from './Navbar';
+import HeroEventPreview from './HeroEventPreview';
 import TopUsersCarousel from './TopUsersCarousel';
 import { fetchPublicEvents } from '../api/events';
 import { isEventPastWithRecurrence } from '../utils/eventDates';
@@ -321,21 +322,6 @@ const LandingPage = () => {
         <div className="lp-hero-orb lp-hero-orb-b" aria-hidden />
         <div className="lp-hero-noise" aria-hidden />
 
-        <button
-          type="button"
-          className="lp-mobile-app-button"
-          aria-controls="app-download"
-          onClick={() => {
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            document.getElementById('app-download')?.scrollIntoView({
-              behavior: reduceMotion ? 'instant' : 'smooth',
-              block: 'center',
-            });
-          }}
-        >
-          Mobile App
-        </button>
-
         <section className="lp-hero">
           <div className="lp-hero-grid">
             <div className="lp-hero-inner">
@@ -382,6 +368,20 @@ const LandingPage = () => {
                 </button>
                 <button
                   type="button"
+                  className="lp-btn lp-btn-ghost"
+                  aria-controls="app-download"
+                  onClick={() => {
+                    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    document.getElementById('app-download')?.scrollIntoView({
+                      behavior: reduceMotion ? 'instant' : 'smooth',
+                      block: 'center',
+                    });
+                  }}
+                >
+                  Mobile App
+                </button>
+                <button
+                  type="button"
                   className="lp-scroll-indicator lp-reveal lp-reveal--tb lp-d5"
                   aria-label="Scroll to next section"
                   onClick={() => window.scrollTo({ top: window.innerHeight * 0.92, behavior: 'smooth' })}
@@ -393,6 +393,7 @@ const LandingPage = () => {
                 </button>
               </div>
             </div>
+            <HeroEventPreview />
           </div>
         </section>
       </header>

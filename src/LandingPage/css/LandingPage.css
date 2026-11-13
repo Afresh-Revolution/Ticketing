@@ -39,33 +39,6 @@
   z-index: 0;
 }
 
-.lp-mobile-app-button {
-  position: absolute;
-  left: max(1rem, env(safe-area-inset-left, 0px));
-  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-  z-index: 6;
-  min-height: 44px;
-  padding: 0.65rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 999px;
-  background: #12584b;
-  color: #f7f8f5;
-  font-family: var(--lp-font-body);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-}
-
-.lp-mobile-app-button:hover {
-  background: #0e463c;
-}
-
-.lp-mobile-app-button:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-}
-
 .lp-hero-orb {
   position: absolute;
   border-radius: 50%;
@@ -572,4 +545,64 @@
   .lp-trending-card {
     min-height: 240px;
   }
+}
+
+/* Layered hero event and ticket preview */
+.lp-hero { max-width: 1280px; }
+.lp-hero-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem); }
+.lp-hero-inner { min-width: 0; }
+.lp-event-preview { position: relative; isolation: isolate; width: 100%; max-width: 470px; margin: 0 auto; padding: 28px 24px 0; box-sizing: border-box; }
+.lp-preview-glow { position: absolute; z-index: -1; inset: 8% -12% 5%; border-radius: 50%; background: radial-gradient(ellipse, rgba(110, 224, 184, .23), transparent 68%); pointer-events: none; }
+.lp-preview-event { overflow: hidden; border: 1px solid rgba(194, 234, 218, .24); border-radius: 22px; background: #16332e; box-shadow: 0 28px 65px rgba(0,0,0,.3); transform: rotate(-5deg); animation: lpPreviewFloat 7s ease-in-out infinite; }
+.lp-preview-photo { position: relative; aspect-ratio: 1.22; overflow: hidden; background: #292035; }
+.lp-preview-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.2), transparent 35%, rgba(8,22,18,.92)); }
+.lp-preview-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lp-preview-tag { position: absolute; top: 18px; left: 18px; right: 18px; z-index: 1; display: flex; align-items: center; justify-content: space-between; font-size: .65rem; letter-spacing: .15em; color: #fff; }
+.lp-preview-photo-copy { position: absolute; z-index: 1; bottom: 22px; left: 24px; right: 24px; }
+.lp-preview-photo-copy > span { font-size: .65rem; letter-spacing: .18em; color: #b9ead5; }
+.lp-preview-photo-copy h2 { margin: 8px 0 0; font-family: var(--lp-font-display); font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.15; color: #fff; }
+.lp-preview-event-details { padding: 18px 22px 26px; }
+.lp-preview-event-details p { display: flex; align-items: center; gap: 9px; margin: 0 0 12px; font-size: .8rem; color: #e0eae5; }
+.lp-preview-event-details svg { flex-shrink: 0; color: #a4d7c3; }
+.lp-preview-event-footer { border-top: 1px solid rgba(255,255,255,.12); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: .67rem; color: #a9bfb5; }
+.lp-preview-ticket { position: relative; z-index: 2; width: 91%; margin: -28px -10px 0 auto; padding: 18px; box-sizing: border-box; border: 1px solid rgba(197,241,220,.4); border-radius: 16px; background: linear-gradient(130deg, #e2f5e9, #b8dbca); color: #163b30; box-shadow: 0 20px 45px rgba(0,0,0,.28); transform: rotate(5deg); animation: lpTicketFloat 8s ease-in-out infinite; }
+.lp-preview-ticket-heading { display: flex; align-items: center; gap: 8px; font-size: .85rem; font-weight: 700; }
+.lp-preview-check { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #1b5844; color: #e2f5e9; }
+.lp-preview-ticket-body { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 0; }
+.lp-preview-ticket-label, .lp-preview-ticket-id { display: block; font-size: .52rem; letter-spacing: .12em; }
+.lp-preview-ticket-body h3 { margin: 6px 0; font-family: var(--lp-font-display); font-size: 1.2rem; }
+.lp-preview-ticket-body p { margin: 0 0 12px; font-size: .65rem; }
+.lp-preview-qr { flex-shrink: 0; padding: 3px; background: #f2f8f3; border-radius: 7px; }
+.lp-preview-qr svg { display: block; width: 72px; height: auto; }
+.lp-preview-ticket-bottom { display: flex; justify-content: space-between; gap: 8px; border-top: 1px dashed #79a38f; padding-top: 12px; font-size: .6rem; }
+.lp-preview-ticket-bottom span:last-child { font-weight: 800; }
+.lp-event-preview figcaption { margin-top: 34px; text-align: center; font-size: .75rem; letter-spacing: .04em; color: #cfdfd8; }
+.lp-event-preview figcaption span { display: block; margin-top: 7px; font-size: .6rem; color: #91aaa0; }
+@keyframes lpPreviewFloat { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-9px) rotate(-4deg); } }
+@keyframes lpTicketFloat { 0%, 100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+@media (max-width: 959px) {
+  .lp-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .lp-hero-inner { max-width: 680px; }
+  .lp-event-preview { max-width: 440px; margin-top: 0; }
+  .lp-hero-cta-row { margin-bottom: 1rem; }
+}
+@media (max-width: 479px) {
+  .lp-hero-cta-row > .lp-btn-primary {
+    flex: 1 1 100%;
+  }
+
+  .lp-hero-cta-row > .lp-btn-ghost {
+    flex: 1 1 auto;
+  }
+
+  .lp-event-preview { padding: 18px 12px 0; }
+  .lp-preview-event-details { padding: 16px 16px 22px; }
+  .lp-preview-ticket { width: 96%; margin-right: -4px; padding: 14px; }
+  .lp-preview-ticket-body { gap: 8px; }
+  .lp-preview-qr svg { width: 60px; }
+  .lp-preview-photo-copy { left: 18px; bottom: 18px; }
+  .lp-hero-title { font-size: clamp(2rem, 8.8vw, 2.6rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-preview-event, .lp-preview-ticket { animation: none; }
 }

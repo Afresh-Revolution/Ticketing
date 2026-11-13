@@ -81,10 +81,20 @@ function poolsToTicketTypes(pools: TicketPool[], eventType: EventFormat) {
   }));
 }
 
+const EVENT_STEPS = ['Basics', 'Date & Location', 'Tickets & Merchandise', 'Media & Review'];
+
 type Me = { id: number; role?: string } | null;
 
 const AdminCreateEvent = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    headingRef.current?.focus();
+    headingRef.current?.scrollIntoView({ block: 'start' });
+  }, [step]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -236,8 +246,26 @@ const AdminCreateEvent = () => {
     setImageUploadError('');
   };
 
+  const validateStep = () => {
+    if (!formRef.current?.reportValidity()) return false;
+    const stepError = step === 2 ? validatePools(pools) || getMerchFormError(merchItems) : null;
+    setError(stepError || '');
+    return !stepError;
+  };
+
+  const goBack = () => {
+    setError('');
+    setStep((current) => Math.max(0, current - 1));
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (loading || uploadingImage || merchItems.some((item) => item.images.some((image) => image.uploading))) return;
+    if (!validateStep()) return;
+    if (step < EVENT_STEPS.length - 1) {
+      setStep((current) => current + 1);
+      return;
+    }
     setLoading(true);
     setError('');
 
@@ -373,7 +401,7 @@ const AdminCreateEvent = () => {
 
   return (
     <div className="admin-page">
-      <h1 className="admin-page-title">Create Event</h1>
+      <h1 className="admin-page-title" ref={headingRef} tabIndex={-1}>Create Event</h1>
       {me != null && (
         <p className="admin-create-as" style={{ marginBottom: '1rem', opacity: 0.9, fontSize: '0.95rem' }}>
           {isSuperAdminSession
@@ -383,12 +411,24 @@ const AdminCreateEvent = () => {
       )}
 
       {error && (
-        <div className="admin-error-message" style={{ marginBottom: '1rem', color: '#fca5a5', background: 'rgba(220, 38, 38, 0.1)', padding: '1rem', borderRadius: '8px' }}>
+        <div role="alert" className="admin-error-message" style={{ marginBottom: '1rem', color: '#fca5a5', background: 'rgba(220, 38, 38, 0.1)', padding: '1rem', borderRadius: '8px' }}>
           {error}
         </div>
       )}
 
-      <form className="admin-form" onSubmit={handleSubmit}>
+      <ol className="admin-event-steps" aria-label="Event creation progress">
+        {EVENT_STEPS.map((label, index) => (
+          <li key={label} aria-current={step === index ? 'step' : undefined}
+            className={index === step ? 'is-current' : index < step ? 'is-complete' : ''}>
+            <span className="admin-event-step-number">{index < step ? '?' : index + 1}</span>
+            <span>{label}</span>
+          </li>
+        ))}
+      </ol>
+      <p className="admin-input-hint" aria-live="polite">Step {step + 1} of {EVENT_STEPS.length}: {EVENT_STEPS[step]}</p>
+      <form ref={formRef} className="admin-form" onSubmit={handleSubmit}>
+        <fieldset className="admin-event-step-panel" hidden={step !== 0} disabled={step !== 0 || loading}>
+        <legend className="admin-event-step-legend">Basics</legend>
         {/* Basic Information */}
         <section className="admin-section">
           <h2 className="admin-section-title">
@@ -450,6 +490,9 @@ const AdminCreateEvent = () => {
           </div>
         </section>
 
+        </fieldset>
+        <fieldset className="admin-event-step-panel" hidden={step !== 1} disabled={step !== 1 || loading}>
+        <legend className="admin-event-step-legend">Date & Location</legend>
         {/* Date & Time */}
         <section className="admin-section">
           <h2 className="admin-section-title">
@@ -671,6 +714,9 @@ const AdminCreateEvent = () => {
           </div>
         </section>
 
+        </fieldset>
+        <fieldset className="admin-event-step-panel" hidden={step !== 2} disabled={step !== 2 || loading}>
+        <legend className="admin-event-step-legend">Tickets & Merchandise</legend>
         {/* Capacity & Tickets */}
         <section className="admin-section">
           <h2 className="admin-section-title">
@@ -859,6 +905,10 @@ const AdminCreateEvent = () => {
           </div>
         </section>
 
+        <AdminMerchForm items={merchItems} onChange={setMerchItems} />
+        </fieldset>
+        <fieldset className="admin-event-step-panel" hidden={step !== 3} disabled={step !== 3 || loading}>
+        <legend className="admin-event-step-legend">Media & Review</legend>
         {/* Event Media */}
         <section className="admin-section">
           <h2 className="admin-section-title">
@@ -932,14 +982,28 @@ const AdminCreateEvent = () => {
           {imageUploadError && <p className="admin-input-hint" style={{ color: '#fca5a5' }}>{imageUploadError}</p>}
         </section>
 
-        <AdminMerchForm items={merchItems} onChange={setMerchItems} />
+        <section className="admin-section">
+          <h2 className="admin-section-title">Review your event</h2>
+          <p className="admin-input-hint">Check your details below. Use Back to make changes before saving and publishing.</p>
+          <dl className="admin-event-review">
+            <div><dt>Event</dt><dd>{formData.title}</dd></div>
+            <div><dt>Category & format</dt><dd>{formData.category} ? {formData.eventType}</dd></div>
+            <div><dt>Starts</dt><dd>{formData.startDate} at {formData.startTime} ({formData.timezone})</dd></div>
+            <div><dt>Location</dt><dd>{isOnlineOnly ? 'Online' : [formData.venue, formData.address, formData.city, formData.state].filter(Boolean).join(', ')}</dd></div>
+            <div><dt>Tickets</dt><dd>{pools.map((pool) => `${pool.ticketName} (${pool.quantity})`).join(', ')}</dd></div>
+            <div><dt>Merchandise</dt><dd>{merchItems.length} items</dd></div>
+            <div><dt>Images</dt><dd>{formData.imageUrls.length ? `${formData.imageUrls.length} uploaded` : 'Default event image'}</dd></div>
+          </dl>
+        </section>
+        </fieldset>
 
         <div className="admin-form-actions">
-          <button type="button" className="admin-btn-secondary" onClick={() => navigate('/admin/events')}>
+          <button type="button" className="admin-btn-secondary" disabled={loading} onClick={() => navigate('/admin/events')}>
             Cancel
           </button>
-          <button type="submit" className="admin-btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Create Event'}
+          {step > 0 && <button type="button" className="admin-btn-secondary" disabled={loading} onClick={goBack}>Back</button>}
+          <button type="submit" className="admin-btn-primary" disabled={loading || uploadingImage || merchItems.some((item) => item.images.some((image) => image.uploading))}>
+            {loading ? 'Publishing...' : step === EVENT_STEPS.length - 1 ? 'Save & Publish' : 'Continue'}
           </button>
         </div>
       </form>

@@ -4031,3 +4031,21 @@ html.admin-bank-modal-open .admin-withdraw-scroll {
 .admin-recurrence-fields {
   margin-top: 0.75rem;
 }
+
+/* Event creation wizard */
+.admin-event-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 24px 0 16px; }
+.admin-event-steps li { display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; color: #a8bab6; }
+.admin-event-steps .is-current { border-color: #88d5bd; background: rgba(136,213,189,.1); color: #fff; }
+.admin-event-steps .is-complete { color: #88d5bd; }
+.admin-event-step-number { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: rgba(136,213,189,.15); font-weight: 700; }
+.admin-event-step-panel { border: 0; padding: 0; margin: 0; min-width: 0; }
+.admin-event-step-panel[hidden] { display: none; }
+.admin-event-step-legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.admin-event-review { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.admin-event-review dt { color: #a8bab6; font-size: .9rem; margin-bottom: 6px; }
+.admin-event-review dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+@media (max-width: 640px) {
+  .admin-event-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .admin-event-steps li { padding: 10px; font-size: .85rem; }
+  .admin-event-review { grid-template-columns: 1fr; }
+}
