@@ -27,6 +27,13 @@ import {
 } from '../utils/ticketDiscounts';
 import { AddTicketTypeControl } from './AddTicketTypeDropdown';
 import TicketDiscountTierEditor from './TicketDiscountTierEditor';
+import EventSponsorsEditor from './EventSponsorsEditor';
+import {
+  eventSponsorsToPayload,
+  getEventSponsorFormError,
+  parseEventSponsorDrafts,
+  type EventSponsorDraft,
+} from './eventSponsorUtils';
 import './admin.css';
 
 type TicketPool = {
@@ -81,6 +88,7 @@ type EventApiResponse = {
   recurrenceFrequency?: string;
   recurrenceWeekday?: string | null;
   recurrenceUntil?: string | null;
+  sponsors?: unknown;
   tickets?: EventTicket[];
   ticketTypes?: EventTicket[];
 };
@@ -146,6 +154,8 @@ const AdminEditEvent = () => {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool('in_person')]);
   const [merchItems, setMerchItems] = useState<MerchFormItem[]>([]);
+  const [sponsors, setSponsors] = useState<EventSponsorDraft[]>([]);
+  const [uploadingSponsor, setUploadingSponsor] = useState(false);
 
   const authHeaders = (): HeadersInit => {
     const token = localStorage.getItem('adminToken');
@@ -285,6 +295,7 @@ const AdminEditEvent = () => {
         recurrenceWeekday: normalizeRecurrenceWeekday(mergedEvent.recurrenceWeekday),
         recurrenceUntil,
       });
+      setSponsors(parseEventSponsorDrafts(mergedEvent.sponsors));
       const loadedEventType = mergedEvent.eventType || 'in-person';
       const tickets: EventTicket[] = mergedEvent.tickets ?? mergedEvent.ticketTypes ?? [];
       if (tickets.length > 0) {
@@ -420,6 +431,10 @@ const AdminEditEvent = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!id) return;
+    if (uploadingSponsor) {
+      setSubmitError('Wait for the sponsor logo to finish uploading.');
+      return;
+    }
     const submitStartedAt = Date.now();
     const minSavingMs = 500;
     setLoading(true);
@@ -444,6 +459,11 @@ const AdminEditEvent = () => {
       const merchError = getMerchFormError(merchItems);
       if (merchError) {
         setSubmitError(merchError);
+        return;
+      }
+      const sponsorError = getEventSponsorFormError(sponsors);
+      if (sponsorError) {
+        setSubmitError(sponsorError);
         return;
       }
 
@@ -485,6 +505,7 @@ const AdminEditEvent = () => {
         recurrenceUntil:
           formData.isRecurring && formData.recurrenceUntil ? formData.recurrenceUntil : null,
         ticketTypes,
+        sponsors: eventSponsorsToPayload(sponsors),
       };
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -1132,13 +1153,20 @@ const AdminEditEvent = () => {
           {imageUploadError && <p className="admin-input-hint" style={{ color: '#fca5a5' }}>{imageUploadError}</p>}
         </section>
 
+        <EventSponsorsEditor
+          sponsors={sponsors}
+          onChange={setSponsors}
+          onUploadingChange={setUploadingSponsor}
+          disabled={loading}
+        />
+
         <AdminMerchForm items={merchItems} onChange={setMerchItems} />
 
         <div className="admin-form-actions">
           <button type="button" className="admin-btn-secondary" onClick={() => navigate('/admin/events')}>
             Cancel
           </button>
-          <button type="submit" className="admin-btn-primary" disabled={loading}>
+          <button type="submit" className="admin-btn-primary" disabled={loading || uploadingSponsor}>
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>

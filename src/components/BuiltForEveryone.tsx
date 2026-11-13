@@ -20,7 +20,7 @@ const GUEST_BENEFITS = [
   },
   {
     title: 'A passport that stays yours',
-    body: 'Check-in adds one stamp. Keep the passport private, or share only how many events you attended. Never ticket codes or what you paid. Hosts can attach a benefit after you show up. That benefit is not cash.',
+    body: 'Each check-in adds one stamp. Keep the passport private, or share only your attendance count—not ticket codes or payment details. Redeem organizer-funded, non-cash benefits after you attend, and download a copy of your saved events and stamps.',
   },
 ];
 
@@ -43,7 +43,7 @@ const HOST_BENEFITS = [
   },
   {
     title: 'Keep the room earning after the ticket',
-    body: 'Sell merch, go live for an online show, and offer an attendance perk that appears on a guest’s passport after it is approved. Ask to be verified so guests can filter for hosts who have been checked.',
+    body: 'Add sponsor names and logos to an event, sell merch, go live for an online show, and offer an attendance perk that appears on a guest’s passport after it is approved. Ask to be verified so guests can filter for hosts who have been checked.',
   },
 ];
 

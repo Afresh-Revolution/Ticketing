@@ -19,6 +19,12 @@ import {
 } from '../utils/ticketDiscounts';
 import { AddTicketTypeControl } from './AddTicketTypeDropdown';
 import TicketDiscountTierEditor from './TicketDiscountTierEditor';
+import EventSponsorsEditor from './EventSponsorsEditor';
+import {
+  eventSponsorsToPayload,
+  getEventSponsorFormError,
+  type EventSponsorDraft,
+} from './eventSponsorUtils';
 import './admin.css';
 
 type TicketPool = {
@@ -103,6 +109,8 @@ const AdminCreateEvent = () => {
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [pools, setPools] = useState<TicketPool[]>([defaultPool('in_person')]);
   const [merchItems, setMerchItems] = useState<MerchFormItem[]>([]);
+  const [sponsors, setSponsors] = useState<EventSponsorDraft[]>([]);
+  const [uploadingSponsor, setUploadingSponsor] = useState(false);
   const [me, setMe] = useState<Me>(null);
 
   useEffect(() => {
@@ -260,7 +268,12 @@ const AdminCreateEvent = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (loading || uploadingImage || merchItems.some((item) => item.images.some((image) => image.uploading))) return;
+    if (
+      loading ||
+      uploadingImage ||
+      uploadingSponsor ||
+      merchItems.some((item) => item.images.some((image) => image.uploading))
+    ) return;
     if (!validateStep()) return;
     if (step < EVENT_STEPS.length - 1) {
       setStep((current) => current + 1);
@@ -310,6 +323,11 @@ const AdminCreateEvent = () => {
         setError(merchError);
         return;
       }
+      const sponsorError = getEventSponsorFormError(sponsors);
+      if (sponsorError) {
+        setError(sponsorError);
+        return;
+      }
       const merchPayload = merchFormToPayload(merchItems);
 
       let locationString = formData.venue;
@@ -352,6 +370,7 @@ const AdminCreateEvent = () => {
         recurrenceUntil:
           formData.isRecurring && formData.recurrenceUntil ? formData.recurrenceUntil : null,
         ticketTypes,
+        sponsors: eventSponsorsToPayload(sponsors),
       };
       if (merchPayload.length > 0) {
         payload.merch = merchPayload;
@@ -982,6 +1001,13 @@ const AdminCreateEvent = () => {
           {imageUploadError && <p className="admin-input-hint" style={{ color: '#fca5a5' }}>{imageUploadError}</p>}
         </section>
 
+        <EventSponsorsEditor
+          sponsors={sponsors}
+          onChange={setSponsors}
+          onUploadingChange={setUploadingSponsor}
+          disabled={loading}
+        />
+
         <section className="admin-section">
           <h2 className="admin-section-title">Review your event</h2>
           <p className="admin-input-hint">Check your details below. Use Back to make changes before saving and publishing.</p>
@@ -993,6 +1019,7 @@ const AdminCreateEvent = () => {
             <div><dt>Tickets</dt><dd>{pools.map((pool) => `${pool.ticketName} (${pool.quantity})`).join(', ')}</dd></div>
             <div><dt>Merchandise</dt><dd>{merchItems.length} items</dd></div>
             <div><dt>Images</dt><dd>{formData.imageUrls.length ? `${formData.imageUrls.length} uploaded` : 'Default event image'}</dd></div>
+            <div><dt>Sponsors</dt><dd>{eventSponsorsToPayload(sponsors).length}</dd></div>
           </dl>
         </section>
         </fieldset>
@@ -1002,7 +1029,11 @@ const AdminCreateEvent = () => {
             Cancel
           </button>
           {step > 0 && <button type="button" className="admin-btn-secondary" disabled={loading} onClick={goBack}>Back</button>}
-          <button type="submit" className="admin-btn-primary" disabled={loading || uploadingImage || merchItems.some((item) => item.images.some((image) => image.uploading))}>
+          <button
+            type="submit"
+            className="admin-btn-primary"
+            disabled={loading || uploadingImage || uploadingSponsor || merchItems.some((item) => item.images.some((image) => image.uploading))}
+          >
             {loading ? 'Publishing...' : step === EVENT_STEPS.length - 1 ? 'Save & Publish' : 'Continue'}
           </button>
         </div>

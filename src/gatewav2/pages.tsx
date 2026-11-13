@@ -395,10 +395,34 @@ export function PassportWebPage() {
     load();
   }, []);
 
+  const shareAttendance = async () => {
+    setError("");
+    setNote("");
+    const message = `I've attended ${stamps.length} event${stamps.length === 1 ? "" : "s"} on GateWav.`;
+    try {
+      if (typeof navigator.share === "function") {
+        await navigator.share({ text: message });
+        return;
+      }
+      if (!window.isSecureContext || !navigator.clipboard?.writeText) {
+        throw new Error("Sharing is not available in this browser.");
+      }
+      await navigator.clipboard.writeText(message);
+      setNote("Attendance count copied.");
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setError(err instanceof Error ? err.message : "Could not share attendance count.");
+    }
+  };
+
   return (
     <Shell>
       <h1 className="gw-title">Passport</h1>
-      <p className="gw-copy">A stamp is added when a ticket is checked in. This is not a wallet. Organizer benefits are funded by the organizer.</p>
+      <p className="gw-copy">
+        A stamp is added when your ticket is checked in. Keep your passport private, or share only your attendance
+        count. Ticket codes and payment details are never shared. This is not a wallet; organizer benefits are funded
+        by the organizer.
+      </p>
       <label className="gw-copy">
         <input
           type="checkbox"
@@ -414,8 +438,13 @@ export function PassportWebPage() {
         />{" "}
         Keep my passport private
       </label>
-      {error ? <p>{error}</p> : null}
-      {note ? <p className="gw-copy">{note}</p> : null}
+      {error ? <p role="alert">{error}</p> : null}
+      {note ? <p className="gw-copy" role="status">{note}</p> : null}
+      {!hidden ? (
+        <button className="gw-btn alt" type="button" onClick={() => void shareAttendance()}>
+          Share attendance count
+        </button>
+      ) : null}
       <h2>Stamps</h2>
       {stamps.length ? stamps.map((stamp) => (
         <p key={stamp.id}>{stamp.title || "Attended"}{stamp.awardedAt ? ` · ${new Date(stamp.awardedAt).toLocaleDateString()}` : ""}</p>
