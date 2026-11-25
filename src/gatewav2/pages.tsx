@@ -518,7 +518,7 @@ export function OrganizerGrowthPage() {
       <p className="gw-copy">Commission is a share of confirmed paid tickets. Clicks are not earnings. Refunds and chargebacks reverse it. Payout stays an approval, not an automatic transfer.</p>
       <h2>Your campaigns</h2>
       {rows.length ? rows.map((row) => {
-        const link = row.eventId ? `${window.location.origin}/#/event/${row.eventId}?ref=${encodeURIComponent(row.shareCode)}` : "";
+        const link = row.eventId ? `${window.location.origin}/event/${encodeURIComponent(row.eventId)}?ref=${encodeURIComponent(row.shareCode)}` : "";
         return (
           <div key={row.shareCode} className="gw-note">
             <p>{row.campaign || "Campaign"} · {row.eventTitle || "Event"}</p>

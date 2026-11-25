@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt', // Show "Update available" so user can refresh and get latest
+      registerType: 'prompt', // Wait until active sessions end before activating.
+      injectRegister: false, // PWAProvider owns quiet, native registration.
       includeAssets: [
         'favicon.ico',
         'favicon-16x16.png',
@@ -49,9 +50,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallbackDenylist: [/^\/event\//, /^\/share-images\//],
         cleanupOutdatedCaches: true,
         skipWaiting: false,
-        clientsClaim: true,
+        clientsClaim: false,
       },
     }),
   ],

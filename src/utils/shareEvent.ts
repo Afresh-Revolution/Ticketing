@@ -6,7 +6,7 @@ type ShareEventInput = {
 };
 
 export function getEventShareUrl(eventId: string): string {
-  return new URL(`#/event/${eventId}`, window.location.href).href;
+  return new URL(`/event/${encodeURIComponent(eventId)}`, window.location.origin).href;
 }
 
 function isShareAbort(err: unknown): boolean {
@@ -46,37 +46,8 @@ async function copyToClipboard(text: string): Promise<boolean> {
   return false;
 }
 
-function absoluteUrl(maybeUrl: string): string {
-  try {
-    return new URL(maybeUrl, window.location.href).href;
-  } catch {
-    return maybeUrl;
-  }
-}
-
-async function toShareFile(imageUrl: string): Promise<File | null> {
-  const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 2500);
-  try {
-    const res = await fetch(absoluteUrl(imageUrl), {
-      mode: "cors",
-      credentials: "omit",
-      signal: controller.signal,
-    });
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    const type = blob.type.startsWith("image/") ? blob.type : "image/jpeg";
-    const ext = type.split("/")[1]?.split("+")[0] || "jpg";
-    return new File([blob], `gatewav-event.${ext}`, { type });
-  } catch {
-    return null;
-  } finally {
-    window.clearTimeout(timer);
-  }
-}
-
 export async function shareEvent(input: ShareEventInput): Promise<void> {
-  const { title, url, imageUrl, onCopySuccess } = input;
+  const { title, url, onCopySuccess } = input;
   const shareText = `Check out "${title}" on GateWav\n${url}`;
 
   const copied = await copyToClipboard(url);
@@ -92,24 +63,6 @@ export async function shareEvent(input: ShareEventInput): Promise<void> {
   const linkData: ShareData = { title, text: shareText, url };
 
   try {
-    const file = imageUrl ? await toShareFile(imageUrl) : null;
-    if (file) {
-      // Keep the URL in `text` (caption). Do not set `url` together with `files` —
-      // Safari/iOS drops the link when both are present, so Copy/WhatsApp get only the image.
-      const fileData: ShareData = { title, text: shareText, files: [file] };
-      const canShareFiles = !navigator.canShare || navigator.canShare({ files: [file] });
-      if (canShareFiles) {
-        try {
-          await navigator.share(fileData);
-          await copyToClipboard(url);
-          onCopySuccess?.();
-          return;
-        } catch (err) {
-          if (isShareAbort(err)) return;
-        }
-      }
-    }
-
     await navigator.share(linkData);
     await copyToClipboard(url);
     onCopySuccess?.();

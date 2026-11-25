@@ -1,97 +1,66 @@
-import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
-import { registerSW } from 'virtual:pwa-register';
+﻿import { useEffect, type ReactNode } from 'react';
 
-type PWAContextValue = {
-  updateReady: boolean;
-  onRefreshClick: () => void;
-};
-
-const PWAContext = createContext<PWAContextValue | null>(null);
+// Share registration across StrictMode mounts. The virtual registration helper
+// can reload active pages, so updates use the native lifecycle instead.
+let registrationPromise: Promise<ServiceWorkerRegistration> | undefined;
+const UPDATE_INTERVAL = 15 * 60 * 1000;
+let lastUpdateCheck = 0;
 
 export function PWAProvider({ children }: { children: ReactNode }) {
-  const [updateReady, setUpdateReady] = useState(false);
-  const updateSWRef = useRef<((reload?: boolean) => void) | null>(null);
-
   useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    const preventInstallPrompt = (event: Event) => event.preventDefault();
+    window.addEventListener('beforeinstallprompt', preventInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', preventInstallPrompt);
   }, []);
 
   useEffect(() => {
-    let intervalId: number | null = null;
-    let activeRegistration: ServiceWorkerRegistration | undefined;
-    const revalidateForUpdate = async (registration?: ServiceWorkerRegistration) => {
-      if (!registration) return;
+    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
+    let disposed = false;
+    let registration: ServiceWorkerRegistration | undefined;
+    let checking = false;
+    const checkForUpdate = async () => {
+      if (disposed || checking || !registration || !navigator.onLine ||
+          document.visibilityState !== 'visible' ||
+          Date.now() - lastUpdateCheck < UPDATE_INTERVAL) return;
+      checking = true;
+      lastUpdateCheck = Date.now();
       try {
+        // Download silently; never send SKIP_WAITING or reload. Activation
+        // waits until all clients using the old worker have closed.
         await registration.update();
       } catch {
-        // Ignore transient update errors (offline, throttling, etc).
+        // Temporary network failures leave the current version usable.
+      } finally {
+        checking = false;
       }
     };
 
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        void revalidateForUpdate(activeRegistration);
-      }
-    };
-    const onFocus = () => {
-      void revalidateForUpdate(activeRegistration);
-    };
-
-    const bindRegistration = (registration?: ServiceWorkerRegistration) => {
-      if (!registration) return;
-      activeRegistration = registration;
-      void revalidateForUpdate(activeRegistration);
-      if (!intervalId) {
-        intervalId = window.setInterval(() => {
-          void revalidateForUpdate(activeRegistration);
-        }, 60 * 1000);
-      }
-      document.addEventListener('visibilitychange', onVisibility);
-      window.addEventListener('focus', onFocus);
-    };
-
-    const updateSW = registerSW({
-      immediate: true,
-      onNeedRefresh() {
-        setUpdateReady(true);
-      },
-      onOfflineReady() {},
-      onRegisteredSW(_swUrl, registration) {
-        bindRegistration(registration);
-      },
-      onRegistered(registration) {
-        bindRegistration(registration);
-      },
+    registrationPromise ??= navigator.serviceWorker.register(
+      `${import.meta.env.BASE_URL}sw.js`,
+      { scope: import.meta.env.BASE_URL, updateViaCache: 'none' },
+    ).catch((error: unknown) => {
+      registrationPromise = undefined;
+      throw error;
     });
-    updateSWRef.current = updateSW;
+    void registrationPromise.then((value) => {
+      if (disposed) return;
+      registration = value;
+      void checkForUpdate();
+    }).catch(() => {
+      // Registration failure must not prevent the app from opening.
+    });
+
+    const onReturn = () => { void checkForUpdate(); };
+    const interval = window.setInterval(onReturn, UPDATE_INTERVAL);
+    document.addEventListener('visibilitychange', onReturn);
+    window.addEventListener('online', onReturn);
     return () => {
-      if (intervalId) window.clearInterval(intervalId);
-      document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('focus', onFocus);
+      disposed = true;
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onReturn);
+      window.removeEventListener('online', onReturn);
     };
   }, []);
 
-  const onRefreshClick = () => {
-    // Avoid lingering UI if reload is suppressed for any reason (edge cases/offline transitions).
-    setUpdateReady(false);
-    updateSWRef.current?.(true);
-  };
-
-  const value: PWAContextValue = {
-    updateReady,
-    onRefreshClick,
-  };
-
-  return <PWAContext.Provider value={value}>{children}</PWAContext.Provider>;
-}
-
-// Context consumer hook – same-file export is intentional
-// eslint-disable-next-line react-refresh/only-export-components
-export function usePWA() {
-  const ctx = useContext(PWAContext);
-  return ctx;
+  return children;
 }

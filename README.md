@@ -68,7 +68,7 @@ The system is split into two main parts:
                     Paystack (withdrawals / optional payments), etc.
 ```
 
-**Routing:** The app uses **HashRouter** (`#/events`, `#/event/:id`). Share links and deep links must include the hash segment (e.g. `https://yoursite.com/#/event/uuid`).
+**Routing:** The app uses **HashRouter** internally (`#/events`, `#/event/:id`). Public share links use `/event/:id`, served with event-specific preview metadata before opening the event in the app. Legacy hash links still open but cannot provide event-specific previews. See [event sharing deployment](EVENT_SHARING.md).
 
 **State on the client:**
 
@@ -130,7 +130,7 @@ The system is split into two main parts:
 - Embedded marketing sections: features, “built for everyone,” why choose us, get tickets preview, top users carousel, ready to join CTA
 - Landing videos loaded from `GET /api/landing/videos`
 - Top users carousel from `GET /api/landing/top-users`
-- PWA install/update prompts when applicable
+- Quiet PWA updates downloaded in the background
 
 ### Events listing
 
@@ -145,7 +145,7 @@ The system is split into two main parts:
 - Ticket types support **paid** and **free**
 - Quantity selectors respect availability (`quantity - sold`)
 - Navigates to checkout with selected items and totals in router state
-- **Share event** utility can attach cover image when the browser supports file sharing
+- **Share event** sends a public event URL with a server-generated preview image and metadata
 
 ### My Tickets
 
@@ -383,8 +383,7 @@ Admins update status from the dashboard or sales screens and can resend ticket e
 
 ### Mobile UX
 
-- Pull-to-refresh on viewports ≤768px (reload when pulled from top)
-- PWA install banner and “update available” refresh
+- No app-triggered pull-to-refresh or update banner to interrupt active work
 - Touch-friendly ticket quantity controls and checkout forms
 - Viewport meta includes `viewport-fit=cover` for notched devices
 
@@ -394,7 +393,7 @@ Admins update status from the dashboard or sales screens and can resend ticket e
 
 - **Manifest:** name GateWav, standalone display, theme/background `#1A122E`
 - **Icons:** 192, 512, maskable 512 (generated via `npm run generate-icons`)
-- **Service worker:** caches static assets; `registerType: 'prompt'` so users choose when to update
+- **Service worker:** caches static assets and downloads updates quietly. Native registration checks at most every 15 minutes while visible/online, including when returning to the app. Updates wait until all tabs/windows using the old worker close; no forced reload, takeover, or update banner. Backgrounding alone does not apply an update. This protects active checkout, forms, and scanning sessions. Existing installations must first receive this release before following the new behavior.
 - **Update checks:** on focus, visibility, and every 60 seconds while registered
 - **Install:** captures `beforeinstallprompt` for custom install UI (`PWABadges`)
 
@@ -471,7 +470,7 @@ Point `VITE_API_URL` at a running local backend on port 3000, or omit it to use 
 - Full admin dashboard: events, sales, walk-in, coupons, withdrawals, scanner
 - Organizer self-service registration
 - Landing page CMS pieces (videos, top users) for super admin
-- PWA with offline-capable static caching and update prompts
+- PWA with offline-capable static caching and quiet updates between sessions
 - JOSCITY feed integration documented
 - Production deploy pipeline with CDN cache invalidation
 

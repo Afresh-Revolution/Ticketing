@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "npm run generate-icons && tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node --env-file-if-exists=.env server/index.mjs",
+    "test:sharing": "node --test server/sharing.test.mjs"
   },
   "dependencies": {
     "expo-dev-client": "^57.0.10",

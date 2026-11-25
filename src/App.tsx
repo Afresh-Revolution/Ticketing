@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { PWAProvider } from './contexts/PWAContext'
-import PWABadges from './components/PWABadges'
-import PullToRefresh from './components/PullToRefresh'
 import LandingPage from './components/LandingPage'
 import DownloadPage from './components/DownloadPage'
 import LoginPage from './components/LoginPage'
@@ -127,8 +125,6 @@ function App() {
   return (
     <AuthProvider>
     <PWAProvider>
-    <PullToRefresh />
-    <PWABadges />
     <Router>
       <AnimatedRoutes />
     </Router>
