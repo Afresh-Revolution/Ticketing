@@ -41,6 +41,5 @@ jobs:
             npm install
             npm run build
             systemctl reload nginx
-            pm2 delete wav || true
-            pm2 start ecosystem.config.cjs --only wav
+            pm2 restart wav || pm2 start serve --name wav -- -s dist -l 5107
             pm2 save || true

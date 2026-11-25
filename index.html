@@ -14,9 +14,6 @@
     <script>
       (function () {
         var path = location.pathname || "";
-        if (/^\/event\/[^/]+\/?$/.test(path)) {
-          history.replaceState(null, "", "/#" + path.replace(/\/$/, "") + location.search);
-        }
         if (path.indexOf("/plans/invite/") === 0 || path.indexOf("/circles/invite/") === 0) {
           location.replace("/#" + path + location.search);
         }

@@ -68,7 +68,7 @@ The system is split into two main parts:
                     Paystack (withdrawals / optional payments), etc.
 ```
 
-**Routing:** The app uses **HashRouter** internally (`#/events`, `#/event/:id`). Public share links use `/event/:id`, served with event-specific preview metadata before opening the event in the app. Legacy hash links still open but cannot provide event-specific previews. See [event sharing deployment](EVENT_SHARING.md).
+**Routing:** The app uses **HashRouter** (`#/events`, `#/event/:id`). Share links and deep links must include the hash segment (e.g. `https://yoursite.com/#/event/uuid`).
 
 **State on the client:**
 
@@ -145,7 +145,7 @@ The system is split into two main parts:
 - Ticket types support **paid** and **free**
 - Quantity selectors respect availability (`quantity - sold`)
 - Navigates to checkout with selected items and totals in router state
-- **Share event** sends a public event URL with a server-generated preview image and metadata
+- **Share event** utility can attach cover image when the browser supports file sharing
 
 ### My Tickets
 
